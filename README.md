@@ -1,4 +1,5 @@
-# SeniorProjectUNIverse
+# SeniorProject: PICKERpals
+## The easy to use app for making one man's trash another man's treasure
 
 ### Members:
 Ryan Beebe
