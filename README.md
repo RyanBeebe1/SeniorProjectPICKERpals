@@ -1,1 +1,4 @@
 # SeniorProjectUNIverse
+
+Members:
+Joseph Whittier
