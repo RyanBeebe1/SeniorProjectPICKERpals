@@ -8,3 +8,4 @@ Manoj George
 Matthew DeGenaro
 Sean Spencer
 Joseph Antaki
+Gianluca Solari
