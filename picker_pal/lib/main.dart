@@ -86,20 +86,6 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             RaisedButton(
@@ -119,7 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add_call),
+        child: new ConstrainedBox(
+          constraints: new BoxConstraints.expand(),
+          child: new Image.network('https://scontent-iad3-1.xx.fbcdn.net/v/t1.0-9/48359345_1107609006066476_6806559665556553728_n.jpg?_nc_cat=103&_nc_ht=scontent-iad3-1.xx&oh=fe20a1a8970e0d62f402bb24fa8e5cf7&oe=5CFB169B', fit: BoxFit.cover, gaplessPlayback: true),
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
