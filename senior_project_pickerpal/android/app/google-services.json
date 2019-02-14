@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "290691590579",
-    "firebase_url": "https://my-project-1514252723265.firebaseio.com",
-    "project_id": "my-project-1514252723265",
-    "storage_bucket": "my-project-1514252723265.appspot.com"
+    "project_number": "765982925225",
+    "firebase_url": "https://pickerpals-8a94b.firebaseio.com",
+    "project_id": "pickerpals-8a94b",
+    "storage_bucket": "pickerpals-8a94b.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:290691590579:android:affc34c2a855f920",
+        "mobilesdk_app_id": "1:765982925225:android:affc34c2a855f920",
         "android_client_info": {
           "package_name": "beebe.seniorprojectpickerpal"
         }
       },
       "oauth_client": [
         {
-          "client_id": "290691590579-2j7gn9ealrrken7t7ken49olom3mrp8p.apps.googleusercontent.com",
+          "client_id": "765982925225-495fud7ce1vkkaa2ns45lpp2s9rknkm3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAYomJVeLwjPlphxX3ZJFhhi7rTTNg0Big"
+          "current_key": "AIzaSyBa6OcNJkiFh28ZAYftmhv3HrDT7tJ95n0"
         }
       ],
       "services": {
