@@ -45,10 +45,10 @@ class _ListViewNoteState extends State<ListViewNote> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'grokonez Firestore Demo',
+      title: 'pickerpal',
       home: Scaffold(
         appBar: AppBar(
-          title: Text('grokonez Firestore Demo'),
+          title: Text('pickerpal Firestore Demo'),
           centerTitle: true,
           backgroundColor: Colors.blue,
         ),
