@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "304337257235",
+    "firebase_url": "https://backendtestingmanoj.firebaseio.com",
+    "project_id": "backendtestingmanoj",
+    "storage_bucket": "backendtestingmanoj.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304337257235:android:438e27a28af33842",
+        "android_client_info": {
+          "package_name": "com.example.seniorprojectbackend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304337257235-4d49ttbss3le2si072t9vdv4qfhnun69.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyKey5ORklgmiIlJ_ba4hQCVnQ-EGyeYE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
