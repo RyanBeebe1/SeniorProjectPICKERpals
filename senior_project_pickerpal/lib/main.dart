@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
   String drawerText = "Sign in with Google";
-  String headerTxt = "Not signed in";
+  String headerTxt = "Welcome Picker!";
   bool signedIn = false;
   Future<void> _handleSignIn() async {
     try {
@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
     else {
-       return Padding(
+      return Padding(
         padding: EdgeInsets.all(15.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -208,64 +208,68 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: new Drawer(
           child: new ListView(
-        children: <Widget>[
-          new DrawerHeader(
-            child: new Text(
-              headerTxt,
-              style: TextStyle(fontSize: 30.0),
-            ),
-            decoration: BoxDecoration(color: Colors.lightGreen),
-          ),
-          new ListTile(
-            title: new Text(drawerText),
-            onTap: () {
-              _handleSignIn().whenComplete(() {
-                setState(() {
-                    drawerText = "Signed in as " + _googleSignIn.currentUser.displayName;
-                    headerTxt = "Hello, " + _googleSignIn.currentUser.displayName;
-                });
-              });
-            },
-          ),
-          new Divider(),
-          new ListTile(
-            title: new Text('Item Feed'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          new Divider(),
-          new ListTile(
-            title: new Text('My Items'),
-            onTap: () {},
-          ),
-          new Divider(),
-          new ListTile(
-            title: new Text('Settings'),
-            onTap: () {
-              setState(() {
-                if (_state == HomePageState.feed)
-                  _state = HomePageState.map;
-                else
-                  _state = HomePageState.feed;
-                Navigator.pop(context);
-              });
-            },
-          ),
-          new Divider(),
-          new ListTile(
-            title: new Text('Sign Out'),
-            onTap: () {
-              _handleSignOut().whenComplete(() {
-                setState(() {
-                  drawerText = "Sign in with Google";
-                  headerTxt = "Not signed in";
-                });
-              });
-            },
-          ),
-        ],
-      )),
+            children: <Widget>[
+              new DrawerHeader(
+                child: new Text(
+                  headerTxt,
+                  style: TextStyle(fontSize: 30.0),
+                ),
+                decoration: BoxDecoration(color: Colors.lightGreen),
+              ),
+              Visibility(
+                visible: signedIn?false:true,
+              child: new ListTile(
+                title: new Text(drawerText),
+                onTap: () {
+                  _handleSignIn().whenComplete(() {
+                    setState(() {
+                      headerTxt = "Hello, " + _googleSignIn.currentUser.displayName;
+                      signedIn = true;
+                    });
+                  });
+                },
+              ),),
+              new Divider(),
+              new ListTile(
+                title: new Text('Item Feed'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              new Divider(),
+              new ListTile(
+                title: new Text('My Items'),
+                onTap: () {},
+              ),
+              new Divider(),
+              new ListTile(
+                title: new Text('Settings'),
+                onTap: () {
+                  setState(() {
+                    if (_state == HomePageState.feed)
+                      _state = HomePageState.map;
+                    else
+                      _state = HomePageState.feed;
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+              new Divider(),
+              Visibility(
+                visible: signedIn?true:false,
+              child: new ListTile(
+                title: new Text('Sign Out'),
+                onTap: () {
+                  _handleSignOut().whenComplete(() {
+                    setState(() {
+                      headerTxt = "Not signed in";
+                      signedIn = false;
+                    });
+                  });
+                },
+              ),),
+            ],
+          )),
       body: Center(
         child: _getHomeView(),
       ),
