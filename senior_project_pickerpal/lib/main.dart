@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'fancy_fab.dart';
 
 void main() => runApp(MyApp());
 int item = 0;
@@ -273,15 +274,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: _getHomeView(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _addItem();
-          print(_googleSignIn.currentUser.email);
-          print(_googleSignIn.currentUser.displayName);
-        },
-        tooltip: 'Add new item to feed',
-        child: new Icon(Icons.add),
-      ),
+      floatingActionButton:
+        new FancyFab(),
     );
   }
   void _onMapCreated(GoogleMapController controller) {
