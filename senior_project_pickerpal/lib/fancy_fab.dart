@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'upload_item.dart';
 
 class FancyFab extends StatefulWidget {
   final Function() onPressed;
@@ -73,59 +74,9 @@ class _FancyFabState extends State<FancyFab>
   Widget add() {
     return Container(
       child: FloatingActionButton(
-        onPressed: () {
-        showDialog(
-        context: context,
-        builder: (_) => new SimpleDialog(
-          contentPadding: EdgeInsets.all(10.0),
-          children: <Widget>[
-            Text(
-              "Item Name",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0),
-            ),
-            Padding(padding: EdgeInsets.all(20.0)),
-            Icon(
-              Icons.delete,
-              size: 100.0,
-            ),
-            Padding(padding: EdgeInsets.all(20.0)),
-            Text(
-              "Item Description: Lorem ipsum dolor sit amet, "
-                  "consectetur adipiscing elit, sed do eiusmod tempor incididunt "
-                  "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis "
-                  "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo "
-                  "consequat. Duis aute irure dolor in reprehenderit in voluptate velit "
-                  "esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                  "cupidatat non proident, sunt in culpa qui officia deserunt mollit anim "
-                  "id est laborum",
-              style: TextStyle(fontSize: 15.0),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                height: 30.0,
-                width: 10.0,
-                child: Text(
-                  "Ok",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0),
-                  textAlign: TextAlign.center,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.lightGreen,
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-    },
+        heroTag: 'upload',
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new upload_item(tag: "Electronics")),
+        );},
         tooltip: 'Add',
         child: Icon(Icons.keyboard),
       ),
@@ -135,7 +86,9 @@ class _FancyFabState extends State<FancyFab>
   Widget image() {
     return Container(
       child: FloatingActionButton(
-        onPressed: null,
+        heroTag: 'upload2',
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new upload_item(tag: "Furniture",)),
+        );},
         tooltip: 'Image',
         child: Icon(Icons.hotel),
       ),
@@ -145,7 +98,9 @@ class _FancyFabState extends State<FancyFab>
   Widget inbox() {
     return Container(
       child: FloatingActionButton(
-        onPressed: null,
+        heroTag: 'upload3',
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new upload_item(tag: "Misc",)),
+        );},
         tooltip: 'Inbox',
         child: Icon(Icons.language),
       ),
@@ -154,15 +109,15 @@ class _FancyFabState extends State<FancyFab>
 
   Widget toggle() {
     return Container(
-      child: FloatingActionButton(
-        backgroundColor: _buttonColor.value,
-        onPressed: animate,
-        tooltip: 'Toggle',
-        child: AnimatedIcon(
-          icon: AnimatedIcons.menu_close,
-          progress: _animateIcon,
+        child: FloatingActionButton(
+          backgroundColor: _buttonColor.value,
+          onPressed: animate,
+          tooltip: 'Toggle',
+          child: AnimatedIcon(
+            icon: AnimatedIcons.menu_close,
+            progress: _animateIcon,
+          ),
         ),
-      ),
     );
   }
 
