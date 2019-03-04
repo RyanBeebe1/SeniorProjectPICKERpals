@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'fancy_fab.dart';
 
 void main() => runApp(MyApp());
@@ -53,102 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _getHomeView() {
     if (_state == HomePageState.feed) {
-      return ListView(
-        children: items.map((String string) {
-          return Container(
-              decoration:
-              new BoxDecoration(border: Border.all(color: Colors.black)),
-              child: ListTile(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => new SimpleDialog(
-                        contentPadding: EdgeInsets.all(10.0),
-                        children: <Widget>[
-                          Text(
-                            "Item Name",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24.0),
-                          ),
-                          Padding(padding: EdgeInsets.all(20.0)),
-                          Icon(
-                            Icons.delete,
-                            size: 100.0,
-                          ),
-                          Padding(padding: EdgeInsets.all(20.0)),
-                          Text(
-                            "Item Description: Lorem ipsum dolor sit amet, "
-                                "consectetur adipiscing elit, sed do eiusmod tempor incididunt "
-                                "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis "
-                                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo "
-                                "consequat. Duis aute irure dolor in reprehenderit in voluptate velit "
-                                "esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                                "cupidatat non proident, sunt in culpa qui officia deserunt mollit anim "
-                                "id est laborum",
-                            style: TextStyle(fontSize: 15.0),
-                          ),
-                          SimpleDialogOption(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Container(
-                              height: 30.0,
-                              width: 10.0,
-                              child: Text(
-                                "Ok",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20.0),
-                                textAlign: TextAlign.center,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.lightGreen,
-                                border: Border.all(color: Colors.black),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                  leading: Icon(Icons.delete),
-                  title: Text("Item Name"),
-                  subtitle: Text("Item Description"),
-                  trailing: IconButton(
-                      icon: Icon(Icons.chat),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (_) => new AlertDialog(
-                              title: Text("Chat with Seller"),
-                              content:
-                              Text("This is where the chat would be"),
-                              actions: <Widget>[
-                                Container(
-                                  height: 30.0,
-                                  child: RaisedButton(
-                                    child: const Text(
-                                      'I Understand',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    splashColor: Colors.grey,
-                                  ),
-                                  decoration: BoxDecoration(
-                                      color: Colors.lightGreen,
-                                      border: Border.all(
-                                          color: Colors.black)),
-                                ),
-                              ],
-                            ));
-                      })));
-        }).toList(),
-      );
+      return ListingFeed();
     }
     else {
       return Padding(
