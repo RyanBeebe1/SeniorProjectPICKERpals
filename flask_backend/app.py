@@ -38,7 +38,7 @@ ma = Marshmallow(app)
 ## SQLAlchemy DB classes(map db tables to python objects)
 #TODO implement tables for Users and Ratings
 class Listing(db.Model):
-    _tablename_ = 'listing'
+    __tablename__ = 'listing'
     listingid = db.Column('listing_id', db.Integer, primary_key=True)
     views = db.Column('views', db.Integer, default=0)
     description = db.Column('description', db.String(120))
@@ -62,7 +62,7 @@ class Listing(db.Model):
         self.condition = condition
 
 class Rating(db.Model):
-    _tablename_ = 'rating'
+    __tablename__ = 'rating'
     ratingid = db.Column('rating_id', db.Integer, primary_key=True)
     rating = db.Column('rating', db.Integer)
     listingid = db.Column('listing_id',db.Integer)
@@ -75,7 +75,7 @@ class Rating(db.Model):
 
 
 class User(db.Model):
-    _tablename_ = 'users'
+    __tablename__ = 'users'
     userid = db.Column('users_id', db.Integer, primary_key=True)
     overallrating = db.Column('overall_rating', db.Integer)
     emailaddress = db.Column('email_address',db.String(45))
@@ -85,7 +85,7 @@ class User(db.Model):
         self.emailaddress = emailaddress
 
 class DesiredItem(db.Model):
-    _tablename_ = 'desired_item'
+    __tablename__ = 'desired_item'
     desireditemid = db.Column('desired_item_id', db.Integer, primary_key=True)
     userid = db.Column('user_id', db.Integer)
     keyword = db.Column('keyword',db.String(45))
@@ -95,7 +95,7 @@ class DesiredItem(db.Model):
         self.keyword = keyword
 
 class Images(db.Model):
-    _tablename_ = 'images'
+    __tablename__ = 'images'
     name = db.Column('image_name', db.String(200), primary_key = True)
     listingid = db.Column('listing_id', db.Integer, db.ForeignKey('listing.listing_id'), nullable = False)
     index = db.Column('image_index', db.Integer, default=0)

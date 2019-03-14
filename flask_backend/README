@@ -1,4 +1,4 @@
-app3test.py is now just app.py for simplicity
+right now this is a copy of app.py with a few things added
 
 config file is exactly the same
 
@@ -14,5 +14,6 @@ commits to "Ubuntu"
 To get credited for your commits you the following syntax:
 
 git commit --author="gitusername <gitemailaddress>" -m "commit message"
+
 
 -Matt D
