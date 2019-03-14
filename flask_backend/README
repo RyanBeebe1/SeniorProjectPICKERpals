@@ -1,0 +1,11 @@
+app3test.py is now just app.py for simplicity
+
+config file is exactly the same
+
+this is on its own branch of the repo, 'backend'
+make sure you commit and push to that branch instead of the master
+
+we'll merch the two branches as we get close to the end, just so we don't 
+need to worry about the changes the frontend team makes
+
+-Matt D
