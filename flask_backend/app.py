@@ -63,47 +63,46 @@ class Listing(db.Model):
 
 class Rating(db.Model):
     __tablename__ = 'rating'
-    ratingid = db.Column('rating_id', db.Integer, primary_key=True)
+    rating_id = db.Column('rating_id', db.Integer, primary_key=True)
     rating = db.Column('rating', db.Integer)
-    listingid = db.Column('listing_id',db.Integer)
-    userid = db.Column('user_id',db.Integer)
+    listing_id = db.Column('listing_id',db.Integer)
+    user_id = db.Column('user_id',db.Integer)
 
     def __init__(self, rating, listingid, userid):
         self.rating = ratingid
-        self.listingid = listingid
-        self.userid = userid
+        self.listing_id = listingid
+        self.user_id = userid
 
 
 class User(db.Model):
     __tablename__ = 'users'
-    userid = db.Column('users_id', db.Integer, primary_key=True)
-    overallrating = db.Column('overall_rating', db.Integer)
-    emailaddress = db.Column('email_address',db.String(45))
+    user_id = db.Column('user_id', db.Integer, primary_key=True)
+    overall_rating = db.Column('overall_rating', db.Integer)
+    email_address = db.Column('email_address',db.String(45))
 
     def __init__(self, overallrating, emailaddress):
-        self.overallrating = overallrating
-        self.emailaddress = emailaddress
+        self.overall_rating = overallrating
+        self.email_address = emailaddress
 
 class DesiredItem(db.Model):
     __tablename__ = 'desired_item'
-    desireditemid = db.Column('desired_item_id', db.Integer, primary_key=True)
-    userid = db.Column('user_id', db.Integer)
+    desired_item_id = db.Column('desired_item_id', db.Integer, primary_key=True)
+    user_id = db.Column('user_id', db.Integer)
     keyword = db.Column('keyword',db.String(45))
 
     def __init__(self, userid, keyword):
-        self.userid = userid
+        self.user_id = userid
         self.keyword = keyword
 
 class Images(db.Model):
     __tablename__ = 'images'
-    name = db.Column('image_name', db.String(200), primary_key = True)
-    listingid = db.Column('listing_id', db.Integer, db.ForeignKey('listing.listing_id'), nullable = False)
-    index = db.Column('image_index', db.Integer, default=0)
+    image_name = db.Column('image_name', db.String(200), primary_key = True)
+    listing_id = db.Column('listing_id', db.Integer, db.ForeignKey('listing.listing_id'), nullable = False)
 
     def __init__(self, name, listingid, index):
-        self.name = name
-        self.listingid = listingid
-        self.index = index
+        self.image_name = name
+        self.listing_id = listingid
+
 
 
 # Listing shcemas (what fields to serve when pulling from database)
@@ -118,15 +117,15 @@ class RatingSchema(ma.Schema):
 # Images shcemas
 class ImageSchema(ma.Schema):
     class Meta:
-        fields = ('name', 'listingid', 'index')
+        fields = ('image_name', 'listing_id')
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('userid','overallrating','emailaddress')
+        fields = ('user_id','overall_rating','email_address')
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
-        fields = ('desireditemid','userid','keyword')
+        fields = ('desired_item_id','user_id','keyword')
 
 
 # Init Schema
@@ -140,10 +139,10 @@ rating_schema = RatingSchema(strict = True)
 ratings_schema = RatingSchema(many = True, strict = True)
 
 user_schema  = UserSchema(strict = True)
-users_scheme = UsersSchema(many = True, strict = True)
+users_scheme = UserSchema(many = True, strict = True)
 
 desired_item_schema = DesiredItemSchema(strict = True)
-desired_item_schemas = DesiredItemSchemas(many = True, strict = True)
+desired_item_schemas = DesiredItemSchema(many = True, strict = True)
 
 ## APP ENDPOINTS:
 
@@ -164,19 +163,19 @@ def add_listing():
     return listing_schema.jsonify(new_listing)
 
 #Upload image
-@app.route('/uploads/<listingid>/<index>', methods = ['POST'])
-def upload_image(listingid,index):
+@app.route('/uploads/<listingid>', methods = ['POST'])
+def upload_image(listingid):
     photo = photos.save(request.files['photo'])
     imagename = os.path.basename(photo)
-    new_image = Images(imagename,listingid,index)
+    new_image = Images(imagename,listingid)
     db.session.add(new_image)
     db.session.commit()
     return imagename
 
 # Get image from listing
-@app.route('/images/<listingid>/<index>', methods = ['GET'])
-def get_image(listingid,index):
-    photo = Images.query.filter(Images.listingid == listingid and Images.index == index).first()
+@app.route('/images/<listingid>', methods = ['GET'])
+def get_image(listingid):
+    photo = Images.query.filter(Images.listing_id == listingid).first()
     return send_from_directory(UPLOAD_FOLDER,photo.name)
 
 # Return next available listing id 
