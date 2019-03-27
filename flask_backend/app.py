@@ -99,7 +99,7 @@ class Images(db.Model):
     image_name = db.Column('image_name', db.String(200), primary_key = True)
     listing_id = db.Column('listing_id', db.Integer, db.ForeignKey('listing.listing_id'), nullable = False)
 
-    def __init__(self, name, listingid, index):
+    def __init__(self, name, listingid):
         self.image_name = name
         self.listing_id = listingid
 
@@ -163,7 +163,7 @@ def add_listing():
     return listing_schema.jsonify(new_listing)
 
 #Upload image
-@app.route('/uploads/<listingid>', methods = ['POST'])
+@app.route('/upload/<listingid>', methods = ['POST'])
 def upload_image(listingid):
     photo = photos.save(request.files['photo'])
     imagename = os.path.basename(photo)
@@ -176,7 +176,7 @@ def upload_image(listingid):
 @app.route('/images/<listingid>', methods = ['GET'])
 def get_image(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
-    return send_from_directory(UPLOAD_FOLDER,photo.name)
+    return send_from_directory(UPLOAD_FOLDER,photo.image_name)
 
 # Return next available listing id 
 @app.route('/getnextid/', methods = ['GET'])
