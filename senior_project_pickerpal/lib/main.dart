@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'package:senior_project_pickerpal/search_bar.dart';
 import 'fancy_fab.dart';
+import 'splashScreen.dart';
 
 void main() => runApp(MyApp());
 int item = 0;
@@ -14,11 +15,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PickerPAL',
-      theme: ThemeData(
-        primarySwatch: Colors.lightGreen,
-      ),
-      home: MyHomePage(title: 'PickerPAL Feed'),
+      theme:
+          ThemeData(primaryColor: Colors.lightGreen, accentColor: Colors.green),
+      debugShowCheckedModeBanner: false,
+      home: SplashScreen(),
     );
   }
 }
@@ -31,7 +31,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum HomePageState {feed, map}
+enum HomePageState { feed, map }
+
 class _MyHomePageState extends State<MyHomePage> {
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
@@ -45,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(error);
     }
   }
+
   Future<void> _handleSignOut() async {
     try {
       await _googleSignIn.signOut();
@@ -56,8 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _getHomeView() {
     if (_state == HomePageState.feed) {
       return ListingFeed();
-    }
-    else {
+    } else {
       return Padding(
         padding: EdgeInsets.all(15.0),
         child: Column(
@@ -68,23 +69,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 300.0,
                 height: 200.0,
                 child: GoogleMap(
-                  initialCameraPosition: CameraPosition(target: LatLng(51.5160895, -0.1294527)),
+                  initialCameraPosition:
+                      CameraPosition(target: LatLng(51.5160895, -0.1294527)),
                   onMapCreated: _onMapCreated,
                 ),
               ),
             ),
             RaisedButton(
               child: const Text('Go to London'),
-              onPressed: mapController == null ? null : () {
-                mapController.animateCamera(CameraUpdate.newCameraPosition(
-                  const CameraPosition(
-                    bearing: 270.0,
-                    target: LatLng(51.5160895, -0.1294527),
-                    tilt: 30.0,
-                    zoom: 17.0,
-                  ),
-                ));
-              },
+              onPressed: mapController == null
+                  ? null
+                  : () {
+                      mapController
+                          .animateCamera(CameraUpdate.newCameraPosition(
+                        const CameraPosition(
+                          bearing: 270.0,
+                          target: LatLng(51.5160895, -0.1294527),
+                          tilt: 30.0,
+                          zoom: 17.0,
+                        ),
+                      ));
+                    },
             ),
           ],
         ),
@@ -106,6 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
       items.add(itemnum);
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,76 +130,81 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: new Drawer(
           child: new ListView(
-            children: <Widget>[
-              new DrawerHeader(
-                child: new Text(
-                  headerTxt,
-                  style: TextStyle(fontSize: 30.0),
-                ),
-                decoration: BoxDecoration(color: Colors.lightGreen),
-              ),
-              Visibility(
-                visible: signedIn?false:true,
-              child: new ListTile(
-                title: new Text(drawerText),
-                onTap: () {
-                  _handleSignIn().whenComplete(() {
-                    setState(() {
-                      headerTxt = "Hello, " + _googleSignIn.currentUser.displayName;
-                      signedIn = true;
-                    });
-                  });
-                },
-              ),),
-              new Divider(),
-              new ListTile(
-                title: new Text('Item Feed'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              new Divider(),
-              new ListTile(
-                title: new Text('My Items'),
-                onTap: () {},
-              ),
-              new Divider(),
-              new ListTile(
-                title: new Text('Settings'),
-                onTap: () {
+        children: <Widget>[
+          new DrawerHeader(
+            child: new Text(
+              headerTxt,
+              style: TextStyle(fontSize: 30.0),
+            ),
+            decoration: BoxDecoration(color: Colors.lightGreen),
+          ),
+          Visibility(
+            visible: signedIn ? false : true,
+            child: new ListTile(
+              title: new Text(drawerText),
+              onTap: () {
+                _handleSignIn().whenComplete(() {
                   setState(() {
-                    if (_state == HomePageState.feed)
-                      _state = HomePageState.map;
-                    else
-                      _state = HomePageState.feed;
-                    Navigator.pop(context);
+                    headerTxt =
+                        "Hello, " + _googleSignIn.currentUser.displayName;
+                    signedIn = true;
                   });
-                },
-              ),
-              new Divider(),
-              Visibility(
-                visible: signedIn?true:false,
-              child: new ListTile(
-                title: new Text('Sign Out'),
-                onTap: () {
-                  _handleSignOut().whenComplete(() {
-                    setState(() {
-                      headerTxt = "Not signed in";
-                      signedIn = false;
-                    });
+                });
+              },
+            ),
+          ),
+          new Divider(),
+          new ListTile(
+            title: new Text('Item Feed'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          new Divider(),
+          new ListTile(
+            title: new Text('My Items'),
+            onTap: () {},
+          ),
+          new Divider(),
+          new ListTile(
+            title: new Text('Settings'),
+            onTap: () {
+              setState(() {
+                if (_state == HomePageState.feed)
+                  _state = HomePageState.map;
+                else
+                  _state = HomePageState.feed;
+                Navigator.pop(context);
+              });
+            },
+          ),
+          new Divider(),
+          Visibility(
+            visible: signedIn ? true : false,
+            child: new ListTile(
+              title: new Text('Sign Out'),
+              onTap: () {
+                _handleSignOut().whenComplete(() {
+                  setState(() {
+                    headerTxt = "Not signed in";
+                    signedIn = false;
                   });
-                },
-              ),),
-            ],
-          )),
+                });
+              },
+            ),
+          ),
+        ],
+      )),
       body: Center(
         child: _getHomeView(),
       ),
-      floatingActionButton:
-        signedIn?new FancyFab():null,
+      floatingActionButton: signedIn ? new FancyFab() : null,
     );
   }
+
   void _onMapCreated(GoogleMapController controller) {
-    setState(() { mapController = controller; });
+    setState(() {
+      mapController = controller;
+    });
   }
 }
