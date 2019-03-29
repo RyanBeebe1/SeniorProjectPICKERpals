@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
+import 'package:senior_project_pickerpal/search_bar.dart';
 import 'fancy_fab.dart';
 
 void main() => runApp(MyApp());
@@ -112,6 +113,14 @@ class _MyHomePageState extends State<MyHomePage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              showSearch(context: context, delegate: SearchBar());
+            },
+          )
+        ],
       ),
       drawer: new Drawer(
           child: new ListView(
@@ -181,7 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: _getHomeView(),
       ),
       floatingActionButton:
-        new FancyFab(),
+        signedIn?new FancyFab():null,
     );
   }
   void _onMapCreated(GoogleMapController controller) {

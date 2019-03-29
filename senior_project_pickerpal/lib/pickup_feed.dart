@@ -13,56 +13,43 @@ class ListingFeed extends StatefulWidget {
 final List<Listing> items = [];
 
 class _ListingFeed extends State<ListingFeed> {
+  int pageNum;
   ScrollController _controller = ScrollController();
-  List<int> ids = [
-    4151,
-    2577,
-    11830,
-    13237,
-    4151,
-    2577,
-    11830,
-    13237,
-    4151,
-    2577,
-    11830,
-    13237,
-  ];
+ 
   bool loading = false, refreshing = false;
 
   Future<void> _onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
-    for (int id in ids) {
       BackendService.fetchListing(
-              'http://services.runescape.com/m=itemdb_oldschool/api/catalogue/detail.json?item=' +
-                  id.toString())
+              'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
           .whenComplete(() {})
           .then((pick) {
+            print(pick[0].item_title);
         setState(() {
-          items.add(pick);
+          items.addAll(pick);
         });
       });
-    }
+
     refreshing = false;
-    print("loadingg done.");
+    print("loading done.");
     return null;
   }
 
   Future<void> _onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
-    for (int id in ids) {
+
       BackendService.fetchListing(
-              'http://services.runescape.com/m=itemdb_oldschool/api/catalogue/detail.json?item=' +
-                  id.toString())
+          'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
           .whenComplete(() {})
           .then((pick) {
+             print(pick[0].item_title);
         setState(() {
-          items.add(pick);
+          items.addAll(pick);
         });
       });
-    }
+
     loading = false;
-    print("loadingg done.");
+    print("loading done.");
     return null;
   }
 
@@ -75,6 +62,7 @@ class _ListingFeed extends State<ListingFeed> {
 
   @override
   void initState() {
+    pageNum = 1;
     _onLoad();
     _controller.addListener(() {
       if (_controller.position.pixels == _controller.position.maxScrollExtent) {
@@ -82,6 +70,8 @@ class _ListingFeed extends State<ListingFeed> {
           if (!loading) {
             loading = true;
             print("now loading");
+            _onLoad();
+            pageNum++;
           }
         });
       }
@@ -107,20 +97,17 @@ class _ListingFeed extends State<ListingFeed> {
       },
       child: ListView.separated(
           separatorBuilder: (context, ind) {
-            if ((ind+1)%20==0) return ListTile(title: Center(child: Text("PAGE SOMETHING"),),);  else  return Divider(color: Colors.lightGreen,);
+             return Divider(color: Colors.lightGreen,);
           },
           primary: false,
           controller: _controller,
           itemCount: items.length + 1,
           itemBuilder: (context, index) {
-            if (index == items.length) {
+            if (index == items.length && !refreshing) {
               return ListTile(
-                title: Center(child: Text("LOAD MORE")),
-                onTap: () {
-                  _onLoad();
-                },
+                title: Center(child: CircularProgressIndicator(backgroundColor: Colors.green,)),
               );
-            } else {
+            } else if (!refreshing) {
               final item = items[index];
               return Dismissible(
                 key: Key(item.hashCode.toString()),
@@ -135,7 +122,7 @@ class _ListingFeed extends State<ListingFeed> {
                               items.insert(index, item);
                             });
                           }),
-                      content: Text(item.name + " dismissed"),
+                      content: Text(item.item_title + " dismissed"),
                     ));
                   });
                 },
@@ -155,17 +142,13 @@ class _ListingFeed extends State<ListingFeed> {
                               contentPadding: EdgeInsets.all(10.0),
                               children: <Widget>[
                                 Text(
-                                  item.name + "  " + index.toString(),
+                                  item.item_title + "  " + index.toString(),
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 24.0),
                                 ),
                                 Padding(padding: EdgeInsets.all(20.0)),
-                                Image.network(
-                                  item.icon_large,
-                                  height: 100,
-                                  width: 100,
-                                ),
+
                                 Padding(padding: EdgeInsets.all(20.0)),
                                 Text(
                                   item.description,
@@ -195,8 +178,8 @@ class _ListingFeed extends State<ListingFeed> {
                             ),
                       );
                     },
-                    leading: Image.network(item.icon),
-                    title: Text(item.name),
+
+                    title: Text(item.item_title),
                     subtitle: Text(item.description),
                     trailing: IconButton(
                         icon: Icon(Icons.chat),
