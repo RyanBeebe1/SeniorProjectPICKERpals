@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:senior_project_pickerpal/backend_service.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
+import 'package:senior_project_pickerpal/session.dart';
 class upload_item extends StatefulWidget {
   upload_item({Key key, this.tag}) : super(key: key);
   final String tag;
@@ -152,10 +153,12 @@ class _uploadItemState extends State<upload_item> {
                   color: Colors.lightGreen,
                   onPressed: () {
 
-                    Listing l = new Listing(_descController.text, "myemail@email.com", _titleController.text, "10.0,10.0", widget.tag, "08080", dropdownValue, _getDate());
-                    BackendService.createListing(l);
+                    UploadListing ll = new UploadListing(_descController.text, SessionVariables.loggedInEmail, _titleController.text, "10.0,10.0", widget.tag, "08080", dropdownValue, _getDate());
+                    BackendService.createListing(ll,_image).then(
+                            (l) {
 
-
+                        }
+                    );
                     Navigator.of(context).pop();
                   },
                   child: Text("Submit"),)

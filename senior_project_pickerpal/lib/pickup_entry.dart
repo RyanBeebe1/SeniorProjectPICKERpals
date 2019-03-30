@@ -10,7 +10,7 @@ class Listing {
   final String zipcode;
   final String cond;
   final String listing_date;
-  final String listing_id;
+  final dynamic listing_id;
 
 
 
@@ -42,7 +42,8 @@ class Listing {
     "tag":l.tag,
     "zipcode":l.zipcode,
     "date":l.listing_date,
-    "condition":l.cond
+    "condition":l.cond,
+    "listingid" :l.listing_id
   };
 }
 class UploadListing {
@@ -127,6 +128,10 @@ class DesiredItem {
     );
   }
 
+  static List<DesiredItem> fromJsonList(jsonList) {
+    return jsonList.map<DesiredItem>((obj) => DesiredItem.fromJson(obj)).toList();
+  }
+
   static Map<String,dynamic> toJson(DesiredItem item) => {
     'desired_item_id' : item.desiredItemId,
     'user_id':item.userId,
@@ -176,6 +181,10 @@ class Rating {
         json['listing_id'],
         json['user_id']
     );
+  }
+
+  static List<Rating> fromJsonList(jsonList) {
+    return jsonList.map<Rating>((obj) => Rating.fromJson(obj)).toList();
   }
 
   static Map<String,dynamic> toJson(Rating r) => {

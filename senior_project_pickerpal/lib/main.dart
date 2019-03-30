@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'package:senior_project_pickerpal/search_bar.dart';
+import 'package:senior_project_pickerpal/session.dart';
 import 'fancy_fab.dart';
 import 'splashScreen.dart';
 
@@ -105,12 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
   );
   List<String> items = new List();
 
-  void _addItem() {
-    String itemnum = item.toString();
-    setState(() {
-      items.add(itemnum);
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
             decoration: BoxDecoration(color: Colors.lightGreen),
           ),
           Visibility(
-            visible: signedIn ? false : true,
+            visible: SessionVariables.loggedIn ? false : true,
             child: new ListTile(
               title: new Text(drawerText),
               onTap: () {
@@ -147,7 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   setState(() {
                     headerTxt =
                         "Hello, " + _googleSignIn.currentUser.displayName;
-                    signedIn = true;
+                    SessionVariables.loggedIn = true;
+                    SessionVariables.loggedInEmail = _googleSignIn.currentUser.email;
                   });
                 });
               },
@@ -180,14 +177,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           new Divider(),
           Visibility(
-            visible: signedIn ? true : false,
+            visible: SessionVariables.loggedIn ? true : false,
             child: new ListTile(
               title: new Text('Sign Out'),
               onTap: () {
                 _handleSignOut().whenComplete(() {
                   setState(() {
                     headerTxt = "Not signed in";
-                    signedIn = false;
+                    SessionVariables.loggedIn = true;
+                    SessionVariables.loggedInEmail = null;
                   });
                 });
               },
@@ -198,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: _getHomeView(),
       ),
-      floatingActionButton: signedIn ? new FancyFab() : null,
+      floatingActionButton: SessionVariables.loggedIn ? new FancyFab() : null,
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:senior_project_pickerpal/backend_service.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
@@ -15,7 +17,7 @@ final List<Listing> items = [];
 class _ListingFeed extends State<ListingFeed> {
   int pageNum;
   ScrollController _controller = ScrollController();
- 
+
   bool loading = false, refreshing = false;
 
   Future<void> _onRefresh() async {
@@ -85,6 +87,15 @@ class _ListingFeed extends State<ListingFeed> {
     super.initState();
   }
 
+  File _getFileFromImage(dynamic listingId) {
+    File f;
+    BackendService.getImage(listingId).then(
+        (file) {
+          f = file;
+        }
+    );
+    return f;
+  }
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -148,7 +159,7 @@ class _ListingFeed extends State<ListingFeed> {
                                       fontSize: 24.0),
                                 ),
                                 Padding(padding: EdgeInsets.all(20.0)),
-
+                                Image.file(_getFileFromImage(item.listing_id)),
                                 Padding(padding: EdgeInsets.all(20.0)),
                                 Text(
                                   item.description,
