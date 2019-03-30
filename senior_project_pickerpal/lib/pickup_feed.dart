@@ -86,16 +86,7 @@ class _ListingFeed extends State<ListingFeed> {
     });
     super.initState();
   }
-
-  File _getFileFromImage(dynamic listingId) {
-    File f;
-    BackendService.getImage(listingId).then(
-        (file) {
-          f = file;
-        }
-    );
-    return f;
-  }
+  
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -159,7 +150,7 @@ class _ListingFeed extends State<ListingFeed> {
                                       fontSize: 24.0),
                                 ),
                                 Padding(padding: EdgeInsets.all(20.0)),
-                                Image.file(_getFileFromImage(item.listing_id)),
+                                Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString()),
                                 Padding(padding: EdgeInsets.all(20.0)),
                                 Text(
                                   item.description,

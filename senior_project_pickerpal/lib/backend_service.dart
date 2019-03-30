@@ -47,20 +47,6 @@ class BackendService {
       return user;
   }
 
-  static Future<File> getImage(dynamic listingId) async {
-      final response = await http.get("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+listingId.toString());
-      var bytes;
-      File file;
-      if (response.statusCode == 200) {
-        bytes = response.bodyBytes;
-        file = new File("/assets");
-      }
-      else {
-        throw Exception("ya dun goofed");
-      }
-      file.writeAsBytesSync(bytes);
-      return file;
-  }
   static _uploadImage(File imageFile, dynamic listingId) async {
     var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
     var length = await imageFile.length();
