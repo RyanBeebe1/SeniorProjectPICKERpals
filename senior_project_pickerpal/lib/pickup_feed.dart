@@ -5,8 +5,9 @@ import 'package:senior_project_pickerpal/backend_service.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
 
 class ListingFeed extends StatefulWidget {
-  ListingFeed({Key key, this.title}) : super(key: key);
+  ListingFeed({Key key, this.title,this.endpoint}) : super(key: key);
   final String title;
+  final String endpoint;
 
   @override
   _ListingFeed createState() => _ListingFeed();
@@ -15,6 +16,7 @@ class ListingFeed extends StatefulWidget {
 final List<Listing> items = [];
 
 class _ListingFeed extends State<ListingFeed> {
+
   int pageNum;
   ScrollController _controller = ScrollController();
 
@@ -23,7 +25,7 @@ class _ListingFeed extends State<ListingFeed> {
   Future<void> _onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
       BackendService.fetchListing(
-              'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
+              widget.endpoint)
           .whenComplete(() {})
           .then((pick) {
             print(pick[0].item_title);
@@ -37,11 +39,12 @@ class _ListingFeed extends State<ListingFeed> {
     return null;
   }
 
+
   Future<void> _onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
 
       BackendService.fetchListing(
-          'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
+          widget.endpoint)
           .whenComplete(() {})
           .then((pick) {
              print(pick[0].item_title);
@@ -59,6 +62,7 @@ class _ListingFeed extends State<ListingFeed> {
   @override
   void dispose() {
     _controller.dispose();
+    items.clear();
     super.dispose();
   }
 
@@ -86,7 +90,7 @@ class _ListingFeed extends State<ListingFeed> {
     });
     super.initState();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -144,18 +148,20 @@ class _ListingFeed extends State<ListingFeed> {
                               contentPadding: EdgeInsets.all(10.0),
                               children: <Widget>[
                                 Text(
-                                  item.item_title + "  " + index.toString(),
+                                  item.item_title,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 24.0),
                                 ),
                                 Padding(padding: EdgeInsets.all(20.0)),
-                                Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString()),
+                                Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString(), scale: 0.3,),
                                 Padding(padding: EdgeInsets.all(20.0)),
                                 Text(
                                   item.description,
                                   style: TextStyle(fontSize: 15.0),
                                 ),
+                                Text("Posted by: " + item.user_id,
+                                    style: TextStyle(fontSize: 15.0)),
                                 SimpleDialogOption(
                                   onPressed: () {
                                     Navigator.of(context).pop();

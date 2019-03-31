@@ -5,17 +5,16 @@ import 'package:intl/intl.dart';
 import 'package:senior_project_pickerpal/backend_service.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
 import 'package:senior_project_pickerpal/session.dart';
-class upload_item extends StatefulWidget {
-  upload_item({Key key, this.tag}) : super(key: key);
+class UploadItem extends StatefulWidget {
+  UploadItem({Key key, this.tag}) : super(key: key);
   final String tag;
   @override
-  _uploadItemState createState() => _uploadItemState();
+  _UploadItemState createState() => _UploadItemState();
 }
 
-class _uploadItemState extends State<upload_item> {
+class _UploadItemState extends State<UploadItem> {
   File _image;
-  String dropdownValue = null;
-  String _longLat, _date;
+  String dropdownValue;
   TextEditingController _titleController, _descController;
 
 
@@ -34,6 +33,20 @@ class _uploadItemState extends State<upload_item> {
 
   }
 
+  /*
+  Future<List<double>> _getLatLong() async {
+    var location = new Location();
+    double lat, long;
+    location.getLocation().then((location) {
+
+      lat = location.latitude;
+      long = location.longitude;
+
+    }
+    );
+    return [lat,long];
+  }
+  */
   Future getImage() async {
     var image;
     return showDialog(
@@ -152,8 +165,13 @@ class _uploadItemState extends State<upload_item> {
                 RaisedButton(
                   color: Colors.lightGreen,
                   onPressed: () {
-
-                    UploadListing ll = new UploadListing(_descController.text, SessionVariables.loggedInEmail, _titleController.text, "10.0,10.0", widget.tag, "08080", dropdownValue, _getDate());
+                    List<double> longLat;
+                    /*
+                    _getLatLong().then((stuff) {
+                      longLat = stuff;
+                    });
+                    */
+                    UploadListing ll = new UploadListing(_descController.text, SessionVariables.loggedInEmail, _titleController.text, "145.0,243.0", widget.tag, "08080", dropdownValue, _getDate());
                     BackendService.createListing(ll,_image).then(
                             (l) {
 

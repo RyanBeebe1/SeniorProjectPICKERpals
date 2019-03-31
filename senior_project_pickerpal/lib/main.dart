@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:senior_project_pickerpal/personal_feed.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'package:senior_project_pickerpal/search_bar.dart';
 import 'package:senior_project_pickerpal/session.dart';
@@ -32,9 +33,10 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum HomePageState { feed, map }
+enum HomePageState { feed, map,personalfeed }
 
 class _MyHomePageState extends State<MyHomePage> {
+  ListingFeed feed = new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings');
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
   String drawerText = "Sign in with Google";
@@ -58,43 +60,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _getHomeView() {
     if (_state == HomePageState.feed) {
-      return ListingFeed();
+      return feed;
     } else {
-      return Padding(
-        padding: EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Center(
-              child: SizedBox(
-                width: 300.0,
-                height: 200.0,
-                child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: LatLng(51.5160895, -0.1294527)),
-                  onMapCreated: _onMapCreated,
-                ),
-              ),
-            ),
-            RaisedButton(
-              child: const Text('Go to London'),
-              onPressed: mapController == null
-                  ? null
-                  : () {
-                      mapController
-                          .animateCamera(CameraUpdate.newCameraPosition(
-                        const CameraPosition(
-                          bearing: 270.0,
-                          target: LatLng(51.5160895, -0.1294527),
-                          tilt: 30.0,
-                          zoom: 17.0,
-                        ),
-                      ));
-                    },
-            ),
-          ],
-        ),
-      );
+      return MyFeed();
+
     }
   }
 
@@ -154,13 +123,20 @@ class _MyHomePageState extends State<MyHomePage> {
           new ListTile(
             title: new Text('Item Feed'),
             onTap: () {
-              Navigator.pop(context);
+              setState(() {
+                _state = HomePageState.feed;
+                Navigator.pop(context);
+              });
             },
           ),
           new Divider(),
           new ListTile(
             title: new Text('My Items'),
-            onTap: () {},
+            onTap: () {
+              feed = null;
+              Navigator.push(context, new MaterialPageRoute(builder: (context) => new MyFeed()),
+              );
+            },
           ),
           new Divider(),
           new ListTile(
@@ -184,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 _handleSignOut().whenComplete(() {
                   setState(() {
                     headerTxt = "Not signed in";
-                    SessionVariables.loggedIn = true;
+                    SessionVariables.loggedIn = false;
                     SessionVariables.loggedInEmail = null;
                   });
                 });
