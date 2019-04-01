@@ -5,9 +5,8 @@ import 'package:senior_project_pickerpal/backend_service.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
 
 class ListingFeed extends StatefulWidget {
-  ListingFeed({Key key, this.title,this.endpoint}) : super(key: key);
+  ListingFeed({Key key, this.title}) : super(key: key);
   final String title;
-  final String endpoint;
 
   @override
   _ListingFeed createState() => _ListingFeed();
@@ -16,16 +15,18 @@ class ListingFeed extends StatefulWidget {
 final List<Listing> items = [];
 
 class _ListingFeed extends State<ListingFeed> {
-
   int pageNum;
   ScrollController _controller = ScrollController();
 
   bool loading = false, refreshing = false;
 
+  int rating_id = 0;
+  int test = 1;
+
   Future<void> _onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
       BackendService.fetchListing(
-              widget.endpoint)
+              'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
           .whenComplete(() {})
           .then((pick) {
             print(pick[0].item_title);
@@ -39,12 +40,11 @@ class _ListingFeed extends State<ListingFeed> {
     return null;
   }
 
-
   Future<void> _onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
 
       BackendService.fetchListing(
-          widget.endpoint)
+          'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
           .whenComplete(() {})
           .then((pick) {
              print(pick[0].item_title);
@@ -62,12 +62,12 @@ class _ListingFeed extends State<ListingFeed> {
   @override
   void dispose() {
     _controller.dispose();
-    items.clear();
     super.dispose();
   }
 
   @override
   void initState() {
+
     pageNum = 1;
     _onLoad();
     _controller.addListener(() {
@@ -148,20 +148,18 @@ class _ListingFeed extends State<ListingFeed> {
                               contentPadding: EdgeInsets.all(10.0),
                               children: <Widget>[
                                 Text(
-                                  item.item_title,
+                                  item.item_title + "  " + index.toString(),
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 24.0),
                                 ),
                                 Padding(padding: EdgeInsets.all(20.0)),
-                                Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString(), scale: 0.3,),
+                                Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString()),
                                 Padding(padding: EdgeInsets.all(20.0)),
                                 Text(
                                   item.description,
                                   style: TextStyle(fontSize: 15.0),
                                 ),
-                                Text("Posted by: " + item.user_id,
-                                    style: TextStyle(fontSize: 15.0)),
                                 SimpleDialogOption(
                                   onPressed: () {
                                     Navigator.of(context).pop();
@@ -186,10 +184,12 @@ class _ListingFeed extends State<ListingFeed> {
                             ),
                       );
                     },
-
                     title: Text(item.item_title),
                     subtitle: Text(item.description),
-                    trailing: IconButton(
+                    trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
                         icon: Icon(Icons.chat),
                         onPressed: () {
                           showDialog(
@@ -220,7 +220,36 @@ class _ListingFeed extends State<ListingFeed> {
                                       ),
                                     ],
                                   ));
-                        })),
+                        }),IconButton(
+                  icon: Icon(Icons.star),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (_) => new AlertDialog(
+                          title: Text("Rate this listing"),
+                          content:
+                          Text("Choose from 1 to 5:"),
+                          actions: <Widget>[
+                            Container(
+                              height: 100.0,
+                              width: 315.0,
+                              child: new Column(crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  new Flexible(
+                                      child: new TextField(textAlign: TextAlign.center,
+                                          onSubmitted: (String submitted) {
+                                        Rating rat = new Rating(submitted, item.listing_id.toString(), item.user_id);
+                                        BackendService.addRating(rat).then( (test) {});
+                                        rating_id = rating_id + 1;
+                                        Navigator.of(context).pop();
+                                      })
+                                  )
+                                ]
+                              ),
+                            ),
+                          ],
+                        ));
+                  })])),
               );
             }
           }),

@@ -168,15 +168,14 @@ class Images {
 
 
 class Rating {
-  final String ratingId;
+  //final String ratingId;
   final String rating;
   final String listingId;
   final String userId;
 
-  Rating(this.ratingId,this.rating,this.listingId,this.userId);
+  Rating(this.rating,this.listingId,this.userId);
   factory Rating.fromJson(Map<String,dynamic> json) {
     return Rating(
-        json['rating_id'],
         json['rating'],
         json['listing_id'],
         json['user_id']
@@ -188,7 +187,6 @@ class Rating {
   }
 
   static Map<String,dynamic> toJson(Rating r) => {
-    'rating_id':r.ratingId,
     'rating':r.rating,
     'listing_id':r.listingId,
     'user_id':r.userId
