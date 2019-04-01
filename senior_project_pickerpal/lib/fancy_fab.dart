@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:senior_project_pickerpal/main.dart';
 import 'upload_item.dart';
 
 class FancyFab extends StatefulWidget {
   final Function() onPressed;
   final String tooltip;
   final IconData icon;
+  final MyHomePageState page;
 
-  FancyFab({this.onPressed, this.tooltip, this.icon});
+  FancyFab({this.onPressed, this.tooltip, this.icon, this.page});
 
   @override
   _FancyFabState createState() => _FancyFabState();
@@ -75,7 +77,7 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Electronics")),
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Electronics", page: widget.page)),
         );},
         tooltip: 'Add',
         child: Icon(Icons.keyboard),
@@ -87,7 +89,7 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload2',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Furniture",)),
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Furniture",page: widget.page)),
         );},
         tooltip: 'Image',
         child: Icon(Icons.hotel),
@@ -99,7 +101,7 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload3',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Misc",)),
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Misc", page: widget.page)),
         );},
         tooltip: 'Inbox',
         child: Icon(Icons.language),

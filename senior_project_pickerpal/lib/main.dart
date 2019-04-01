@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:senior_project_pickerpal/personal_feed.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'package:senior_project_pickerpal/search_bar.dart';
 import 'package:senior_project_pickerpal/session.dart';
@@ -30,12 +29,12 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
 enum HomePageState { feed, map,personalfeed }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   ListingFeed feed = new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings');
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
@@ -62,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_state == HomePageState.feed) {
       return feed;
     } else {
-      return MyFeed();
 
     }
   }
@@ -134,8 +132,8 @@ class _MyHomePageState extends State<MyHomePage> {
             title: new Text('My Items'),
             onTap: () {
               feed = null;
-              Navigator.push(context, new MaterialPageRoute(builder: (context) => new MyFeed()),
-              );
+             // Navigator.push(context, new MaterialPageRoute(builder: (context) => new MyFeed()),
+             // );
             },
           ),
           new Divider(),
@@ -172,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: _getHomeView(),
       ),
-      floatingActionButton: SessionVariables.loggedIn ? new FancyFab() : null,
+      floatingActionButton: SessionVariables.loggedIn ? new FancyFab(page: this,) : null,
     );
   }
 

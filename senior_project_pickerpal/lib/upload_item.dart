@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:senior_project_pickerpal/backend_service.dart';
+import 'package:senior_project_pickerpal/main.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
+import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'package:senior_project_pickerpal/session.dart';
 class UploadItem extends StatefulWidget {
-  UploadItem({Key key, this.tag}) : super(key: key);
+  UploadItem({Key key, this.tag, this.page}) : super(key: key);
   final String tag;
+  MyHomePageState page;
   @override
   _UploadItemState createState() => _UploadItemState();
 }
@@ -165,19 +168,16 @@ class _UploadItemState extends State<UploadItem> {
                 RaisedButton(
                   color: Colors.lightGreen,
                   onPressed: () {
-                    List<double> longLat;
-                    /*
-                    _getLatLong().then((stuff) {
-                      longLat = stuff;
-                    });
-                    */
+                    Listing newListing;
                     UploadListing ll = new UploadListing(_descController.text, SessionVariables.loggedInEmail, _titleController.text, "145.0,243.0", widget.tag, "08080", dropdownValue, _getDate());
                     BackendService.createListing(ll,_image).then(
                             (l) {
-
+                            newListing = l;
                         }
                     );
-                    Navigator.of(context).pop();
+
+                      Navigator.of(context).pop();
+                      widget.page.setState(() {});
                   },
                   child: Text("Submit"),)
               ],
