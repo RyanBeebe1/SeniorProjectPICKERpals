@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:senior_project_pickerpal/personal_feed.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
 import 'package:senior_project_pickerpal/search_bar.dart';
 import 'package:senior_project_pickerpal/session.dart';
@@ -35,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 enum HomePageState { feed, map,personalfeed }
 
 class MyHomePageState extends State<MyHomePage> {
-  ListingFeed feed = new ListingFeed();
+  ListingFeed feed = new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings',personalMode: false,);
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
   String drawerText = "Sign in with Google";
@@ -71,7 +72,7 @@ class MyHomePageState extends State<MyHomePage> {
       'https://www.googleapis.com/auth/contacts.readonly',
     ],
   );
-  List<String> items = new List();
+
 
 
 
@@ -86,7 +87,7 @@ class MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              showSearch(context: context, delegate: SearchBar());
+              showSearch(context: context, delegate: SearchBar(feed.items));
             },
           )
         ],
@@ -131,9 +132,45 @@ class MyHomePageState extends State<MyHomePage> {
           new ListTile(
             title: new Text('My Items'),
             onTap: () {
-              feed = null;
-             // Navigator.push(context, new MaterialPageRoute(builder: (context) => new MyFeed()),
-             // );
+              if (SessionVariables.loggedIn) {
+                Navigator.of(context).pop();
+                Navigator.push(context, new MaterialPageRoute(
+                    builder: (context) => new MyFeed(feedState: feed.state,)),
+                );
+              } else {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Center(child: Text('Alert')),
+                      content: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children : <Widget>[
+                          Expanded(
+                            child: Text(
+                              "Please login to view your items",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.red,
+
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      actions: <Widget>[
+                        FlatButton(
+                            child: Text('Ok'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            })
+                      ],
+                    );
+                  },
+                );
+              }
             },
           ),
           new Divider(),

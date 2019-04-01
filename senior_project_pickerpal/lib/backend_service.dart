@@ -48,6 +48,29 @@ class BackendService {
 
   }
 
+  static Future<void> deleteListing(String url) async {
+
+
+
+    final response =
+
+    await http.get(url);
+
+
+
+    if (response.statusCode == 200) {
+
+      // If server returns an OK response, parse the JSON
+
+    } else {
+
+      // If that response was not OK, throw an error.
+
+      throw Exception('Failed to load post');
+
+    }
+
+  }
   //Create a listing in the database, return the new listing.
 
   static Future<Listing> createListing(UploadListing listing,File image) async {

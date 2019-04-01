@@ -3,6 +3,8 @@ import 'package:senior_project_pickerpal/pickup_entry.dart';
 import 'package:senior_project_pickerpal/pickup_feed.dart';
 
 class SearchBar extends SearchDelegate {
+  final List<Listing> items;
+  SearchBar(this.items);
   @override
   List<Widget> buildActions(BuildContext context) {
     // TODO: implement buildActions

@@ -5,16 +5,20 @@ import 'package:senior_project_pickerpal/backend_service.dart';
 import 'package:senior_project_pickerpal/pickup_entry.dart';
 
 class ListingFeed extends StatefulWidget {
-  ListingFeed({Key key, this.title}) : super(key: key);
+  ListingFeed({Key key, this.title,this.endpoint,this.personalMode}) : super(key: key);
   final String title;
-
+  final String endpoint;
+  final List<Listing> items = [];
+  final bool personalMode;
+  ListingFeedState state = ListingFeedState();
   @override
-  _ListingFeed createState() => _ListingFeed();
+  ListingFeedState createState() => state;
 }
 
-final List<Listing> items = [];
 
-class _ListingFeed extends State<ListingFeed> {
+
+class ListingFeedState extends State<ListingFeed> {
+
   int pageNum;
   ScrollController _controller = ScrollController();
 
@@ -23,15 +27,18 @@ class _ListingFeed extends State<ListingFeed> {
   int rating_id = 0;
   int test = 1;
 
-  Future<void> _onRefresh() async {
+  List<Listing> getItems() {
+    return widget.items;
+  }
+  Future<void> onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
       BackendService.fetchListing(
-              'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
+              widget.endpoint)
           .whenComplete(() {})
           .then((pick) {
             print(pick[0].item_title);
         setState(() {
-          items.addAll(pick);
+          widget.items.addAll(pick);
         });
       });
 
@@ -40,16 +47,16 @@ class _ListingFeed extends State<ListingFeed> {
     return null;
   }
 
-  Future<void> _onLoad() async {
+  Future<void> onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
 
       BackendService.fetchListing(
-          'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings')
+          widget.endpoint)
           .whenComplete(() {})
           .then((pick) {
              print(pick[0].item_title);
         setState(() {
-          items.addAll(pick);
+          widget.items.addAll(pick);
         });
       });
 
@@ -69,14 +76,14 @@ class _ListingFeed extends State<ListingFeed> {
   void initState() {
 
     pageNum = 1;
-    _onLoad();
+    onLoad();
     _controller.addListener(() {
       if (_controller.position.pixels == _controller.position.maxScrollExtent) {
         setState(() {
           if (!loading) {
             loading = true;
             print("now loading");
-            _onLoad();
+            onLoad();
             pageNum++;
           }
         });
@@ -98,8 +105,8 @@ class _ListingFeed extends State<ListingFeed> {
         setState(() {
           refreshing = true;
         });
-        items.clear();
-        return _onRefresh();
+        widget.items.clear();
+        return onRefresh();
       },
       child: ListView.separated(
           separatorBuilder: (context, ind) {
@@ -107,25 +114,31 @@ class _ListingFeed extends State<ListingFeed> {
           },
           primary: false,
           controller: _controller,
-          itemCount: items.length + 1,
+          itemCount: widget.items.length + 1,
           itemBuilder: (context, index) {
-            if (index == items.length && !refreshing) {
-              return ListTile(
-                title: Center(child: CircularProgressIndicator(backgroundColor: Colors.green,)),
-              );
+            if (index == widget.items.length && !refreshing) {
+             if (!widget.personalMode) {
+               return ListTile(
+                 title: Center(child: CircularProgressIndicator(backgroundColor: Colors.green,)),
+               );
+             } else {
+               return ListTile(
+                 title: Center(child: Text("End of List")),
+               );
+             }
             } else if (!refreshing) {
-              final item = items[index];
+              final item = widget.items[index];
               return Dismissible(
                 key: Key(item.hashCode.toString()),
                 onDismissed: (direction) {
                   setState(() {
-                    items.removeAt(index);
+                    widget.items.removeAt(index);
                     Scaffold.of(context).showSnackBar(SnackBar(
                       action: SnackBarAction(
                           label: "UNDO",
                           onPressed: () {
                             setState(() {
-                              items.insert(index, item);
+                              widget.items.insert(index, item);
                             });
                           }),
                       content: Text(item.item_title + " dismissed"),
@@ -141,6 +154,51 @@ class _ListingFeed extends State<ListingFeed> {
                     child: Text("Y E E E E E E E E E E E T"),
                     color: Colors.green),
                 child: ListTile(
+                  onLongPress: () {
+                    if (widget.personalMode) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Center(child: Text('Alert')),
+                            content: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children : <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    "Are you sure you want to delete this listing?",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.red,
+
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            actions: <Widget>[
+                              FlatButton(
+                                  child: Text('No'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  }),
+                              FlatButton(
+                                  child: Text('Yes'),
+                                  onPressed: () {
+                                    BackendService.deleteListing("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/deletelisting/" + item.listing_id.toString());
+                                    setState(() {
+                                      widget.items.removeAt(index);
+                                    });
+                                    Navigator.of(context).pop();
+                                  })
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
                     onTap: () {
                       showDialog(
                         context: context,
@@ -148,7 +206,7 @@ class _ListingFeed extends State<ListingFeed> {
                               contentPadding: EdgeInsets.all(10.0),
                               children: <Widget>[
                                 Text(
-                                  item.item_title + "  " + index.toString(),
+                                  item.item_title,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 24.0),
