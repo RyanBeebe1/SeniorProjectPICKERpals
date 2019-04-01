@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 enum HomePageState { feed, map,personalfeed }
 
 class MyHomePageState extends State<MyHomePage> {
-  ListingFeed feed = new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings');
+  ListingFeed feed = new ListingFeed();
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
   String drawerText = "Sign in with Google";
