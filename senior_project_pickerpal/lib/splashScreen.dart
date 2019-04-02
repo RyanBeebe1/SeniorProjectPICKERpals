@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
         fit: StackFit.expand,
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(color: Colors.lightGreen),
+            decoration: BoxDecoration(color: Colors.black),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -42,12 +42,8 @@ class _SplashScreenState extends State<SplashScreen> {
                     children: <Widget>[
                       CircleAvatar(
                         backgroundColor: Colors.black,
-                        radius: 50.0,
-                        child: Icon(
-                          Icons.restore_from_trash,
-                          color: Colors.lightGreen,
-                          size: 50.0,
-                        ),
+                        radius: 150.0,
+                        child: Image.asset('assets/pickerPals_logo.jpg'),
                       ),
                       Padding(
                         padding: EdgeInsets.only(top: 10.0),
@@ -55,8 +51,8 @@ class _SplashScreenState extends State<SplashScreen> {
                       Text(
                         "PickerPals",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25.0,
+                            color: Colors.lightGreen,
+                            fontSize: 55.0,
                             fontWeight: FontWeight.bold),
                       )
                     ],
