@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     children: <Widget>[
                       CircleAvatar(
                         backgroundColor: Colors.black,
-                        radius: 150.0,
+                        radius: 175.0,
                         child: Image.asset('assets/pickerPals_logo.jpg'),
                       ),
                       Padding(
@@ -53,7 +53,8 @@ class _SplashScreenState extends State<SplashScreen> {
                         style: TextStyle(
                             color: Colors.lightGreen,
                             fontSize: 55.0,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic),
                       )
                     ],
                   ),
@@ -72,7 +73,8 @@ class _SplashScreenState extends State<SplashScreen> {
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 20.0,
-                            fontWeight: FontWeight.bold))
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic))
                   ],
                 ),
               )
