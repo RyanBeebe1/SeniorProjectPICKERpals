@@ -1,12 +1,12 @@
-name: senior_project_pickerpal
-description: A new Flutter application.
+name: seniorproject_final_updated
+description: Senior Project
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
-# Read more about versioning at semver.org.
+# Read more about versioning at sever.org.
 version: 1.0.0+1
 
 environment:
@@ -30,6 +30,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: "^0.7.0"
+
+##########################################################
+#flutter_icons:
+#  image_path: "pickerPals_icon/res/pickerPals_icon.png"
+#  android: "launcher_icon"
+#  ios: true
+# Note to self: FIX THIS
+##########################################################
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
@@ -41,6 +50,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+  - pickerPals_explosion.png
+  - pickerPals_logo.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
