@@ -2,6 +2,7 @@ import configparser
 import json
 import os
 import MySQLdb
+from PIL import Image
 from sqlalchemy.sql import func
 from flask import Flask, jsonify, request, send_from_directory
 from flask_marshmallow import Marshmallow
@@ -35,7 +36,6 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 ## SQLAlchemy DB classes(map db tables to python objects)
-#TODO implement tables for Users and Ratings
 class Listing(db.Model):
     __tablename__ = 'listing'
     listingid = db.Column('listing_id', db.Integer, primary_key=True)
@@ -103,7 +103,6 @@ class Images(db.Model):
         self.listing_id = listingid
 
 
-
 # Listing shcemas (what fields to serve when pulling from database)
 class ListingSchema(ma.Schema):
     class Meta:
@@ -143,15 +142,12 @@ users_scheme = UserSchema(many = True, strict = True)
 desired_item_schema = DesiredItemSchema(strict = True)
 desired_item_schemas = DesiredItemSchema(many = True, strict = True)
 
-
-
 # Unfinished
 def check_desired_items(description):
     listings = Listing.query.filter(Listing.description.like("%"+description+"%"))
     list_dump = listings_schema.dump(all_listings)
     for listing in list_dump:
         print(listing)
-
 
 ## APP ENDPOINTS:
 
@@ -174,8 +170,16 @@ def add_listing():
 #Upload image
 @app.route('/upload/<listingid>', methods = ['POST'])
 def upload_image(listingid):
+    # Save image and get name
     photo = photos.save(request.files['photo'])
     imagename = os.path.basename(photo)
+    
+    ## Make Image object and thumbnail
+    thumbnail_image = Image.open(f'{UPLOAD_FOLDER}/{imagename}')
+    thumbnail_image.thumbnail((100,100))
+    thumbnail_image.save(f'{UPLOAD_FOLDER}/{imagename}_thumbnail.jpg')
+    
+    ## Add Image object to database
     new_image = Images(imagename,listingid)
     db.session.add(new_image)
     db.session.commit()
@@ -222,11 +226,10 @@ def get_listingsbytag(tag):
     results = listings_schema.dump(listings)
     return jsonify(results.data)
 
-
-# Get listings by userid
-@app.route('/listingsbyuserid/<user_id>', methods = ['GET'])
-def get_listingsbyuserid(user_id):
-    listings = Listing.query.filter(Listing.userid == user_id)
+# Get a Users listings with their email
+@app.route('/listingbyuser/<email>', methods = ['GET'])
+def get_listingsbyuseremail(email):
+    listings = Listing.query.filter(Listing.userid == email)
     results = listings_schema.dump(listings)
     return jsonify(results.data)
 
@@ -234,6 +237,7 @@ def get_listingsbyuserid(user_id):
 @app.route('/deletelisting/<listingid>', methods = ['GET'])
 def deletelisting(listingid):
     listing = Listing.query.get(listingid)
+    ## TODO implement code to delete image from DB and folder
     db.session.delete(listing)
     db.session.commit()
     return "Operation successful"
