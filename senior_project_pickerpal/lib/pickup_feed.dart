@@ -19,6 +19,7 @@ class ListingFeed extends StatefulWidget {
 
 class ListingFeedState extends State<ListingFeed> {
 
+  bool ratePress = false;
   int pageNum;
   ScrollController _controller = ScrollController();
 
@@ -26,21 +27,22 @@ class ListingFeedState extends State<ListingFeed> {
 
   int rating_id = 0;
   int test = 1;
+  int _radioValue = -1;
 
   List<Listing> getItems() {
     return widget.items;
   }
   Future<void> onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
-      BackendService.fetchListing(
-              widget.endpoint)
-          .whenComplete(() {})
-          .then((pick) {
-            print(pick[0].item_title);
-        setState(() {
-          widget.items.addAll(pick);
-        });
+    BackendService.fetchListing(
+        widget.endpoint)
+        .whenComplete(() {})
+        .then((pick) {
+      print(pick[0].item_title);
+      setState(() {
+        widget.items.addAll(pick);
       });
+    });
 
     refreshing = false;
     print("loading done.");
@@ -50,15 +52,15 @@ class ListingFeedState extends State<ListingFeed> {
   Future<void> onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
 
-      BackendService.fetchListing(
-          widget.endpoint)
-          .whenComplete(() {})
-          .then((pick) {
-             print(pick[0].item_title);
-        setState(() {
-          widget.items.addAll(pick);
-        });
+    BackendService.fetchListing(
+        widget.endpoint)
+        .whenComplete(() {})
+        .then((pick) {
+      print(pick[0].item_title);
+      setState(() {
+        widget.items.addAll(pick);
       });
+    });
 
     loading = false;
     print("loading done.");
@@ -110,22 +112,22 @@ class ListingFeedState extends State<ListingFeed> {
       },
       child: ListView.separated(
           separatorBuilder: (context, ind) {
-             return Divider(color: Colors.lightGreen,);
+            return Divider(color: Colors.lightGreen,);
           },
           primary: false,
           controller: _controller,
           itemCount: widget.items.length + 1,
           itemBuilder: (context, index) {
             if (index == widget.items.length && !refreshing) {
-             if (!widget.personalMode) {
-               return ListTile(
-                 title: Center(child: CircularProgressIndicator(backgroundColor: Colors.green,)),
-               );
-             } else {
-               return ListTile(
-                 title: Center(child: Text("End of List")),
-               );
-             }
+              if (!widget.personalMode) {
+                return ListTile(
+                  title: Center(child: CircularProgressIndicator(backgroundColor: Colors.green,)),
+                );
+              } else {
+                return ListTile(
+                  title: Center(child: Text("End of List")),
+                );
+              }
             } else if (!refreshing) {
               final item = widget.items[index];
               return Dismissible(
@@ -154,92 +156,92 @@ class ListingFeedState extends State<ListingFeed> {
                     child: Text("Y E E E E E E E E E E E T"),
                     color: Colors.green),
                 child: ListTile(
-                  onLongPress: () {
-                    if (widget.personalMode) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Center(child: Text('Alert')),
-                            content: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children : <Widget>[
-                                Expanded(
-                                  child: Text(
-                                    "Are you sure you want to delete this listing?",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.red,
+                    onLongPress: () {
+                      if (widget.personalMode) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Center(child: Text('Alert')),
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children : <Widget>[
+                                  Expanded(
+                                    child: Text(
+                                      "Are you sure you want to delete this listing?",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.red,
 
+                                      ),
                                     ),
-                                  ),
-                                )
+                                  )
+                                ],
+                              ),
+                              actions: <Widget>[
+                                FlatButton(
+                                    child: Text('No'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    }),
+                                FlatButton(
+                                    child: Text('Yes'),
+                                    onPressed: () {
+                                      BackendService.deleteListing("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/deletelisting/" + item.listing_id.toString());
+                                      setState(() {
+                                        widget.items.removeAt(index);
+                                      });
+                                      Navigator.of(context).pop();
+                                    })
                               ],
-                            ),
-                            actions: <Widget>[
-                              FlatButton(
-                                  child: Text('No'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  }),
-                              FlatButton(
-                                  child: Text('Yes'),
-                                  onPressed: () {
-                                    BackendService.deleteListing("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/deletelisting/" + item.listing_id.toString());
-                                    setState(() {
-                                      widget.items.removeAt(index);
-                                    });
-                                    Navigator.of(context).pop();
-                                  })
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  },
+                            );
+                          },
+                        );
+                      }
+                    },
                     onTap: () {
                       showDialog(
                         context: context,
                         builder: (_) => new SimpleDialog(
-                              contentPadding: EdgeInsets.all(10.0),
-                              children: <Widget>[
-                                Text(
-                                  item.item_title,
+                          contentPadding: EdgeInsets.all(10.0),
+                          children: <Widget>[
+                            Text(
+                              item.item_title,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24.0),
+                            ),
+                            Padding(padding: EdgeInsets.all(20.0)),
+                            Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString()),
+                            Text("Posted by: " + item.user_id),
+                            Text(
+                              item.description,
+                              style: TextStyle(fontSize: 15.0),
+                            ),
+                            SimpleDialogOption(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Container(
+                                height: 30.0,
+                                width: 10.0,
+                                child: Text(
+                                  "Ok",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 24.0),
+                                      fontSize: 20.0),
+                                  textAlign: TextAlign.center,
                                 ),
-                                Padding(padding: EdgeInsets.all(20.0)),
-                                Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/"+item.listing_id.toString()),
-                                Padding(padding: EdgeInsets.all(20.0)),
-                                Text(
-                                  item.description,
-                                  style: TextStyle(fontSize: 15.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.lightGreen,
+                                  border: Border.all(color: Colors.black),
                                 ),
-                                SimpleDialogOption(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Container(
-                                    height: 30.0,
-                                    width: 10.0,
-                                    child: Text(
-                                      "Ok",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20.0),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.lightGreen,
-                                      border: Border.all(color: Colors.black),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                              ),
+                            )
+                          ],
+                        ),
                       );
                     },
                     title: Text(item.item_title),
@@ -248,69 +250,143 @@ class ListingFeedState extends State<ListingFeed> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           IconButton(
-                        icon: Icon(Icons.chat),
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (_) => new AlertDialog(
-                                    title: Text("Chat with Seller"),
-                                    content:
-                                        Text("This is where the chat would be"),
-                                    actions: <Widget>[
-                                      Container(
-                                        height: 30.0,
-                                        child: RaisedButton(
-                                          child: const Text(
-                                            'I Understand',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
+                              icon: Icon(Icons.chat),
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (_) => new AlertDialog(
+                                      title: Text("Chat with Seller"),
+                                      content:
+                                      Text("This is where the chat would be"),
+                                      actions: <Widget>[
+                                        Container(
+                                          height: 30.0,
+                                          child: RaisedButton(
+                                            child: const Text(
+                                              'I Understand',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            splashColor: Colors.grey,
                                           ),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          splashColor: Colors.grey,
+                                          decoration: BoxDecoration(
+                                              color: Colors.lightGreen,
+                                              border: Border.all(
+                                                  color: Colors.black)),
                                         ),
-                                        decoration: BoxDecoration(
-                                            color: Colors.lightGreen,
-                                            border: Border.all(
-                                                color: Colors.black)),
-                                      ),
-                                    ],
-                                  ));
-                        }),IconButton(
-                  icon: Icon(Icons.star),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (_) => new AlertDialog(
-                          title: Text("Rate this listing"),
-                          content:
-                          Text("Choose from 1 to 5:"),
-                          actions: <Widget>[
-                            Container(
-                              height: 100.0,
-                              width: 315.0,
-                              child: new Column(crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  new Flexible(
-                                      child: new TextField(textAlign: TextAlign.center,
-                                          onSubmitted: (String submitted) {
-                                        Rating rat = new Rating(submitted, item.listing_id.toString(), item.user_id);
-                                        BackendService.addRating(rat).then( (test) {});
-                                        rating_id = rating_id + 1;
-                                        Navigator.of(context).pop();
-                                      })
-                                  )
-                                ]
-                              ),
-                            ),
-                          ],
-                        ));
-                  })])),
+                                      ],
+                                    ));
+                              }),
+                          Visibility(
+                            child: IconButton(
+                                icon: Icon(Icons.star),
+                                onPressed: () async {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (_) => RatingDialog(item: item,));
+                                  setState(() {
+                                    ratePress = true;
+                                  });
+                                }),
+                          visible: ratePress?false:true)
+                        ]
+                    )
+                ),
               );
             }
           }),
+    );
+  }
+}
+
+class RatingDialog extends StatefulWidget {
+  RatingDialog({Key key, this.title, this.item}) : super(key: key);
+
+  final String title;
+  final Listing item;
+
+  @override
+  _RatingDialogState createState() => new _RatingDialogState();
+}
+
+class _RatingDialogState extends State<RatingDialog>{
+
+  int _radioValue = -1;
+  void _handleRadioValueChange(int value) {
+    setState(() {
+      _radioValue = value;
+    });
+    switch (_radioValue) {
+      case 0:
+        setState(() {
+          _radioValue = 0;
+        });
+        break;
+      case 1:
+        setState(() {
+          _radioValue = 1;
+        });
+        break;
+      case 2:
+        setState(() {
+          _radioValue = 2;
+        });
+        break;
+      case 3:
+        setState(() {
+          _radioValue = 3;
+        });
+        break;
+      case 4:
+        setState(() {
+          _radioValue = 4;
+        });
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+      title: Text("Rate this listing"),
+      content:
+      Text("Choose from 1 to 5:"),
+      actions: <Widget>[
+        Center(
+            child: new Column(
+              children: <Widget>[
+                new Row(
+                  children: <Widget>[
+                    new Radio(value: 0, groupValue: _radioValue, onChanged: _handleRadioValueChange),
+                    new Text("1"),
+                    new Radio(value: 1, groupValue: _radioValue, onChanged: _handleRadioValueChange),
+                    new Text("2"),
+                    new Radio(value: 2, groupValue: _radioValue, onChanged: _handleRadioValueChange),
+                    new Text("3"),
+                    new Radio(value: 3, groupValue: _radioValue, onChanged: _handleRadioValueChange),
+                    new Text("4"),
+                    new Radio(value: 4, groupValue: _radioValue, onChanged: _handleRadioValueChange),
+                    new Text("5"),
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.center,),
+                new RaisedButton(
+                  color: Colors.lightGreen,
+                  onPressed:() {Navigator.of(context).pop();
+                  Rating r = new Rating(_radioValue.toString(), widget.item.listing_id.toString(), widget.item.user_id.toString());
+                  BackendService.addRating(r);
+                  _radioValue = -1;
+                },
+                  child: Text("Ok",style: TextStyle(
+                  color: Colors.black,
+                ),),),
+              ],
+            )
+        ),
+      ],
     );
   }
 }
