@@ -8,7 +8,6 @@ from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import IMAGES, UploadSet, configure_uploads
 
-
 app = Flask(__name__)
 
 #Configure image uploading
@@ -144,6 +143,16 @@ users_scheme = UserSchema(many = True, strict = True)
 desired_item_schema = DesiredItemSchema(strict = True)
 desired_item_schemas = DesiredItemSchema(many = True, strict = True)
 
+
+
+# Unfinished
+def check_desired_items(description):
+    listings = Listing.query.filter(Listing.description.like("%"+description+"%"))
+    list_dump = listings_schema.dump(all_listings)
+    for listing in list_dump:
+        print(listing)
+
+
 ## APP ENDPOINTS:
 
 # Add listing 
@@ -195,6 +204,8 @@ def get_listings():
 @app.route('/listingbyid/<listingid>', methods = ['GET'])
 def get_listingbyid(listingid):
     listing = Listing.query.get(listingid)
+    listing.views += 1
+    db.session.commit()
     return listing_schema.jsonify(listing)
 
 # Get listings by zipcode
@@ -204,18 +215,18 @@ def get_listingsbyzip(zipcode):
     results = listings_schema.dump(listings)
     return jsonify(results.data)
 
-# Increment/Update listing views
-@app.route('/incrementview/<listingid>', methods = ['PUT'])
-def incrementview(listingid):
-    listing = Listing.query.get(listingid)
-    listing.views += 1
-    db.session.commit()
-    return listing_schema.jsonify(listing)
-
 # Get listings by tag
 @app.route('/listingsbytag/<tag>', methods = ['GET'])
 def get_listingsbytag(tag):
     listings = Listing.query.filter(Listing.tag == tag)
+    results = listings_schema.dump(listings)
+    return jsonify(results.data)
+
+
+# Get listings by userid
+@app.route('/listingsbyuserid/<user_id>', methods = ['GET'])
+def get_listingsbyuserid(user_id):
+    listings = Listing.query.filter(Listing.userid == user_id)
     results = listings_schema.dump(listings)
     return jsonify(results.data)
 
