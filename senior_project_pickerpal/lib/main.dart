@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:senior_project_pickerpal/personal_feed.dart';
-import 'package:senior_project_pickerpal/pickup_feed.dart';
-import 'package:senior_project_pickerpal/search_bar.dart';
-import 'package:senior_project_pickerpal/session.dart';
+import 'personal_feed.dart';
+import 'pickup_feed.dart';
+import 'search_bar.dart';
+import 'session.dart';
 import 'fancy_fab.dart';
 import 'splashScreen.dart';
+import 'dart:io';
 
 void main() => runApp(MyApp());
 int item = 0;
@@ -33,10 +34,13 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-enum HomePageState { feed, map,personalfeed }
+enum HomePageState { feed, map, personalfeed }
 
 class MyHomePageState extends State<MyHomePage> {
-  ListingFeed feed = new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings',personalMode: false,);
+  ListingFeed feed = new ListingFeed(
+    endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings',
+    personalMode: false,
+  );
   GoogleMapController mapController;
   HomePageState _state = HomePageState.feed;
   String drawerText = "Sign in with Google";
@@ -61,9 +65,7 @@ class MyHomePageState extends State<MyHomePage> {
   Widget _getHomeView() {
     if (_state == HomePageState.feed) {
       return feed;
-    } else {
-
-    }
+    } else {}
   }
 
   GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -72,9 +74,6 @@ class MyHomePageState extends State<MyHomePage> {
       'https://www.googleapis.com/auth/contacts.readonly',
     ],
   );
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +111,8 @@ class MyHomePageState extends State<MyHomePage> {
                     headerTxt =
                         "Hello, " + _googleSignIn.currentUser.displayName;
                     SessionVariables.loggedIn = true;
-                    SessionVariables.loggedInEmail = _googleSignIn.currentUser.email;
+                    SessionVariables.loggedInEmail =
+                        _googleSignIn.currentUser.email;
                   });
                 });
               },
@@ -134,8 +134,12 @@ class MyHomePageState extends State<MyHomePage> {
             onTap: () {
               if (SessionVariables.loggedIn) {
                 Navigator.of(context).pop();
-                Navigator.push(context, new MaterialPageRoute(
-                    builder: (context) => new MyFeed(feedState: feed.state,)),
+                Navigator.push(
+                  context,
+                  new MaterialPageRoute(
+                      builder: (context) => new MyFeed(
+                            feedState: feed.state,
+                          )),
                 );
               } else {
                 showDialog(
@@ -147,14 +151,13 @@ class MyHomePageState extends State<MyHomePage> {
                       content: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children : <Widget>[
+                        children: <Widget>[
                           Expanded(
                             child: Text(
                               "Please login to view your items",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.red,
-
                               ),
                             ),
                           )
@@ -187,6 +190,11 @@ class MyHomePageState extends State<MyHomePage> {
             },
           ),
           new Divider(),
+          new ListTile(
+            title: new Text('Exit PickerPals'),
+            onTap: () => exit(0),
+          ),
+          new Divider(),
           Visibility(
             visible: SessionVariables.loggedIn ? true : false,
             child: new ListTile(
@@ -207,7 +215,11 @@ class MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: _getHomeView(),
       ),
-      floatingActionButton: SessionVariables.loggedIn ? new FancyFab(page: this,) : null,
+      floatingActionButton: SessionVariables.loggedIn
+          ? new FancyFab(
+              page: this,
+            )
+          : null,
     );
   }
 
