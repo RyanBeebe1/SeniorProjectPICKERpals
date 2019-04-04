@@ -97,9 +97,11 @@ class Images(db.Model):
     __tablename__ = 'images'
     image_name = db.Column('image_name', db.String(200), primary_key = True)
     listing_id = db.Column('listing_id', db.Integer, db.ForeignKey('listing.listing_id'), nullable = False)
+    thumbnail = db.Column('thumbnail', db.String(200))
 
-    def __init__(self, name, listingid):
+    def __init__(self, name, thumbname, listingid):
         self.image_name = name
+        self.thumbnail = thumbname
         self.listing_id = listingid
 
 
@@ -115,7 +117,7 @@ class RatingSchema(ma.Schema):
 # Images shcemas
 class ImageSchema(ma.Schema):
     class Meta:
-        fields = ('image_name', 'listing_id')
+        fields = ('image_name', 'thumbnail', 'listing_id')
 
 class UserSchema(ma.Schema):
     class Meta:
@@ -177,10 +179,12 @@ def upload_image(listingid):
     ## Make Image object and thumbnail
     thumbnail_image = Image.open(f'{UPLOAD_FOLDER}/{imagename}')
     thumbnail_image.thumbnail((100,100))
-    thumbnail_image.save(f'{UPLOAD_FOLDER}/{imagename}_thumbnail.jpg')
+    thumbnail_name = f'{imagename}_thumbnail.jpg'
+    thumbnail_image.save(f'{UPLOAD_FOLDER}/{thumbnail_name}')
+    
     
     ## Add Image object to database
-    new_image = Images(imagename,listingid)
+    new_image = Images(imagename,thumbnail_name,listingid)
     db.session.add(new_image)
     db.session.commit()
     return imagename
@@ -190,6 +194,13 @@ def upload_image(listingid):
 def get_image(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
     return send_from_directory(UPLOAD_FOLDER,photo.image_name)
+
+# Get image thumbnail from listing
+@app.route('/thumbs/<listingid>', methods = ['GET'])
+def get_image_thumbnail(listingid):
+    
+    photo = Images.query.filter(Images.listing_id == listingid).first()
+    return send_from_directory(UPLOAD_FOLDER,photo.thumbnail)
 
 # Return next available listing id 
 @app.route('/getnextid/', methods = ['GET'])
