@@ -179,6 +179,12 @@ def add_desired_item():
     db.session.commit()
     return listing_schema.jsonify(new_desired_item)
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> eed3c1c976ec564b4db278d29b9bfa0f5ec42cc3
 #Upload image
 @app.route('/upload/<listingid>', methods = ['POST'])
 def upload_image(listingid):
@@ -227,7 +233,11 @@ def get_listingbyid(listingid):
     return listing_schema.jsonify(listing)
 
 # Get desired item by id
+<<<<<<< HEAD
 @app.route('/getdesireditem/<desired_item_id>', methods = ['GET'])
+=======
+@app.route('/getdesireditem/<desired_item_id', methods = ['GET'])
+>>>>>>> eed3c1c976ec564b4db278d29b9bfa0f5ec42cc3
 def get_desired_item_byid(desired_item_id):
     desired_item = DesiredItem.query.get(desired_item_id)
     return desired_item_schema.jsonify(desired_item)
@@ -236,7 +246,11 @@ def get_desired_item_byid(desired_item_id):
 @app.route('/desireditems/<user_id>', methods = ['GET'])
 def get_user_desitems(user_id):
     items = DesiredItem.query.filter(DesiredItem.user_id == user_id)
+<<<<<<< HEAD
     results = desired_items_schema.dump(items)
+=======
+    results = desired_item_schemas.dump(items)
+>>>>>>> eed3c1c976ec564b4db278d29b9bfa0f5ec42cc3
     return jsonify(results.data)
 
 # Get listings by zipcode
@@ -270,7 +284,11 @@ def deletelisting(listingid):
     return "Operation successful"
 
 # Delete desired item
+<<<<<<< HEAD
 @app.route('/deletedesireditem/<desired_item_id>', methods = ['GET'])
+=======
+@app.route('deletedesireditem/<desired_item_id', methods ['GET'])
+>>>>>>> eed3c1c976ec564b4db278d29b9bfa0f5ec42cc3
 def deletedesireditem(desired_item_id):
     desired_item = DesiredItem.query.get(desired_item_id)
     db.session.delete(desired_item)
