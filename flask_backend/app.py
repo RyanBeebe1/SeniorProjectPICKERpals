@@ -139,10 +139,10 @@ rating_schema = RatingSchema(strict = True)
 ratings_schema = RatingSchema(many = True, strict = True)
 
 user_schema  = UserSchema(strict = True)
-users_scheme = UserSchema(many = True, strict = True)
+users_schema = UserSchema(many = True, strict = True)
 
 desired_item_schema = DesiredItemSchema(strict = True)
-desired_item_schemas = DesiredItemSchema(many = True, strict = True)
+desired_items_schema = DesiredItemSchema(many = True, strict = True)
 
 # Unfinished
 def check_desired_items(description):
@@ -169,6 +169,16 @@ def add_listing():
     db.session.commit()
     return listing_schema.jsonify(new_listing)
 
+# Add desired item
+@app.route('/adddesireditem', methods=['POST'])
+def add_desired_item():
+    user_id = request.json['user_id']
+    tag = request.json['tag']
+    new_desired_item = DesiredItem(user_id, tag)
+    db.session.add(new_desired_item)
+    db.session.commit()
+    return listing_schema.jsonify(new_desired_item)
+
 #Upload image
 @app.route('/upload/<listingid>', methods = ['POST'])
 def upload_image(listingid):
@@ -182,8 +192,7 @@ def upload_image(listingid):
     thumbnail_name = f'{imagename}_thumbnail.jpg'
     thumbnail_image.save(f'{UPLOAD_FOLDER}/{thumbnail_name}')
     
-    
-    ## Add Image object to database
+     ## Add Image object to database
     new_image = Images(imagename,thumbnail_name,listingid)
     db.session.add(new_image)
     db.session.commit()
@@ -202,12 +211,6 @@ def get_image_thumbnail(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
     return send_from_directory(UPLOAD_FOLDER,photo.thumbnail)
 
-# Return next available listing id 
-@app.route('/getnextid/', methods = ['GET'])
-def get_next_id():
-    nextid = db.session.query(func.max(Listing.listingid)).scalar() + 1
-    return f'{nextid}'
-
 # Get all listings
 @app.route('/listings', methods = ['GET'])
 def get_listings():
@@ -222,6 +225,19 @@ def get_listingbyid(listingid):
     listing.views += 1
     db.session.commit()
     return listing_schema.jsonify(listing)
+
+# Get desired item by id
+@app.route('/getdesireditem/<desired_item_id>', methods = ['GET'])
+def get_desired_item_byid(desired_item_id):
+    desired_item = DesiredItem.query.get(desired_item_id)
+    return desired_item_schema.jsonify(desired_item)
+
+# Get all desired items by user id
+@app.route('/desireditems/<user_id>', methods = ['GET'])
+def get_user_desitems(user_id):
+    items = DesiredItem.query.filter(DesiredItem.user_id == user_id)
+    results = desired_items_schema.dump(items)
+    return jsonify(results.data)
 
 # Get listings by zipcode
 @app.route('/listingsbyzip/<zipcode>', methods = ['GET'])
@@ -250,6 +266,14 @@ def deletelisting(listingid):
     listing = Listing.query.get(listingid)
     ## TODO implement code to delete image from DB and folder
     db.session.delete(listing)
+    db.session.commit()
+    return "Operation successful"
+
+# Delete desired item
+@app.route('/deletedesireditem/<desired_item_id>', methods = ['GET'])
+def deletedesireditem(desired_item_id):
+    desired_item = DesiredItem.query.get(desired_item_id)
+    db.session.delete(desired_item)
     db.session.commit()
     return "Operation successful"
 
