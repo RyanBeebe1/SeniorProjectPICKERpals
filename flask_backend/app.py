@@ -253,7 +253,7 @@ def get_user_desitems(user_id):
 @app.route('/listingsbyzip/<zipcode>', methods = ['GET'])
 def get_listingsbyzip(zipcode):
     listings = Listing.query.filter(Listing.zipcode == zipcode)
-    results = desired_item_schema.dump(listings)
+    results = listings_schema.dump(listings)
     return jsonify(results.data)
 
 # Get listings by tag
