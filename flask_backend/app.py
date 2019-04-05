@@ -169,6 +169,19 @@ def add_listing():
     db.session.commit()
     return listing_schema.jsonify(new_listing)
 
+# Add desired item
+@app.route('/adddesireditem', methods=['POST'])
+def add_desired_item():
+    user_id = request.json['user_id']
+    tag = request.json['tag']
+    new_desired_item = DesiredItem(user_id, tag)
+    db.session.add(new_desired_item)
+    db.session.commit()
+    return listing_schema.jsonify(new_desired_item)
+
+
+
+
 #Upload image
 @app.route('/upload/<listingid>', methods = ['POST'])
 def upload_image(listingid):
@@ -223,11 +236,24 @@ def get_listingbyid(listingid):
     db.session.commit()
     return listing_schema.jsonify(listing)
 
+# Get desired item by id
+@app.route('/getdesireditem/<desired_item_id', methods = ['GET'])
+def get_desired_item_byid(desired_item_id):
+    desired_item = DesiredItem.query.get(desired_item_id)
+    return desired_item_schema.jsonify(desired_item)
+
+# Get all desired items by user id
+@app.route('/desireditems/<user_id>', methods = ['GET'])
+def get_user_desitems(user_id):
+    items = DesiredItem.query.filter(DesiredItem.user_id == user_id)
+    results = desired_item_schemas.dump(items)
+    return jsonify(results.data)
+
 # Get listings by zipcode
 @app.route('/listingsbyzip/<zipcode>', methods = ['GET'])
 def get_listingsbyzip(zipcode):
     listings = Listing.query.filter(Listing.zipcode == zipcode)
-    results = listings_schema.dump(listings)
+    results = desired_item_schema.dump(listings)
     return jsonify(results.data)
 
 # Get listings by tag
@@ -250,6 +276,14 @@ def deletelisting(listingid):
     listing = Listing.query.get(listingid)
     ## TODO implement code to delete image from DB and folder
     db.session.delete(listing)
+    db.session.commit()
+    return "Operation successful"
+
+# Delete desired item
+@app.route('deletedesireditem/<desired_item_id', methods ['GET'])
+def deletedesireditem(desired_item_id):
+    desired_item = DesiredItem.query.get(desired_item_id)
+    db.session.delete(desired_item)
     db.session.commit()
     return "Operation successful"
 
