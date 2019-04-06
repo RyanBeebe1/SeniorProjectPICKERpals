@@ -8,7 +8,7 @@ import 'package:async/async.dart';
 
 import 'package:path/path.dart';
 
-import 'package:senior_project_pickerpal/pickup_entry.dart';
+import 'pickup_entry.dart';
 
 import 'package:http/http.dart' as http;
 

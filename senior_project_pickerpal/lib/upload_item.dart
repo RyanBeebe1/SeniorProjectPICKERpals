@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:senior_project_pickerpal/backend_service.dart';
-import 'package:senior_project_pickerpal/main.dart';
-import 'package:senior_project_pickerpal/pickup_entry.dart';
-import 'package:senior_project_pickerpal/pickup_feed.dart';
-import 'package:senior_project_pickerpal/session.dart';
+import 'backend_service.dart';
+import 'main.dart';
+import 'pickup_entry.dart';
+import 'pickup_feed.dart';
+import 'session.dart';
+
 class UploadItem extends StatefulWidget {
   UploadItem({Key key, this.tag, this.page}) : super(key: key);
   final String tag;

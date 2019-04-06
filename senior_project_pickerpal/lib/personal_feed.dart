@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:senior_project_pickerpal/pickup_feed.dart';
-import 'package:senior_project_pickerpal/session.dart';
+import 'pickup_feed.dart';
+import 'session.dart';
 
 
 class MyFeed extends StatefulWidget {

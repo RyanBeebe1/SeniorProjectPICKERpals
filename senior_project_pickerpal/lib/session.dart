@@ -1,4 +1,4 @@
-import 'package:senior_project_pickerpal/pickup_entry.dart';
+import 'pickup_entry.dart';
 
 class SessionVariables {
 

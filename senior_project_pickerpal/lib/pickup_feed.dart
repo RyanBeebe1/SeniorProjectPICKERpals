@@ -1,8 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:senior_project_pickerpal/backend_service.dart';
-import 'package:senior_project_pickerpal/pickup_entry.dart';
+import 'backend_service.dart';
+import 'pickup_entry.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ListingFeed extends StatefulWidget {

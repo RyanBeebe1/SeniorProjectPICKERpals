@@ -8,15 +8,18 @@ import 'session.dart';
 import 'fancy_fab.dart';
 import 'splashScreen.dart';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() => runApp(MyApp());
 int item = 0;
 bool clicked = false;
 
 class MyApp extends StatelessWidget {
+  
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       theme:
           ThemeData(primaryColor: Colors.lightGreen, accentColor: Colors.green),
@@ -37,6 +40,28 @@ class MyHomePage extends StatefulWidget {
 enum HomePageState { feed, map, personalfeed }
 
 class MyHomePageState extends State<MyHomePage> {
+  
+  //Firebase messaging setup
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+  @override
+  void initState() {
+    super.initState();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) {
+        print(message);
+      },
+      onResume: (Map<String, dynamic> message) {
+        print(message);
+      },
+      onLaunch: (Map<String, dynamic> message) {
+        print(message);
+      },
+    );
+    _firebaseMessaging.getToken().then((token){
+      print(token);
+    });
+  }
+
   ListingFeed feed = new ListingFeed(
     endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings',
     personalMode: false,
@@ -229,3 +254,4 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 }
+
