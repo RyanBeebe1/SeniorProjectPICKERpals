@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import IMAGES, UploadSet, configure_uploads
+from pyfcm import FCMNotification
 
 app = Flask(__name__)
 
@@ -17,6 +18,8 @@ photos = UploadSet('photos', IMAGES)
 app.config['UPLOADED_PHOTOS_DEST'] = UPLOAD_FOLDER
 configure_uploads(app, photos)
 
+#Configure Firebase Push Service
+push_service = FCMNotification(api_key = "<AAAAQ66RqbM:APA91bEc1XP3s3qW1PQ2TueB0b20taMD0Kt8lUBMGicMeeYaQccw1lws_OJboLAy_7t-J2ACEcZa-sHlq71Ty7wBjrd3bm5yw51CPjPefl5Fzyh7WTsBYZH9psfg2pc7uUS4sPsmlI7A>")
 # app.debug = True
 config=configparser.ConfigParser()
 config.read('./config.ini')
@@ -76,12 +79,18 @@ class Rating(db.Model):
 class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column('user_id', db.Integer, primary_key=True)
+    email_address = db.Column('email',db.String(50))
+    display_name = db.Column('display_name',db.String(50))
+    token_id = db.Column('tokenid',db.String(200))
+    fb_uid = db.Column('fb_uid', db.String(200))
     overall_rating = db.Column('overall_rating', db.Integer)
-    email_address = db.Column('email_address',db.String(45))
+    
 
-    def __init__(self, overallrating, emailaddress):
-        self.overall_rating = overallrating
+    def __init__(self, emailaddress, displayname, tokenid, uid):
         self.email_address = emailaddress
+        self.display_name = displayname
+        self.token_id = tokenid
+        self.fb_uid = uid
 
 class DesiredItem(db.Model):
     __tablename__ = 'desired_item'
@@ -121,7 +130,7 @@ class ImageSchema(ma.Schema):
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('user_id','overall_rating','email_address')
+        fields = ('user_id', 'email_address', 'display_name', 'token_id','overall_rating', 'fb_uid')
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
@@ -152,6 +161,18 @@ def check_desired_items(description):
         print(listing)
 
 ## APP ENDPOINTS:
+
+# Add new user
+@app.route('/adduser', methods=['POST'])
+def add_user():
+    email = request.json['email_address']
+    name = request.json['display_name']
+    tokenid = request.json['token_id']
+    uid = request.json['fb_uid']
+    new_user = User(email, name, tokenid, uid)
+    db.session.add(new_user)
+    db.session.commit()
+    return listing_schema.jsonify(new_user)
 
 # Add listing 
 @app.route('/addlisting', methods=['POST'])
@@ -276,6 +297,11 @@ def deletedesireditem(desired_item_id):
     db.session.delete(desired_item)
     db.session.commit()
     return "Operation successful"
+
+@db.event.listens_for(Listing, "after_insert")
+def alert_user():
+    return "test"
+
 
 # The hello world endpoint
 @app.route("/hello")
