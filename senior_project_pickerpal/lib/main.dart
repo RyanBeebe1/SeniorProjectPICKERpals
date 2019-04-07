@@ -9,17 +9,16 @@ import 'fancy_fab.dart';
 import 'splashScreen.dart';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() => runApp(MyApp());
 int item = 0;
 bool clicked = false;
 
 class MyApp extends StatelessWidget {
-  
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       theme:
           ThemeData(primaryColor: Colors.lightGreen, accentColor: Colors.green),
@@ -40,7 +39,8 @@ class MyHomePage extends StatefulWidget {
 enum HomePageState { feed, map, personalfeed }
 
 class MyHomePageState extends State<MyHomePage> {
-  
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = new GoogleSignIn();
   //Firebase messaging setup
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   @override
@@ -48,20 +48,21 @@ class MyHomePageState extends State<MyHomePage> {
     super.initState();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
-        print(message);
+        print('on message $message');
       },
       onResume: (Map<String, dynamic> message) {
-        print(message);
+        print('on resume $message');
       },
       onLaunch: (Map<String, dynamic> message) {
-        print(message);
+        print('on launch $message');
       },
     );
-    _firebaseMessaging.getToken().then((token){
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.getToken().then((token) {
       print(token);
     });
   }
-
   ListingFeed feed = new ListingFeed(
     endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings',
     personalMode: false,
@@ -71,14 +72,28 @@ class MyHomePageState extends State<MyHomePage> {
   String drawerText = "Sign in with Google";
   String headerTxt = "Welcome Picker!";
   bool signedIn = false;
-  Future<void> _handleSignIn() async {
-    try {
-      await _googleSignIn.signIn();
-    } catch (error) {
-      print(error);
-    }
-  }
+  
+  //Firebase/Google signin, returns FirebaseUser object
+  Future<FirebaseUser> _handleSignIn() async {
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    final FirebaseUser user = await _auth.signInWithCredential(credential);
+    assert(user.email != null);
+    assert(user.displayName != null);
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
 
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+
+    return user;
+  }
+  
   Future<void> _handleSignOut() async {
     try {
       await _googleSignIn.signOut();
@@ -99,6 +114,8 @@ class MyHomePageState extends State<MyHomePage> {
       'https://www.googleapis.com/auth/contacts.readonly',
     ],
   );
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +148,8 @@ class MyHomePageState extends State<MyHomePage> {
             child: new ListTile(
               title: new Text(drawerText),
               onTap: () {
-                _handleSignIn().whenComplete(() {
+                //TODO: handle way to take Firebase user info object returned below and add to DB
+                _handleSignIn().then((FirebaseUser user)=>print(user.displayName)).whenComplete(() {
                   setState(() {
                     headerTxt =
                         "Hello, " + _googleSignIn.currentUser.displayName;
@@ -254,4 +272,3 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 }
-

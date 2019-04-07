@@ -1,154 +1,106 @@
 import 'dart:async';
-
 import 'dart:convert';
-
 import 'dart:io';
-
 import 'package:async/async.dart';
-
 import 'package:path/path.dart';
-
 import 'pickup_entry.dart';
-
 import 'package:http/http.dart' as http;
 
 class BackendService {
-
-
-
-
-
   //Get a list of pickup listings from server.
-
   static Future<List<Listing>> fetchListing(String url) async {
-
-
-
-    final response =
-
-    await http.get(url);
-
-
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
-
       // If server returns an OK response, parse the JSON
 
       List<Listing> newList = Listing.fromJsonList(json.decode(response.body));
 
       return newList;
-
     } else {
-
       // If that response was not OK, throw an error.
 
       throw Exception('Failed to load post');
-
     }
-
   }
 
   static Future<void> deleteListing(String url) async {
-
-
-
-    final response =
-
-    await http.get(url);
-
-
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
-
       // If server returns an OK response, parse the JSON
 
     } else {
-
       // If that response was not OK, throw an error.
 
       throw Exception('Failed to load post');
-
     }
-
   }
   //Create a listing in the database, return the new listing.
 
-  static Future<Listing> createListing(UploadListing listing,File image) async {
-
+  static Future<Listing> createListing(
+      UploadListing listing, File image) async {
     Listing listin;
 
-    await http.post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addlisting",headers: {"Content-Type": "application/json"}, body: json.encode(UploadListing.toJson(listing))).then((response) {
-
-
-
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addlisting",
+            headers: {"Content-Type": "application/json"},
+            body: json.encode(UploadListing.toJson(listing)))
+        .then((response) {
       listin = Listing.fromJson(json.decode(response.body));
-
-
-
-
-
     });
 
-    _uploadImage(image,listin.listing_id);
+    _uploadImage(image, listin.listing_id);
 
     return listin;
-
   }
 
   //Add a user to the database if it doesn't already exist, return the user.
 
   static Future<User> addUser(User user) async {
+    User user;
 
-      User user;
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adduser",
+            headers: {"Content-Type": "application/json"},
+            body: json.encode(User.toJson(user)))
+        .then((response) {
+      user = User.fromJson(json.decode(response.body));
+    });
 
-
-
-      await http.post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adduser", headers: {"Content-Type": "application/json"}, body: json.encode(User.toJson(user))).then(
-
-          (response) {
-
-           user = User.fromJson(json.decode(response.body));
-
-      }
-
-      );
-
-      return user;
-
+    return user;
   }
-  
+
   static Future<Rating> addRating(Rating rating) async {
     Rating rat;
 
-    await http.post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addrating", headers: {"Content-Type": "application/json"}, body: json.encode(Rating.toJson(rating))).then((response) {
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addrating",
+            headers: {"Content-Type": "application/json"},
+            body: json.encode(Rating.toJson(rating)))
+        .then((response) {
       rat = Rating.fromJson(json.decode(response.body));
     });
     return rat;
   }
 
   //Upload an image for the given listing
-
   static _uploadImage(File imageFile, dynamic listingId) async {
-
-    var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+    var stream =
+        new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
 
     var length = await imageFile.length();
 
-
-
-    var uri = Uri.parse("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/upload/"+listingId.toString());
-
-
+    var uri = Uri.parse(
+        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/upload/" +
+            listingId.toString());
 
     var request = new http.MultipartRequest("POST", uri);
 
     var multipartFile = new http.MultipartFile('photo', stream, length,
-
         filename: basename(imageFile.path));
 
     //contentType: new MediaType('image', 'png'));
-
-
 
     request.files.add(multipartFile);
 
@@ -157,13 +109,7 @@ class BackendService {
     print(response.statusCode);
 
     response.stream.transform(utf8.decoder).listen((value) {
-
       print(value);
-
     });
-
   }
-
-
-
 }
