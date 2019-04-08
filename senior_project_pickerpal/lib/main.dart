@@ -150,7 +150,6 @@ class MyHomePageState extends State<MyHomePage> {
             child: new ListTile(
               title: new Text(drawerText),
               onTap: () {
-                //TODO: handle way to take Firebase user info object returned below and add to DB
                 _handleSignIn()..whenComplete(() {
                   setState(() {
                     headerTxt =
@@ -160,7 +159,9 @@ class MyHomePageState extends State<MyHomePage> {
                         _googleSignIn.currentUser.email;
                   });
                 }).then((FirebaseUser user) {
-                    user.getIdToken().whenComplete((){}).then((tok) {
+                    // Create firebase messaging object for client and extract token
+                    FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+                    _firebaseMessaging.getToken().whenComplete((){}).then((tok) {
                     User newUser = User(user.email,user.displayName,tok,user.uid,0);
                     BackendService.addUser(newUser).whenComplete((){});
                   });
