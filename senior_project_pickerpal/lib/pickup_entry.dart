@@ -92,23 +92,34 @@ class UploadListing {
 }
 
 class User {
-  final String usersId;
-  final String overallRating;
+  int userId;
   final String emailAddress;
+  final String displayName;
+  final String tokenId;
+  final String fbId;
+  final int overallRating;
 
-  User(this.usersId,this.overallRating,this.emailAddress);
+  User(this.emailAddress,this.displayName,this.tokenId,this.fbId,this.overallRating);
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-        json['users_id'],
-        json['overall_rating'],
-        json['email_address']
+      json['email_address'],
+      json['display_name'],
+      json['token_id'],
+      json['fb_uid'],
+      json['overall_rating']
     );
   }
 
+  setUserId(int id) {
+    this.userId = id;
+  }
+
   static Map<String,dynamic> toJson(User user) => {
-    'users_id' : user.usersId,
-    'overall_rating':user.overallRating,
-    'email_address':user.emailAddress
+    'email_address':user.emailAddress,
+    'display_name':user.displayName,
+    'token_id':user.tokenId,
+    'fb_uid':user.fbId,
+    'overall_rating':user.overallRating
   };
 
 }

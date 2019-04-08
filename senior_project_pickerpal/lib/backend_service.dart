@@ -48,6 +48,7 @@ class BackendService {
             body: json.encode(UploadListing.toJson(listing)))
         .then((response) {
       listin = Listing.fromJson(json.decode(response.body));
+      return listin;
     });
 
     _uploadImage(image, listin.listing_id);
@@ -58,17 +59,20 @@ class BackendService {
   //Add a user to the database if it doesn't already exist, return the user.
 
   static Future<User> addUser(User user) async {
-    User user;
+    User myUser;
 
     await http
         .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adduser",
             headers: {"Content-Type": "application/json"},
             body: json.encode(User.toJson(user)))
         .then((response) {
-      user = User.fromJson(json.decode(response.body));
+      Map<String, dynamic> jmap = json.decode(response.body);
+      myUser = User.fromJson(jmap);
+      myUser.setUserId(jmap['user_id']);
+      return myUser;
     });
 
-    return user;
+    return myUser;
   }
 
   static Future<Rating> addRating(Rating rating) async {
@@ -80,6 +84,7 @@ class BackendService {
             body: json.encode(Rating.toJson(rating)))
         .then((response) {
       rat = Rating.fromJson(json.decode(response.body));
+      return rat;
     });
     return rat;
   }

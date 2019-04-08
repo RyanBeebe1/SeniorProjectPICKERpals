@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:seniorproject_final_updated/backend_service.dart';
+import 'package:seniorproject_final_updated/pickup_entry.dart';
 import 'personal_feed.dart';
 import 'pickup_feed.dart';
 import 'search_bar.dart';
@@ -149,7 +151,7 @@ class MyHomePageState extends State<MyHomePage> {
               title: new Text(drawerText),
               onTap: () {
                 //TODO: handle way to take Firebase user info object returned below and add to DB
-                _handleSignIn().then((FirebaseUser user)=>print(user.displayName)).whenComplete(() {
+                _handleSignIn()..whenComplete(() {
                   setState(() {
                     headerTxt =
                         "Hello, " + _googleSignIn.currentUser.displayName;
@@ -157,6 +159,12 @@ class MyHomePageState extends State<MyHomePage> {
                     SessionVariables.loggedInEmail =
                         _googleSignIn.currentUser.email;
                   });
+                }).then((FirebaseUser user) {
+                    user.getIdToken().whenComplete((){}).then((tok) {
+                    User newUser = User(user.email,user.displayName,tok,user.uid,0);
+                    BackendService.addUser(newUser).whenComplete((){});
+                  });
+
                 });
               },
             ),
