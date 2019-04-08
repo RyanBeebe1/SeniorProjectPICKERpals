@@ -81,7 +81,7 @@ class User(db.Model):
     user_id = db.Column('user_id', db.Integer, primary_key=True)
     email_address = db.Column('email',db.String(50))
     display_name = db.Column('display_name',db.String(50))
-    token_id = db.Column('tokenid',db.String(200))
+    token_id = db.Column('token_id',db.String(1500))
     fb_uid = db.Column('fb_uid', db.String(200))
     overall_rating = db.Column('overall_rating', db.Integer)
     
@@ -97,6 +97,7 @@ class DesiredItem(db.Model):
     desired_item_id = db.Column('desired_item_id', db.Integer, primary_key=True)
     user_id = db.Column('user_id', db.Integer)
     keyword = db.Column('keyword',db.String(45))
+    found_listing_id = db.Column('found_listing_id',db.Integer)
 
     def __init__(self, userid, keyword):
         self.user_id = userid
@@ -134,7 +135,7 @@ class UserSchema(ma.Schema):
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
-        fields = ('desired_item_id','user_id','keyword')
+        fields = ('desired_item_id','user_id','keyword','found_listing_id')
 
 
 # Init Schema
@@ -165,14 +166,18 @@ def check_desired_items(description):
 # Add new user
 @app.route('/adduser', methods=['POST'])
 def add_user():
-    email = request.json['email_address']
-    name = request.json['display_name']
-    tokenid = request.json['token_id']
-    uid = request.json['fb_uid']
-    new_user = User(email, name, tokenid, uid)
-    db.session.add(new_user)
-    db.session.commit()
-    return listing_schema.jsonify(new_user)
+    anobj = User.query.filter(User.fb_uid == request.json['fb_uid']).first()
+    if anobj == None:
+        email = request.json['email_address']
+        name = request.json['display_name']
+        tokenid = request.json['token_id']
+        uid = request.json['fb_uid']
+        new_user = User(email, name, tokenid, uid)
+        db.session.add(new_user)
+        db.session.commit()
+    else:
+        return user_schema.jsonify(anobj)
+    return user_schema.jsonify(new_user)
 
 # Add listing 
 @app.route('/addlisting', methods=['POST'])
@@ -298,9 +303,9 @@ def deletedesireditem(desired_item_id):
     db.session.commit()
     return "Operation successful"
 
-@db.event.listens_for(Listing, "after_insert")
-def alert_user():
-    return "test"
+#@db.event.listens_for(Listing, "after_insert")
+#def alert_user():
+ #   return "test"
 
 
 # The hello world endpoint
