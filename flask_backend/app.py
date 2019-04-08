@@ -18,8 +18,6 @@ photos = UploadSet('photos', IMAGES)
 app.config['UPLOADED_PHOTOS_DEST'] = UPLOAD_FOLDER
 configure_uploads(app, photos)
 
-#Configure Firebase Push Service
-push_service = FCMNotification(api_key = "<AAAAQ66RqbM:APA91bEc1XP3s3qW1PQ2TueB0b20taMD0Kt8lUBMGicMeeYaQccw1lws_OJboLAy_7t-J2ACEcZa-sHlq71Ty7wBjrd3bm5yw51CPjPefl5Fzyh7WTsBYZH9psfg2pc7uUS4sPsmlI7A>")
 # app.debug = True
 config=configparser.ConfigParser()
 config.read('./config.ini')
@@ -27,6 +25,10 @@ hostname = config.get('config','hostname')
 username = config.get('config','username')
 database = config.get('config','database')
 password = config.get('config','password')
+firebase_api = config.get('config','api_key')
+
+#Configure Firebase Push Service
+push_service = FCMNotification(api_key = firebase_api)
 
 #SQL-Alchemy settings
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{username}:{password}@{hostname}/{database}'
@@ -75,7 +77,6 @@ class Rating(db.Model):
         self.listing_id = listingid
         self.user_id = userid
 
-
 class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column('user_id', db.Integer, primary_key=True)
@@ -85,7 +86,6 @@ class User(db.Model):
     fb_uid = db.Column('fb_uid', db.String(200))
     overall_rating = db.Column('overall_rating', db.Integer)
     
-
     def __init__(self, emailaddress, displayname, tokenid, uid):
         self.email_address = emailaddress
         self.display_name = displayname
@@ -97,7 +97,6 @@ class DesiredItem(db.Model):
     desired_item_id = db.Column('desired_item_id', db.Integer, primary_key=True)
     user_id = db.Column('user_id', db.Integer)
     keyword = db.Column('keyword',db.String(45))
-    found_listing_id = db.Column('found_listing_id',db.Integer)
 
     def __init__(self, userid, keyword):
         self.user_id = userid
@@ -135,7 +134,7 @@ class UserSchema(ma.Schema):
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
-        fields = ('desired_item_id','user_id','keyword','found_listing_id')
+        fields = ('desired_item_id','user_id','keyword')
 
 
 # Init Schema
@@ -160,15 +159,6 @@ def check_desired_items(description):
     list_dump = listings_schema.dump(all_listings)
     for listing in list_dump:
         print(listing)
-
-
-def new_listing_desire_check(listing):
-    desired_items = DesiredItem.query.all()
-    di_dump = desired_items_schema.dump(desired_items)
-    for di in di_dump:
-        if di.keyword in listing.description:
-            di.found_listing_id = listing.listingid
-    
 
 ## APP ENDPOINTS:
 
@@ -202,7 +192,6 @@ def add_listing():
     new_listing = Listing(description,location,date,zipcode,userid,title,tag,condition)
     db.session.add(new_listing)
     db.session.commit()
-    new_listing_desire_check()
     return listing_schema.jsonify(new_listing)
 
 # Add desired item
@@ -313,10 +302,26 @@ def deletedesireditem(desired_item_id):
     db.session.commit()
     return "Operation successful"
 
-#@db.event.listens_for(Listing, "after_insert")
-#def alert_user():
- #   return "test"
+#test notify, basically sends push notification to the user_id specified below
+@app.route('/notifyuser/<user_id>', methods = ['GET'])
+def notifyuser(user_id):
+    user = User.query.get(user_id)
+    registration_id = user.token_id
+    data = {
+    "title": "some new stuff just came in",
+    "body": "This offer expires at 11:30 or whatever",
+    "notId": 10,
+    "surveyID": "ewtawgreg-gragrag-rgarhthgbad"
+    }
+    message_title = "yo dawg"
+    message_body = "wassup"
+    result =  push_service.notify_single_device(registration_id=registration_id, message_title=message_title,message_body=message_body, data_message=data, ) 
+    return registration_id
 
+# gonna mess with listener later, going to be used for alerting users of their desired items
+@db.event.listens_for(Listing, "after_insert")
+def after_insert(mapper, connection, target):
+    return "test"
 
 # The hello world endpoint
 @app.route("/hello")
