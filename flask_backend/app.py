@@ -97,6 +97,7 @@ class DesiredItem(db.Model):
     desired_item_id = db.Column('desired_item_id', db.Integer, primary_key=True)
     user_id = db.Column('user_id', db.Integer)
     keyword = db.Column('keyword',db.String(45))
+    found_listing_id = db.Column('found_listing_id', db.Integer)
 
     def __init__(self, userid, keyword):
         self.user_id = userid
@@ -134,7 +135,7 @@ class UserSchema(ma.Schema):
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
-        fields = ('desired_item_id','user_id','keyword')
+        fields = ('desired_item_id','user_id','keyword','found_listing_id')
 
 
 # Init Schema
@@ -159,6 +160,13 @@ def check_desired_items(description):
     list_dump = listings_schema.dump(all_listings)
     for listing in list_dump:
         print(listing)
+
+def new_listing_desire_check(listing):
+    desired_items = DesiredItem.query.all()
+    di_dump = desired_items_schema.dump(desired_items)
+    for di in di_dump:
+        if di.keyword in listing.description:
+            di.found_listing_id = listing.listingid
 
 ## APP ENDPOINTS:
 
@@ -192,6 +200,7 @@ def add_listing():
     new_listing = Listing(description,location,date,zipcode,userid,title,tag,condition)
     db.session.add(new_listing)
     db.session.commit()
+    new_listing_desire_check()
     return listing_schema.jsonify(new_listing)
 
 # Add desired item
