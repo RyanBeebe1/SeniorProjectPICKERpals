@@ -161,12 +161,13 @@ def check_desired_items(description):
     for listing in list_dump:
         print(listing)
 
+
+# Checks all desired items against newly added listing
 def new_listing_desire_check(listing):
     desired_items = DesiredItem.query.all()
-    di_dump = desired_items_schema.dump(desired_items)
-    for di in di_dump:
+    for di in desired_items:
         if di.keyword in listing.description:
-            di.found_listing_id = listing.listingid
+            print("put the working code for push notifications here")
 
 ## APP ENDPOINTS:
 
