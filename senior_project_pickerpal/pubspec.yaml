@@ -1,4 +1,4 @@
-name: seniorproject_final_updated
+name: seniorprojectnuked
 description: Senior Project
 
 # The following defines the version and build number for your application.
@@ -6,23 +6,28 @@ description: Senior Project
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
-# Read more about versioning at sever.org.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
   location:
   intl:
-  image_picker: ^0.4.12+1
-  http: ^0.12.0+1
-  google_maps_flutter: ^0.2.0+2
-  google_sign_in: 3.2.4
-  cached_network_image: ^0.7.0
-  firebase_auth: 0.7.0
-  firebase_core: 0.2.5+1
-  firebase_messaging: 2.1.0
+  image_picker:
+  http: 
+  google_maps_flutter:
+  google_sign_in: 
+  cached_network_image: 
+  firebase_auth: 
+  firebase_core: 
+  firebase_messaging: 
+  flutter_launcher_icons: 
   flutter:
     sdk: flutter
 
@@ -34,15 +39,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_launcher_icons: "^0.7.0"
-
-##########################################################
-#flutter_icons:
-#  image_path: "pickerPals_icon/res/pickerPals_icon.png"
-#  android: "launcher_icon"
-#  ios: true
-# Note to self: FIX THIS
-##########################################################
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
@@ -54,7 +50,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  
   assets:
   - pickerPals_explosion.png
   - pickerPals_logo.jpg

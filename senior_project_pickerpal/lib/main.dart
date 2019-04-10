@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:seniorproject_final_updated/backend_service.dart';
-import 'package:seniorproject_final_updated/pickup_entry.dart';
+import 'backend_service.dart';
+import 'pickup_entry.dart';
 import 'personal_feed.dart';
 import 'pickup_feed.dart';
 import 'search_bar.dart';
