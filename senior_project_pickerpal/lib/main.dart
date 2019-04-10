@@ -242,11 +242,6 @@ class MyHomePageState extends State<MyHomePage> {
             },
           ),
           new Divider(),
-          new ListTile(
-            title: new Text('Exit PickerPals'),
-            onTap: () => exit(0),
-          ),
-          new Divider(),
           Visibility(
             visible: SessionVariables.loggedIn ? true : false,
             child: new ListTile(
@@ -281,3 +276,4 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 }
+
