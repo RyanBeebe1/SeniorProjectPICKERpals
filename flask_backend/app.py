@@ -103,14 +103,14 @@ class User(db.Model):
         self.fb_uid = uid
 
     ## Send push notification to user
-    def notify(title, body, data):
+    def notify(self, title, body, data):
         result = push_service.notify_single_device(
             registration_id=self.token_id,
             message_title=title,
             message_body=body,
             data_message=data,
         )
-        print("Success")
+        print(f"Push sent to {self.display_name} at {self.token_id} when {result}")
 
 
 class DesiredItem(db.Model):
@@ -155,8 +155,7 @@ class ListingSchema(ma.Schema):
             "tag",
             "condition",
         )
-
-
+# Use this schema when joining listing and user tables
 class UserListingSchema(ma.Schema):
     class Meta:
         fields = (
@@ -169,16 +168,14 @@ class UserListingSchema(ma.Schema):
             "title",
             "tag",
             "condition",
-            "display_name",
+            "display_name"
         )
-
 
 class RatingSchema(ma.Schema):
     class Meta:
         fields = ("ratingid", "rating", "listingid", "userid")
 
 
-# Images shcemas
 class ImageSchema(ma.Schema):
     class Meta:
         fields = ("image_name", "thumbnail", "listing_id")
@@ -194,7 +191,6 @@ class UserSchema(ma.Schema):
             "overall_rating",
             "fb_uid",
         )
-
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
@@ -218,18 +214,17 @@ desired_item_schema = DesiredItemSchema(strict=True)
 desired_items_schema = DesiredItemSchema(many=True, strict=True)
 
 user_listing_schema = UserListingSchema(strict=True)
-user_listings_schema = UserListingSchema(many=True, strict=True)
+user_listings_schema =UserListingSchema(many=True,strict=True)
 
-# Checks all desired items against newly added listing, then pushes listing json to user if match is found
+# Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
     desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword)
     for di in desired_items:
         user = User.query.get(di.user_id)
-        user.notify(
-            "Desired Item",
-            f"A desired item matching {di.keyword} has been uploaded",
-            listing_schema.jsonify(listing),
-        )
+        title = "Desired item alert"
+        body = f"A desired item matching {di.keyword} has just been uploaded, claim it now!"
+        data = {"Listing" : f"{listing.listingid}",}
+        user.notify(title,body,data)
 
 
 ## APP ENDPOINTS:
