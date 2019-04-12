@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 class Listing {
-
   final String description;
   final String user_id;
   final String item_title;
@@ -10,24 +9,33 @@ class Listing {
   final String zipcode;
   final String cond;
   final String listing_date;
+  final String display_name;
   final dynamic listing_id;
 
-
-
-  Listing(this.description,this.user_id,this.item_title,this.location,this.tag, this.zipcode, this.cond, this.listing_date,this.listing_id);
+  Listing(
+      this.description,
+      this.user_id,
+      this.item_title,
+      this.location,
+      this.tag,
+      this.zipcode,
+      this.cond,
+      this.listing_date,
+      this.listing_id,
+      this.display_name);
 
   factory Listing.fromJson(Map<String, dynamic> json) {
     return Listing(
         json['description'],
-        json['userid'],
+        json['userid'].toString(),
         json['title'],
         json['location'],
         json['tag'],
         json['zipcode'],
         json['condition'],
         json['date'],
-        json['listingid']
-    );
+        json['listingid'],
+        json['display_name']);
   }
 
   static List<Listing> fromJsonList(jsonList) {
@@ -35,19 +43,20 @@ class Listing {
   }
 
   static Map<String, dynamic> toJson(Listing l) => {
-    "description" : l.description,
-    "title":l.item_title,
-    "userid":l.user_id,
-    "location":l.location,
-    "tag":l.tag,
-    "zipcode":l.zipcode,
-    "date":l.listing_date,
-    "condition":l.cond,
-    "listingid" :l.listing_id
-  };
+        "description": l.description,
+        "title": l.item_title,
+        "userid": l.user_id,
+        "location": l.location,
+        "tag": l.tag,
+        "zipcode": l.zipcode,
+        "date": l.listing_date,
+        "condition": l.cond,
+        "listingid": l.listing_id,
+        "display_name": l.display_name
+      };
 }
-class UploadListing {
 
+class UploadListing {
   final String description;
   final String user_id;
   final String item_title;
@@ -57,10 +66,8 @@ class UploadListing {
   final String cond;
   final String listing_date;
 
-
-
-
-  UploadListing(this.description,this.user_id,this.item_title,this.location,this.tag, this.zipcode, this.cond, this.listing_date);
+  UploadListing(this.description, this.user_id, this.item_title, this.location,
+      this.tag, this.zipcode, this.cond, this.listing_date);
 
   factory UploadListing.fromJson(Map<String, dynamic> json) {
     return UploadListing(
@@ -71,24 +78,25 @@ class UploadListing {
         json['tag'],
         json['zipcode'],
         json['condition'],
-        json['date']
-    );
+        json['date']);
   }
 
   static List<UploadListing> fromJsonList(jsonList) {
-    return jsonList.map<UploadListing>((obj) => UploadListing.fromJson(obj)).toList();
+    return jsonList
+        .map<UploadListing>((obj) => UploadListing.fromJson(obj))
+        .toList();
   }
 
   static Map<String, dynamic> toJson(UploadListing l) => {
-    "description" : l.description,
-    "title":l.item_title,
-    "userid":l.user_id,
-    "location":l.location,
-    "tag":l.tag,
-    "zipcode":l.zipcode,
-    "date":l.listing_date,
-    "condition":l.cond
-  };
+        "description": l.description,
+        "title": l.item_title,
+        "userid": l.user_id,
+        "location": l.location,
+        "tag": l.tag,
+        "zipcode": l.zipcode,
+        "date": l.listing_date,
+        "condition": l.cond
+      };
 }
 
 class User {
@@ -99,57 +107,48 @@ class User {
   final String fbId;
   final int overallRating;
 
-  User(this.emailAddress,this.displayName,this.tokenId,this.fbId,this.overallRating);
+  User(this.emailAddress, this.displayName, this.tokenId, this.fbId,
+      this.overallRating);
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      json['email_address'],
-      json['display_name'],
-      json['token_id'],
-      json['fb_uid'],
-      json['overall_rating']
-    );
+    return User(json['email_address'], json['display_name'], json['token_id'],
+        json['fb_uid'], json['overall_rating']);
   }
 
   setUserId(int id) {
     this.userId = id;
   }
 
-  static Map<String,dynamic> toJson(User user) => {
-    'email_address':user.emailAddress,
-    'display_name':user.displayName,
-    'token_id':user.tokenId,
-    'fb_uid':user.fbId,
-    'overall_rating':user.overallRating
-  };
-
+  static Map<String, dynamic> toJson(User user) => {
+        'email_address': user.emailAddress,
+        'display_name': user.displayName,
+        'token_id': user.tokenId,
+        'fb_uid': user.fbId,
+        'overall_rating': user.overallRating
+      };
 }
-
 
 class DesiredItem {
   final String desiredItemId;
   final String userId;
   final String keyword;
 
-  DesiredItem(this.desiredItemId,this.userId,this.keyword);
+  DesiredItem(this.desiredItemId, this.userId, this.keyword);
   factory DesiredItem.fromJson(Map<String, dynamic> json) {
     return DesiredItem(
-        json['desired_item_id'],
-        json['user_id'],
-        json['keyword']
-    );
+        json['desired_item_id'], json['user_id'], json['keyword']);
   }
 
   static List<DesiredItem> fromJsonList(jsonList) {
-    return jsonList.map<DesiredItem>((obj) => DesiredItem.fromJson(obj)).toList();
+    return jsonList
+        .map<DesiredItem>((obj) => DesiredItem.fromJson(obj))
+        .toList();
   }
 
-  static Map<String,dynamic> toJson(DesiredItem item) => {
-    'desired_item_id' : item.desiredItemId,
-    'user_id':item.userId,
-    'keyword':item.keyword
-  };
-
-
+  static Map<String, dynamic> toJson(DesiredItem item) => {
+        'desired_item_id': item.desiredItemId,
+        'user_id': item.userId,
+        'keyword': item.keyword
+      };
 }
 
 class Images {
@@ -157,26 +156,17 @@ class Images {
   final String listingId;
   final String imageIndex;
 
-
-  Images(this.imageName,this.listingId,this.imageIndex);
-  factory Images.fromJson(Map<String,dynamic> json) {
-    return Images (
-        json['image_name'],
-        json['listing_id'],
-        json['image_index']
-    );
+  Images(this.imageName, this.listingId, this.imageIndex);
+  factory Images.fromJson(Map<String, dynamic> json) {
+    return Images(json['image_name'], json['listing_id'], json['image_index']);
   }
 
-
-  static Map<String,dynamic> toJson(Images i) => {
-    'image_name':i.imageName,
-    'listing_id':i.listingId,
-    'image_index':i.imageIndex
-  };
-
-
+  static Map<String, dynamic> toJson(Images i) => {
+        'image_name': i.imageName,
+        'listing_id': i.listingId,
+        'image_index': i.imageIndex
+      };
 }
-
 
 class Rating {
   //final String ratingId;
@@ -184,22 +174,15 @@ class Rating {
   final String listingId;
   final String userId;
 
-  Rating(this.rating,this.listingId,this.userId);
-  factory Rating.fromJson(Map<String,dynamic> json) {
-    return Rating(
-        json['rating'],
-        json['listing_id'],
-        json['user_id']
-    );
+  Rating(this.rating, this.listingId, this.userId);
+  factory Rating.fromJson(Map<String, dynamic> json) {
+    return Rating(json['rating'], json['listing_id'], json['user_id']);
   }
 
   static List<Rating> fromJsonList(jsonList) {
     return jsonList.map<Rating>((obj) => Rating.fromJson(obj)).toList();
   }
 
-  static Map<String,dynamic> toJson(Rating r) => {
-    'rating':r.rating,
-    'listing_id':r.listingId,
-    'user_id':r.userId
-  };
+  static Map<String, dynamic> toJson(Rating r) =>
+      {'rating': r.rating, 'listing_id': r.listingId, 'user_id': r.userId};
 }

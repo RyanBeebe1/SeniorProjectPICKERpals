@@ -5,7 +5,8 @@ import 'pickup_entry.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ListingFeed extends StatefulWidget {
-  ListingFeed({Key key, this.title,this.endpoint,this.personalMode}) : super(key: key);
+  ListingFeed({Key key, this.title, this.endpoint, this.personalMode})
+      : super(key: key);
   final String title;
   final String endpoint;
   final List<Listing> items = [];
@@ -15,10 +16,7 @@ class ListingFeed extends StatefulWidget {
   ListingFeedState createState() => state;
 }
 
-
-
 class ListingFeedState extends State<ListingFeed> {
-
   bool ratePress = false;
   int pageNum;
   ScrollController _controller = ScrollController();
@@ -32,10 +30,10 @@ class ListingFeedState extends State<ListingFeed> {
   List<Listing> getItems() {
     return widget.items;
   }
+
   Future<void> onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
-    BackendService.fetchListing(
-        widget.endpoint)
+    BackendService.fetchListing(widget.endpoint)
         .whenComplete(() {})
         .then((pick) {
       print(pick[0].item_title);
@@ -51,8 +49,7 @@ class ListingFeedState extends State<ListingFeed> {
 
   Future<void> onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
-    BackendService.fetchListing(
-        widget.endpoint)
+    BackendService.fetchListing(widget.endpoint)
         .whenComplete(() {})
         .then((pick) {
       print(pick[0].item_title);
@@ -66,7 +63,6 @@ class ListingFeedState extends State<ListingFeed> {
     return null;
   }
 
-
   @override
   void dispose() {
     _controller.dispose();
@@ -75,7 +71,6 @@ class ListingFeedState extends State<ListingFeed> {
 
   @override
   void initState() {
-
     pageNum = 1;
     onLoad();
     _controller.addListener(() {
@@ -103,7 +98,11 @@ class ListingFeedState extends State<ListingFeed> {
   Widget build(BuildContext context) {
     final snackBar = SnackBar(
       content: Text("Cannot Reach Server!"),
-      action: SnackBarAction(label: "Ok", onPressed: () {Scaffold.of(context).hideCurrentSnackBar();}),
+      action: SnackBarAction(
+          label: "Ok",
+          onPressed: () {
+            Scaffold.of(context).hideCurrentSnackBar();
+          }),
     );
     return Scaffold(
       body: RefreshIndicator(
@@ -116,7 +115,9 @@ class ListingFeedState extends State<ListingFeed> {
         },
         child: ListView.separated(
             separatorBuilder: (context, ind) {
-              return Divider(color: Colors.lightGreen,);
+              return Divider(
+                color: Colors.lightGreen,
+              );
             },
             primary: false,
             controller: _controller,
@@ -125,7 +126,10 @@ class ListingFeedState extends State<ListingFeed> {
               if (index == widget.items.length && !refreshing) {
                 if (!widget.personalMode) {
                   return ListTile(
-                    title: Center(child: CircularProgressIndicator(backgroundColor: Colors.green,)),
+                    title: Center(
+                        child: CircularProgressIndicator(
+                      backgroundColor: Colors.green,
+                    )),
                   );
                 } else {
                   return ListTile(
@@ -171,14 +175,13 @@ class ListingFeedState extends State<ListingFeed> {
                                 content: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
-                                  children : <Widget>[
+                                  children: <Widget>[
                                     Expanded(
                                       child: Text(
                                         "Are you sure you want to delete this listing?",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Colors.red,
-
                                         ),
                                       ),
                                     )
@@ -193,7 +196,9 @@ class ListingFeedState extends State<ListingFeed> {
                                   FlatButton(
                                       child: Text('Yes'),
                                       onPressed: () {
-                                        BackendService.deleteListing("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/deletelisting/" + item.listing_id.toString());
+                                        BackendService.deleteListing(
+                                            "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/deletelisting/" +
+                                                item.listing_id.toString());
                                         setState(() {
                                           widget.items.removeAt(index);
                                         });
@@ -209,50 +214,56 @@ class ListingFeedState extends State<ListingFeed> {
                         showDialog(
                           context: context,
                           builder: (_) => new SimpleDialog(
-                            contentPadding: EdgeInsets.all(10.0),
-                            children: <Widget>[
-                              Text(
-                                item.item_title,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24.0),
-                              ),
-                              Padding(padding: EdgeInsets.all(20.0)),
-                              CachedNetworkImage(imageUrl: "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/" + item.listing_id.toString(),
-                                placeholder: (context, url) => new Center(
-                                    child: Container(
-                                        height: 30,
-                                        width: 30,
-                                        child: CircularProgressIndicator(strokeWidth: 5.0,))),
-                                errorWidget: (context, url, error) => new Icon(Icons.error_outline),
-                              ),
-                              Text("Posted by: " + item.user_id),
-                              Text(
-                                item.description,
-                                style: TextStyle(fontSize: 15.0),
-                              ),
-                              SimpleDialogOption(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Container(
-                                  height: 30.0,
-                                  width: 10.0,
-                                  child: Text(
-                                    "Ok",
+                                contentPadding: EdgeInsets.all(10.0),
+                                children: <Widget>[
+                                  Text(
+                                    item.item_title,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 20.0),
-                                    textAlign: TextAlign.center,
+                                        fontSize: 24.0),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.lightGreen,
-                                    border: Border.all(color: Colors.black),
+                                  Padding(padding: EdgeInsets.all(20.0)),
+                                  CachedNetworkImage(
+                                    imageUrl:
+                                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/" +
+                                            item.listing_id.toString(),
+                                    placeholder: (context, url) => new Center(
+                                        child: Container(
+                                            height: 30,
+                                            width: 30,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 5.0,
+                                            ))),
+                                    errorWidget: (context, url, error) =>
+                                        new Icon(Icons.error_outline),
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
+                                  Text("Posted by: " + item.display_name),
+                                  Text(
+                                    item.description,
+                                    style: TextStyle(fontSize: 15.0),
+                                  ),
+                                  SimpleDialogOption(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Container(
+                                      height: 30.0,
+                                      width: 10.0,
+                                      child: Text(
+                                        "Ok",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20.0),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.lightGreen,
+                                        border: Border.all(color: Colors.black),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
                         );
                       },
                       title: Text(item.item_title),
@@ -266,31 +277,32 @@ class ListingFeedState extends State<ListingFeed> {
                                   showDialog(
                                       context: context,
                                       builder: (_) => new AlertDialog(
-                                        title: Text("Chat with Seller"),
-                                        content:
-                                        Text("This is where the chat would be"),
-                                        actions: <Widget>[
-                                          Container(
-                                            height: 30.0,
-                                            child: RaisedButton(
-                                              child: const Text(
-                                                'I Understand',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black),
+                                            title: Text("Chat with Seller"),
+                                            content: Text(
+                                                "This is where the chat would be"),
+                                            actions: <Widget>[
+                                              Container(
+                                                height: 30.0,
+                                                child: RaisedButton(
+                                                  child: const Text(
+                                                    'I Understand',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black),
+                                                  ),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  splashColor: Colors.grey,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.lightGreen,
+                                                    border: Border.all(
+                                                        color: Colors.black)),
                                               ),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              splashColor: Colors.grey,
-                                            ),
-                                            decoration: BoxDecoration(
-                                                color: Colors.lightGreen,
-                                                border: Border.all(
-                                                    color: Colors.black)),
-                                          ),
-                                        ],
-                                      ));
+                                            ],
+                                          ));
                                 }),
                             Visibility(
                                 child: IconButton(
@@ -298,19 +310,20 @@ class ListingFeedState extends State<ListingFeed> {
                                     onPressed: () async {
                                       await showDialog(
                                           context: context,
-                                          builder: (_) => RatingDialog(item: item,));
+                                          builder: (_) => RatingDialog(
+                                                item: item,
+                                              ));
                                       setState(() {
                                         ratePress = true;
                                       });
                                     }),
-                                visible: ratePress?true:true)
-                          ]
-                      )
-                  ),
+                                visible: ratePress ? true : true)
+                          ])),
                 );
               }
             }),
-      ),);
+      ),
+    );
   }
 }
 
@@ -324,8 +337,7 @@ class RatingDialog extends StatefulWidget {
   _RatingDialogState createState() => new _RatingDialogState();
 }
 
-class _RatingDialogState extends State<RatingDialog>{
-
+class _RatingDialogState extends State<RatingDialog> {
   int _radioValue = -1;
   void _handleRadioValueChange(int value) {
     setState(() {
@@ -364,39 +376,61 @@ class _RatingDialogState extends State<RatingDialog>{
   Widget build(BuildContext context) {
     return new AlertDialog(
       title: Text("Rate this listing"),
-      content:
-      Text("Choose from 1 to 5:"),
+      content: Text("Choose from 1 to 5:"),
       actions: <Widget>[
         Center(
             child: new Column(
+          children: <Widget>[
+            new Row(
               children: <Widget>[
-                new Row(
-                  children: <Widget>[
-                    new Radio(value: 0, groupValue: _radioValue, onChanged: _handleRadioValueChange),
-                    new Text("1"),
-                    new Radio(value: 1, groupValue: _radioValue, onChanged: _handleRadioValueChange),
-                    new Text("2"),
-                    new Radio(value: 2, groupValue: _radioValue, onChanged: _handleRadioValueChange),
-                    new Text("3"),
-                    new Radio(value: 3, groupValue: _radioValue, onChanged: _handleRadioValueChange),
-                    new Text("4"),
-                    new Radio(value: 4, groupValue: _radioValue, onChanged: _handleRadioValueChange),
-                    new Text("5"),
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,),
-                new RaisedButton(
-                  color: Colors.lightGreen,
-                  onPressed:() {Navigator.of(context).pop();
-                  Rating r = new Rating(_radioValue.toString(), widget.item.listing_id.toString(), widget.item.user_id.toString());
-                  BackendService.addRating(r);
-                  _radioValue = -1;
-                  },
-                  child: Text("Ok",style: TextStyle(
-                    color: Colors.black,
-                  ),),),
+                new Radio(
+                    value: 0,
+                    groupValue: _radioValue,
+                    onChanged: _handleRadioValueChange),
+                new Text("1"),
+                new Radio(
+                    value: 1,
+                    groupValue: _radioValue,
+                    onChanged: _handleRadioValueChange),
+                new Text("2"),
+                new Radio(
+                    value: 2,
+                    groupValue: _radioValue,
+                    onChanged: _handleRadioValueChange),
+                new Text("3"),
+                new Radio(
+                    value: 3,
+                    groupValue: _radioValue,
+                    onChanged: _handleRadioValueChange),
+                new Text("4"),
+                new Radio(
+                    value: 4,
+                    groupValue: _radioValue,
+                    onChanged: _handleRadioValueChange),
+                new Text("5"),
               ],
-            )
-        ),
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            new RaisedButton(
+              color: Colors.lightGreen,
+              onPressed: () {
+                Navigator.of(context).pop();
+                Rating r = new Rating(
+                    _radioValue.toString(),
+                    widget.item.listing_id.toString(),
+                    widget.item.user_id.toString());
+                BackendService.addRating(r);
+                _radioValue = -1;
+              },
+              child: Text(
+                "Ok",
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        )),
       ],
     );
   }

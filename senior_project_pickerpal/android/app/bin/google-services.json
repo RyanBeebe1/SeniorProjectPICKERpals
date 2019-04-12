@@ -1,0 +1,84 @@
+{
+  "project_info": {
+    "project_number": "290691590579",
+    "firebase_url": "https://my-project-1514252723265.firebaseio.com",
+    "project_id": "my-project-1514252723265",
+    "storage_bucket": "my-project-1514252723265.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290691590579:android:c49f75c380e8cb51",
+        "android_client_info": {
+          "package_name": "com.seniorproject.pickerpal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "290691590579-481rrgn7rqkl35919tvbgbipa1fis6cc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seniorproject.pickerpal",
+            "certificate_hash": "24337e10239ebbc6caf9e9d5ca41e14e83738190"
+          }
+        },
+        {
+          "client_id": "290691590579-3906jl4j9pso977aem1djqolv0538cbv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seniorproject.pickerpal",
+            "certificate_hash": "bfc66fa6db39a504b4a43f03082c5f176f03ab5c"
+          }
+        },
+        {
+          "client_id": "290691590579-rqv19upe3imo0ua393s6inhogtqqrks3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seniorproject.pickerpal",
+            "certificate_hash": "9e859e08a3a1a8210721a25d4eff3b1634ba71b9"
+          }
+        },
+        {
+          "client_id": "290691590579-p1oppt9ar8iq8prt859smqqfpktgn5pp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seniorproject.pickerpal",
+            "certificate_hash": "a7871002bf76b72ed057dc0955d5ab5d62abc46f"
+          }
+        },
+        {
+          "client_id": "290691590579-b8q83jnu3066impmiketg24bsrqale29.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seniorproject.pickerpal",
+            "certificate_hash": "f468fb612549006c2b466adfa647b051f7d1bc9d"
+          }
+        },
+        {
+          "client_id": "290691590579-7vvktcou6g3i7jv7fl2lddhqh5m4mcro.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seniorproject.pickerpal",
+            "certificate_hash": "d00df828bcf751dd55faba5a1e59519699bdf68e"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKRWJgxRBW__DMcvnl_vIDDc4l8JBB9S4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "290691590579-2j7gn9ealrrken7t7ken49olom3mrp8p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
