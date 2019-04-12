@@ -13,6 +13,8 @@ import 'splashScreen.dart';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_tags/selectable_tags.dart';
+import 'selected_items.dart';
 
 void main() => runApp(MyApp());
 int item = 0;
@@ -223,6 +225,21 @@ class MyHomePageState extends State<MyHomePage> {
               }
             },
           ),
+           new Divider(),
+          new ListTile(
+            title: new Text('User Page'),
+            onTap: () {
+                         // trying to edit from here
+              Navigator.push(
+          context,
+         MaterialPageRoute(builder: (context) => new selected_item(title:"TitleStringHere")),
+         
+        );
+
+
+            },
+          ),
+          
           new Divider(),
           new ListTile(
             title: new Text('Settings'),
