@@ -151,10 +151,25 @@ class ListingSchema(ma.Schema):
             "location",
             "date",
             "zipcode",
-            "display_name",
             "title",
             "tag",
             "condition",
+        )
+
+
+class UserListingSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "listingid",
+            "views",
+            "description",
+            "location",
+            "date",
+            "zipcode",
+            "title",
+            "tag",
+            "condition",
+            "display_name",
         )
 
 
@@ -202,17 +217,19 @@ users_schema = UserSchema(many=True, strict=True)
 desired_item_schema = DesiredItemSchema(strict=True)
 desired_items_schema = DesiredItemSchema(many=True, strict=True)
 
-# Checks all desired items against newly added listing
+user_listing_schema = UserListingSchema(strict=True)
+user_listings_schema = UserListingSchema(many=True, strict=True)
+
+# Checks all desired items against newly added listing, then pushes listing json to user if match is found
 def new_listing_desire_check(listing):
-    desired_items = DesiredItem.query.all()
+    desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword)
     for di in desired_items:
-        if di.keyword in listing.tag:
-            user = User.query.get(di.user_id)
-            user.notify(
-                "Desired Item",
-                "A desired item has been uploaded",
-                desired_item_schema.jsonify(di),
-            )
+        user = User.query.get(di.user_id)
+        user.notify(
+            "Desired Item",
+            f"A desired item matching {di.keyword} has been uploaded",
+            listing_schema.jsonify(listing),
+        )
 
 
 ## APP ENDPOINTS:
@@ -262,7 +279,7 @@ def add_desired_item():
     new_desired_item = DesiredItem(user_id, tag)
     db.session.add(new_desired_item)
     db.session.commit()
-    return listing_schema.jsonify(new_desired_item)
+    return listing_schema.jsonify(new_listing)
 
 
 # Upload image
@@ -289,6 +306,8 @@ def upload_image(listingid):
 @app.route("/images/<listingid>", methods=["GET"])
 def get_image(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
+    if photo is None:
+        return "Not found"
     return send_from_directory(UPLOAD_FOLDER, photo.image_name)
 
 
@@ -296,6 +315,8 @@ def get_image(listingid):
 @app.route("/thumbs/<listingid>", methods=["GET"])
 def get_image_thumbnail(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
+    if photo is None:
+        return "Not found"
     return send_from_directory(UPLOAD_FOLDER, photo.thumbnail)
 
 
@@ -318,7 +339,7 @@ def get_listings():
         )
         .all()
     )
-    results = listings_schema.dump(all_listings)
+    results = user_listings_schema.dump(all_listings)
     return jsonify(results.data)
 
 
@@ -351,7 +372,7 @@ def get_listingbyid(listingid):
     )
     listing.views += 1
     db.session.commit()
-    return listing_schema.jsonify(listing)
+    return user_listing_schema.jsonify(listing)
 
 
 # Get desired item by id
@@ -388,7 +409,7 @@ def get_listingsbyzip(zipcode):
             User.display_name,
         )
     )
-    results = listings_schema.dump(listings)
+    results = user_listings_schema.dump(listings)
     return jsonify(results.data)
 
 
@@ -411,7 +432,7 @@ def get_listingsbytag(tag):
             User.display_name,
         )
     )
-    results = listings_schema.dump(listings)
+    results = user_listings_schema.dump(listings)
     return jsonify(results.data)
 
 
@@ -434,7 +455,7 @@ def get_listingsbyuseremail(email):
             User.display_name,
         )
     )
-    results = listings_schema.dump(listings)
+    results = user_listings_schema.dump(listings)
     return jsonify(results.data)
 
 
