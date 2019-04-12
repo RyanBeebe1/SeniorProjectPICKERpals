@@ -24,6 +24,20 @@ class BackendService {
     }
   }
 
+  static Future<List<DesiredItem>> fetchDesiredItem(String url) async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<DesiredItem> desiredItem = DesiredItem.fromJsonList(json.decode(response.body)); 
+      return desiredItem;
+    } else {
+      throw Exception('Failed to load desired item');
+    }
+  }
+
+
+
+
   static Future<void> deleteListing(String url) async {
     final response = await http.get(url);
 
@@ -35,6 +49,20 @@ class BackendService {
 
       throw Exception('Failed to load post');
     }
+  }
+
+  static Future<DesiredItem> createDesiredItem( DesiredItem item) async {
+    DesiredItem dItem;
+    
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adddesireditem",
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(DesiredItem.toJson(item)))
+        .then((response) {
+      dItem = DesiredItem.fromJson(json.decode(response.body));
+      return dItem;
+
+        });
   }
   //Create a listing in the database, return the new listing.
 

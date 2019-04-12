@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
 import 'personal_feed.dart';
+import 'desired_items.dart';
 import 'pickup_feed.dart';
 import 'search_bar.dart';
 import 'session.dart';
@@ -233,6 +234,26 @@ class MyHomePageState extends State<MyHomePage> {
                   _state = HomePageState.feed;
                 Navigator.pop(context);
               });
+            },
+          ),
+          new Divider(),
+          new ListTile(
+            title: new Text('User Page'),
+            onTap: () {
+              setState(() {
+                if (_state == HomePageState.feed)
+                  _state = HomePageState.map;
+                else
+                  _state = HomePageState.feed;
+                Navigator.pop(context);
+              });
+              // trying to edit from here
+              Navigator.push(
+          context,
+         MaterialPageRoute(builder: (context) => new DesiredItemTag(title: "Title Here")),
+        );
+
+
             },
           ),
           new Divider(),
