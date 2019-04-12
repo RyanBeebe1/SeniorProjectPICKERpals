@@ -155,6 +155,8 @@ class ListingSchema(ma.Schema):
             "tag",
             "condition",
         )
+
+
 # Use this schema when joining listing and user tables
 class UserListingSchema(ma.Schema):
     class Meta:
@@ -168,8 +170,9 @@ class UserListingSchema(ma.Schema):
             "title",
             "tag",
             "condition",
-            "display_name"
+            "display_name",
         )
+
 
 class RatingSchema(ma.Schema):
     class Meta:
@@ -191,6 +194,7 @@ class UserSchema(ma.Schema):
             "overall_rating",
             "fb_uid",
         )
+
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
@@ -214,7 +218,7 @@ desired_item_schema = DesiredItemSchema(strict=True)
 desired_items_schema = DesiredItemSchema(many=True, strict=True)
 
 user_listing_schema = UserListingSchema(strict=True)
-user_listings_schema =UserListingSchema(many=True,strict=True)
+user_listings_schema = UserListingSchema(many=True, strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
@@ -223,8 +227,8 @@ def new_listing_desire_check(listing):
         user = User.query.get(di.user_id)
         title = "Desired item alert"
         body = f"A desired item matching {di.keyword} has just been uploaded, claim it now!"
-        data = {"Listing" : f"{listing.listingid}",}
-        user.notify(title,body,data)
+        data = {"Listing": f"{listing.listingid}"}
+        user.notify(title, body, data)
 
 
 ## APP ENDPOINTS:
@@ -458,7 +462,13 @@ def get_listingsbyuseremail(email):
 @app.route("/deletelisting/<listingid>", methods=["GET"])
 def deletelisting(listingid):
     listing = Listing.query.get(listingid)
-    ## TODO implement code to delete image from DB and folder
+    image = Images.query.filter(Images.listing_id == listingid).first()
+
+    if image is not None:
+        os.remove(f"{UPLOAD_FOLDER}/{image.image_name}")
+        os.remove(f"{UPLOAD_FOLDER}/{image.thumbnail}")
+        db.session.delete(image)
+
     db.session.delete(listing)
     db.session.commit()
     return "Operation successful"
