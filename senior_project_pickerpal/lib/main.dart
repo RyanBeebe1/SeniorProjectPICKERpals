@@ -92,7 +92,10 @@ class MyHomePageState extends State<MyHomePage> {
 
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
-
+     FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+    String token =await _firebaseMessaging.getToken();
+    User newUser = User(user.email,user.displayName,token,user.uid,0);
+    SessionVariables.user = await BackendService.addUser(newUser);
     return user;
   }
   
@@ -153,17 +156,8 @@ class MyHomePageState extends State<MyHomePage> {
                 _handleSignIn()..whenComplete(() {
                   setState(() {
                     headerTxt =
-                        "Hello, " + _googleSignIn.currentUser.displayName;
-                    SessionVariables.loggedIn = true;
-                    SessionVariables.loggedInEmail =
-                        _googleSignIn.currentUser.email;
-                  });
-                }).then((FirebaseUser user) {
-                    // Create firebase messaging object for client and extract token
-                    FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-                    _firebaseMessaging.getToken().whenComplete((){}).then((tok) {
-                    User newUser = User(user.email,user.displayName,tok,user.uid,0);
-                    BackendService.addUser(newUser).whenComplete((){});
+                        "Hello, " + SessionVariables.user.displayName;
+                        SessionVariables.loggedIn = true;
                   });
 
                 });

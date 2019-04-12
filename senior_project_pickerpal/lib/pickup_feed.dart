@@ -164,6 +164,7 @@ class ListingFeedState extends State<ListingFeed> {
                       child: Text("Y E E E E E E E E E E E T"),
                       color: Colors.green),
                   child: ListTile(
+                    leading: Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/thumbs/"+item.listing_id.toString()),
                       onLongPress: () {
                         if (widget.personalMode) {
                           showDialog(

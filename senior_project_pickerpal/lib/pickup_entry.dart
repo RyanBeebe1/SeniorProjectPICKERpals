@@ -58,7 +58,7 @@ class Listing {
 
 class UploadListing {
   final String description;
-  final String user_id;
+  final int user_id;
   final String item_title;
   final String location;
   final String tag;

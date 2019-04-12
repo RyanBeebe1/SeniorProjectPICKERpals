@@ -28,6 +28,6 @@ class MyFeedState extends State<MyFeed> {
           }, child: Icon(Icons.close)),
           title: Text("My items"),
         ),
-        body: new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyuser/'+SessionVariables.loggedInEmail,personalMode: true,));
+        body: new ListingFeed(endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyuser/'+SessionVariables.user.emailAddress.toString(),personalMode: true,));
   }
 }

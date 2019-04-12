@@ -170,7 +170,7 @@ class _UploadItemState extends State<UploadItem> {
                   color: Colors.lightGreen,
                   onPressed: () {
                     Listing newListing;
-                    UploadListing ll = new UploadListing(_descController.text, SessionVariables.loggedInEmail, _titleController.text, "145.0,243.0", widget.tag, "08080", dropdownValue, _getDate());
+                    UploadListing ll = new UploadListing(_descController.text, SessionVariables.user.userId, _titleController.text, "145.0,243.0", widget.tag, "08080", dropdownValue, _getDate());
                     BackendService.createListing(ll,_image).then(
                             (l) {
                             newListing = l;
