@@ -51,19 +51,6 @@ class BackendService {
     }
   }
 
-  static Future<DesiredItem> createDesiredItem( DesiredItem item) async {
-    DesiredItem dItem;
-    
-    await http
-        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adddesireditem",
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(DesiredItem.toJson(item)))
-        .then((response) {
-      dItem = DesiredItem.fromJson(json.decode(response.body));
-      return dItem;
-
-        });
-  }
   //Create a listing in the database, return the new listing.
 
   static Future<Listing> createListing(

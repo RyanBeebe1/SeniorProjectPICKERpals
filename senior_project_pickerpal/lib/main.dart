@@ -192,37 +192,7 @@ class MyHomePageState extends State<MyHomePage> {
                           )),
                 );
               } else {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Center(child: Text('Alert')),
-                      content: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              "Please login to view your items",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.red,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      actions: <Widget>[
-                        FlatButton(
-                            child: Text('Ok'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            })
-                      ],
-                    );
-                  },
-                );
+                SessionVariables.loggedInDialogue(context, "Please log in to view your items");
               }
             },
           ),
@@ -230,18 +200,11 @@ class MyHomePageState extends State<MyHomePage> {
           new ListTile(
             title: new Text('User Page'),
             onTap: () {
-              setState(() {
-                if (_state == HomePageState.feed)
-                  _state = HomePageState.map;
-                else
-                  _state = HomePageState.feed;
-                Navigator.pop(context);
-              });
               // trying to edit from here
-              Navigator.push(
+             SessionVariables.loggedIn ? Navigator.push(
           context,
          MaterialPageRoute(builder: (context) => new DesiredItemTag(title: "Title Here")),
-        );
+        ) : SessionVariables.loggedInDialogue(context, "Please log in to set desired items");
 
 
             },
