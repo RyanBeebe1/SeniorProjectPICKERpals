@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:seniorprojectnuked/chat.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -275,6 +276,8 @@ class ListingFeedState extends State<ListingFeed> {
                             IconButton(
                                 icon: Icon(Icons.chat),
                                 onPressed: () {
+                                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat()));
+                                  /*
                                   showDialog(
                                       context: context,
                                       builder: (_) => new AlertDialog(
@@ -304,6 +307,7 @@ class ListingFeedState extends State<ListingFeed> {
                                               ),
                                             ],
                                           ));
+                                          */
                                 }),
                             Visibility(
                                 child: IconButton(

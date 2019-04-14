@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:seniorprojectnuked/chat.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
 import 'personal_feed.dart';
@@ -243,19 +244,6 @@ class MyHomePageState extends State<MyHomePage> {
         );
 
 
-            },
-          ),
-          new Divider(),
-          new ListTile(
-            title: new Text('Settings'),
-            onTap: () {
-              setState(() {
-                if (_state == HomePageState.feed)
-                  _state = HomePageState.map;
-                else
-                  _state = HomePageState.feed;
-                Navigator.pop(context);
-              });
             },
           ),
           new Divider(),

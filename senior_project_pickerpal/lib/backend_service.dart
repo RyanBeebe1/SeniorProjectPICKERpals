@@ -145,4 +145,22 @@ class BackendService {
       print(value);
     });
   }
+
+  //Add a desired item to database.
+  static Future<DesiredItem> addDesiredItem(DesiredItem item) async {
+    DesiredItem newItem;
+
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adddesireditem",
+            headers: {"Content-Type": "application/json"},
+            body: json.encode(DesiredItem.toJson(item)))
+        .then((response) {
+      Map<String, dynamic> jmap = json.decode(response.body);
+      newItem = DesiredItem.fromJson(jmap);
+      newItem.setId(jmap['desired_item_id']);
+      return newItem;
+    });
+
+    return newItem;
+  }
 }

@@ -128,16 +128,19 @@ class User {
 }
 
 class DesiredItem {
-  final String desiredItemId;
-  final String userId;
+  dynamic desiredItemId;
+  final dynamic userId;
   final String keyword;
 
-  DesiredItem(this.desiredItemId, this.userId, this.keyword);
+  DesiredItem(this.userId, this.keyword);
   factory DesiredItem.fromJson(Map<String, dynamic> json) {
     return DesiredItem(
-        json['desired_item_id'], json['user_id'], json['keyword']);
+         json['user_id'], json['keyword']);
   }
 
+  void setId(int itemId) {
+    this.desiredItemId = itemId;
+  }
   static List<DesiredItem> fromJsonList(jsonList) {
     return jsonList
         .map<DesiredItem>((obj) => DesiredItem.fromJson(obj))
@@ -145,7 +148,6 @@ class DesiredItem {
   }
 
   static Map<String, dynamic> toJson(DesiredItem item) => {
-        'desired_item_id': item.desiredItemId,
         'user_id': item.userId,
         'keyword': item.keyword
       };
