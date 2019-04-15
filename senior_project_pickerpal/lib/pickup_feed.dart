@@ -64,6 +64,21 @@ class ListingFeedState extends State<ListingFeed> {
     print("loading done.");
     return null;
   }
+  
+  void setEndpoint(String url) {
+    widget.endpoint = url;
+  }
+  
+  Future<void> newList() async {
+    await Future.delayed(Duration(milliseconds: 1000));
+    BackendService.fetchListing(widget.endpoint).whenComplete(() {})
+    .then((pick) {
+      setState(() {
+        widget.items.clear();
+        widget.items.addAll(pick);
+      });
+    });
+  }
 
   @override
   void dispose() {
