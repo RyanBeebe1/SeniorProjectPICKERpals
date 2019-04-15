@@ -135,6 +135,16 @@ class MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         actions: <Widget>[
           IconButton(
+              icon: Icon(Icons.filter_list),
+              onPressed: () async {
+                await showDialog(context: context,
+                builder: (_) => FilterDialog());
+                setState(() {
+                  feed.state.newList();
+                  feed.state.setEndpoint(SessionVariables.filtered_feed);
+                  });
+                }),
+          IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
               showSearch(context: context, delegate: SearchBar(feed.items));
