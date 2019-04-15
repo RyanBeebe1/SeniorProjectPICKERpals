@@ -14,12 +14,10 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(
         const Duration(seconds: 3),
-        () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => MyHomePage(
-                      title: 'PickerPAL Feed',
-                    ))));
+        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => MyHomePage(
+              title: 'PickerPAL Feed',
+            ))));
   }
 
   @override
