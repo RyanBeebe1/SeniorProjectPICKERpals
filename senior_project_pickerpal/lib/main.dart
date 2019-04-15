@@ -247,11 +247,104 @@ class MyHomePageState extends State<MyHomePage> {
           : null,
     );
   }
+}
 
-  void _onMapCreated(GoogleMapController controller) {
+class FilterDialog extends StatefulWidget {
+  FilterDialog({Key key, this.title}) : super(key: key);
+
+  final String title;
+  @override
+  _FilterDialogState createState() => new _FilterDialogState();
+}
+
+class _FilterDialogState extends State<FilterDialog>{
+  int _filterValue = -1;
+  void _handleFilterValueChange(int value) {
     setState(() {
-      mapController = controller;
+      _filterValue = value;
     });
+    switch (_filterValue) {
+      case 0:
+        setState(() {
+          _filterValue = 0;
+        });
+        break;
+      case 1:
+        setState(() {
+          _filterValue = 1;
+        });
+        break;
+      case 2:
+        setState(() {
+          _filterValue = 2;
+        });
+        break;
+      case 3:
+        setState(() {
+          _filterValue = 3;
+        });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+      title: Text("Filter Feed"),
+      content:
+          new Container(
+            height: 215,
+        child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Text("Choose a Tag: "),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget> [
+              new Radio(value: 0, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Text("None"),],
+          ),
+          new Row(
+            children: <Widget> [
+              new Radio(value: 1, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Text("Electronics"),],
+          ),
+          new Row(
+            children: <Widget> [
+              new Radio(value: 2, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Text("Furniture"),],
+          ),
+          new Row(
+            children: <Widget> [
+              new Radio(value: 3, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Text("Misc"),],
+          ),
+        ],
+      ),
+          ),
+      actions: <Widget>[
+                new RaisedButton(
+                  color: Colors.lightGreen,
+                  onPressed:() {Navigator.of(context).pop();
+                  switch(_filterValue) {
+                    case 0: SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
+                    break;
+                    case 1:
+                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
+                      break;
+                    case 2:
+                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
+                      break;
+                    case 3:
+                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
+                  }
+                  },
+                  child: Text("Ok",style: TextStyle(
+                    color: Colors.black,
+                  ),),),
+              ],
+
+    );
   }
 }
 
