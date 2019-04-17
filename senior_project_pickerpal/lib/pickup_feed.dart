@@ -10,7 +10,7 @@ class ListingFeed extends StatefulWidget {
   ListingFeed({Key key, this.title, this.endpoint, this.personalMode})
       : super(key: key);
   final String title;
-  final String endpoint;
+        String endpoint;
   final List<Listing> items = [];
   final bool personalMode;
   ListingFeedState state = ListingFeedState();
@@ -28,6 +28,7 @@ class ListingFeedState extends State<ListingFeed> {
   int rating_id = 0;
   int test = 1;
   int _radioValue = -1;
+  String endpoint;
 
   List<Listing> getItems() {
     return widget.items;
@@ -255,7 +256,7 @@ class ListingFeedState extends State<ListingFeed> {
                                     errorWidget: (context, url, error) =>
                                         new Icon(Icons.error_outline),
                                   ),
-                                  Text("Posted by: " + item.display_name),
+                                  Text("Posted by: " + item.user.displayName),
                                   Text(
                                     item.description,
                                     style: TextStyle(fontSize: 15.0),

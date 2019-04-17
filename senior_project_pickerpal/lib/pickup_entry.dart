@@ -9,11 +9,11 @@ class Listing {
   final String zipcode;
   final String cond;
   final String listing_date;
-  final String display_name;
+  User user;
   final dynamic listing_id;
 
   Listing(
-      this.description,
+      {this.description,
       this.user_id,
       this.item_title,
       this.location,
@@ -22,20 +22,20 @@ class Listing {
       this.cond,
       this.listing_date,
       this.listing_id,
-      this.display_name);
+      this.user});
 
   factory Listing.fromJson(Map<String, dynamic> json) {
     return Listing(
-        json['description'],
-        json['userid'].toString(),
-        json['title'],
-        json['location'],
-        json['tag'],
-        json['zipcode'],
-        json['condition'],
-        json['date'],
-        json['listingid'],
-        json['display_name']);
+        description: json['description'],
+        user_id: json['userid'].toString(),
+        item_title: json['title'],
+        location: json['location'],
+        tag: json['tag'],
+        zipcode: json['zipcode'],
+        cond: json['condition'],
+        listing_date: json['date'],
+        listing_id: json['listingid'],
+        user: User.fromJson(json['user']));
   }
 
   static List<Listing> fromJsonList(jsonList) {
@@ -52,7 +52,7 @@ class Listing {
         "date": l.listing_date,
         "condition": l.cond,
         "listingid": l.listing_id,
-        "display_name": l.display_name
+        "user": l.user,
       };
 }
 
@@ -107,11 +107,23 @@ class User {
   final String fbId;
   final int overallRating;
 
-  User(this.emailAddress, this.displayName, this.tokenId, this.fbId,
+  User(
+      {this.emailAddress,
+      this.displayName,
+      this.tokenId,
+      this.fbId,
+      this.overallRating});
+
+  User.firebase(this.emailAddress, this.displayName, this.tokenId, this.fbId,
       this.overallRating);
+
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(json['email_address'], json['display_name'], json['token_id'],
-        json['fb_uid'], json['overall_rating']);
+    return User(
+        emailAddress: json['email_address'],
+        displayName: json['display_name'],
+        tokenId: json['token_id'],
+        fbId: json['fb_uid'],
+        overallRating: json['overall_rating']);
   }
 
   setUserId(int id) {
@@ -134,23 +146,21 @@ class DesiredItem {
 
   DesiredItem(this.userId, this.keyword);
   factory DesiredItem.fromJson(Map<String, dynamic> json) {
-    return DesiredItem(
-         json['user_id'], json['keyword']);
+    return DesiredItem(json['user_id'], json['keyword']);
   }
 
   void setId(int itemId) {
     this.desiredItemId = itemId;
   }
+
   static List<DesiredItem> fromJsonList(jsonList) {
     return jsonList
         .map<DesiredItem>((obj) => DesiredItem.fromJson(obj))
         .toList();
   }
 
-  static Map<String, dynamic> toJson(DesiredItem item) => {
-        'user_id': item.userId,
-        'keyword': item.keyword
-      };
+  static Map<String, dynamic> toJson(DesiredItem item) =>
+      {'user_id': item.userId, 'keyword': item.keyword};
 }
 
 class Images {

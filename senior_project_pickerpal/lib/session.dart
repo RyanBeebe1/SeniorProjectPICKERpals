@@ -6,6 +6,7 @@ class SessionVariables {
   static String loggedInEmail;
   static bool loggedIn = false;
   static User user;
+  static String filtered_feed;
 
  static void loggedInDialogue(BuildContext context,String msg) {
      showDialog(

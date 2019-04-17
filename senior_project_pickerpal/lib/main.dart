@@ -98,7 +98,7 @@ class MyHomePageState extends State<MyHomePage> {
     assert(user.uid == currentUser.uid);
      FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
     String token =await _firebaseMessaging.getToken();
-    User newUser = User(user.email,user.displayName,token,user.uid,0);
+    User newUser = new User.firebase(user.email,user.displayName,token,user.uid,0);
     SessionVariables.user = await BackendService.addUser(newUser);
     return user;
   }
