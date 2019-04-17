@@ -220,8 +220,8 @@ class Message {
     return Message(
       title: json['email_address'],
       body: json['display_name'],
-      sender: User.fromJson(json['user']),
-      recipient: User.fromJson(json['user']),
+      sender: User.fromJson(json['sender']),
+      recipient: User.fromJson(json['recipient']),
     );
   }
 }
