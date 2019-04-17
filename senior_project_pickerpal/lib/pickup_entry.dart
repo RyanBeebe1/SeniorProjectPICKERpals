@@ -9,7 +9,7 @@ class Listing {
   final String zipcode;
   final String cond;
   final String listing_date;
-  User user;
+  final User user;
   final dynamic listing_id;
 
   Listing(
@@ -197,4 +197,31 @@ class Rating {
 
   static Map<String, dynamic> toJson(Rating r) =>
       {'rating': r.rating, 'listing_id': r.listingId, 'user_id': r.userId};
+}
+
+class Message {
+  final String title;
+  final String body;
+  final User sender;
+  final User recipient;
+
+  Message({
+    this.title,
+    this.body,
+    this.sender,
+    this.recipient,
+  });
+
+  static List<Message> fromJsonList(jsonList) {
+    return jsonList.map<Message>((obj) => Message.fromJson(obj)).toList();
+  }
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      title: json['email_address'],
+      body: json['display_name'],
+      sender: User.fromJson(json['user']),
+      recipient: User.fromJson(json['user']),
+    );
+  }
 }
