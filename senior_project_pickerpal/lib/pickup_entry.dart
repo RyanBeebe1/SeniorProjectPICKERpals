@@ -199,17 +199,41 @@ class Rating {
       {'rating': r.rating, 'listing_id': r.listingId, 'user_id': r.userId};
 }
 
-class Message {
-  final String title;
-  final String body;
+class UserChat {
+  final int chat_id;
   final User sender;
   final User recipient;
 
-  Message({
-    this.title,
-    this.body,
+  UserChat({
+    this.chat_id,
     this.sender,
-    this.recipient,
+    this.recipient
+  });
+
+  static List<UserChat> fromJsonList(jsonList) {
+    return jsonList.map<UserChat>((obj) =>UserChat.fromJson(obj)).toList();
+  }
+
+  factory UserChat.fromJson(Map<String, dynamic> json) {
+    return UserChat(
+      chat_id: json['chat_id'],
+      sender: User.fromJson(json['sender']),
+      recipient: User.fromJson(json['recipient']),
+    );
+  }
+
+}
+
+class Message {
+  final String body;
+  final String date;
+  final int chat_id;
+
+  Message({
+    this.body,
+    this.chat_id,
+    this.date,
+
   });
 
   static List<Message> fromJsonList(jsonList) {
@@ -218,10 +242,8 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      title: json['email_address'],
-      body: json['display_name'],
-      sender: User.fromJson(json['sender']),
-      recipient: User.fromJson(json['recipient']),
+      body: json['body'],
+      date: json['date'],
     );
   }
 }
