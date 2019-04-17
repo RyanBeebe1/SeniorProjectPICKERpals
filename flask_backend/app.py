@@ -59,7 +59,6 @@ class Listing(db.Model):
     condition = db.Column("cond", db.String(45))
     user = db.relationship("User", backref="user")
 
-
     def __init__(
         self, description, location, date, zipcode, userid, title, tag, condition
     ):
@@ -108,7 +107,7 @@ class User(db.Model):
             message_title=title,
             message_body=body,
             data_message=data,
-            click_action="FLUTTER_NOTIFICATION_CLICK"
+            click_action="FLUTTER_NOTIFICATION_CLICK",
         )
         print(f"Push sent to {self.display_name} at {self.token_id} when {result}")
 
@@ -140,23 +139,31 @@ class Images(db.Model):
         self.thumbnail = thumbname
         self.listing_id = listingid
 
+
 class Messages(db.Model):
     __tablename__ = "message"
     message_id = db.Column("message_id", db.Integer, primary_key=True)
     title = db.Column("title", db.String(50), nullable=False)
     body = db.Column("body", db.String(300), nullable=False)
     date = db.Column("date", db.DateTime, nullable=False)
-    sender_id = db.Column("sender_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    recipient_id = db.Column("recipient_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    sender_id = db.Column(
+        "sender_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
+    )
+    recipient_id = db.Column(
+        "recipient_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
+    )
     sentuser = db.relationship("User", backref="sentuser", foreign_keys=[sender_id])
-    receiveduser = db.relationship("User",backref="receiveduser", foreign_keys=[recipient_id])
+    receiveduser = db.relationship(
+        "User", backref="receiveduser", foreign_keys=[recipient_id]
+    )
 
     def __init__(self, title, body, date, sender, recipient):
         self.title = title
         self.body = body
         self.date = date
-        self.sender = sender
-        self.recipient = recipient
+        self.sender_id = sender
+        self.recipient_id = recipient
+
 
 # Listing shcemas (what fields to serve when pulling from database)
 class ListingSchema(ma.Schema):
@@ -173,7 +180,9 @@ class ListingSchema(ma.Schema):
             "condition",
             "user",
         )
-    user = ma.Nested("UserSchema", exclude=("token_id","fb_uid","user_id",))
+
+    user = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
+
 
 class RatingSchema(ma.Schema):
     class Meta:
@@ -196,15 +205,19 @@ class UserSchema(ma.Schema):
             "fb_uid",
         )
 
+
 class DesiredItemSchema(ma.Schema):
     class Meta:
         fields = ("desired_item_id", "user_id", "keyword", "found_listing_id")
 
+
 class MessageSchema(ma.Schema):
     class Meta:
         fields = ("message_id", "title", "body", "date", "sentuser", "receiveduser")
-    sentuser = ma.Nested("UserSchema", exclude=("token_id","fb_uid","user_id",))
-    receiveduser = ma.Nested("UserSchema", exclude=("token_id","fb_uid","user_id",))
+
+    sentuser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
+    receiveduser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
+
 
 # Init Schema
 listing_schema = ListingSchema(strict=True)
@@ -223,7 +236,7 @@ desired_item_schema = DesiredItemSchema(strict=True)
 desired_items_schema = DesiredItemSchema(many=True, strict=True)
 
 message_schema = MessageSchema(strict=True)
-messages_schema = MessageSchema(many=True,strict=True)
+messages_schema = MessageSchema(many=True, strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
@@ -232,8 +245,26 @@ def new_listing_desire_check(listing):
         user = User.query.get(di.user_id)
         title = "Desired item alert"
         body = f"A desired item matching {di.keyword} has just been uploaded, claim it now!"
-        data = {"Listing" : f"{listing.listingid}", "click_action" : "FLUTTER_NOTIFICATION_CLICK"}
-        user.notify(title,body,data)
+        data = {
+            "Listing": f"{listing.listingid}",
+            "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        }
+        user.notify(title, body, data)
+
+
+# Notify user of new message
+def message_notify(sender, recipient):
+    receiver = User.query.get(recipient)
+    sender = User.query.get(sender)
+    title = f"New message from {sender.display_name}"
+    body = "Click to see message"
+    # Add whatever data is neccessary
+    data = {
+        "sender_id": f"{sender.user_id}",
+        "recipient_id": f"{receiver.user_id}",
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+    }
+    receiver.notify(title, body, data)
 
 
 ## APP ENDPOINTS:
@@ -393,12 +424,12 @@ def get_listingsbyuseremail(email):
 def deletelisting(listingid):
     listing = Listing.query.get(listingid)
     image = Images.query.filter(Images.listing_id == listingid).first()
-    
+
     if image is not None:
-        os.remove(f'{UPLOAD_FOLDER}/{image.image_name}')
-        os.remove(f'{UPLOAD_FOLDER}/{image.thumbnail}')
+        os.remove(f"{UPLOAD_FOLDER}/{image.image_name}")
+        os.remove(f"{UPLOAD_FOLDER}/{image.thumbnail}")
         db.session.delete(image)
-    
+
     db.session.delete(listing)
     db.session.commit()
     return "Operation successful"
@@ -412,6 +443,7 @@ def deletedesireditem(desired_item_id):
     db.session.commit()
     return "Operation successful"
 
+
 # Send message to user
 @app.route("/sendmessage", methods=["POST"])
 def sendmessage():
@@ -420,18 +452,29 @@ def sendmessage():
     date = request.json["date"]
     sender = request.json["sender"]
     recipient = request.json["recipient"]
-
-    new_message = Messages(title,body,date,sender,recipient)
+    new_message = Messages(title, body, date, sender, recipient)
     db.session.add(new_message)
     db.session.commit()
+    # Send Push to Recipient
+    message_notify(sender, recipient)
     return "Message Sent"
 
-# Get all received messages
+
+# Get all received messages from user id
 @app.route("/receivedmessages/<user_id>")
 def getreceivedmessages(user_id):
     received = Messages.query.filter(Messages.recipient_id == user_id)
-    result = messages.schema.dump(received)
-    return messages_schema.jsonify(result)
+    result = messages_schema.dump(received)
+    return jsonify(result.data)
+
+
+# Get all sent messages from user id
+@app.route("/sentmessages/<user_id>")
+def getsentmessages(user_id):
+    sent = Messages.query.filter(Messages.sender_id == user_id)
+    result = messages_schema.dump(sent)
+    return jsonify(result.data)
+
 
 # Delete user message
 
