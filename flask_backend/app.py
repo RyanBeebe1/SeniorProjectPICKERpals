@@ -54,11 +54,11 @@ class Listing(db.Model):
     userid = db.Column(
         "user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
     )
-    user = db.relationship("User", back_populates="listings", lazy=True)
     title = db.Column("item_title", db.String(45))
     tag = db.Column("tag", db.String(45))
     condition = db.Column("cond", db.String(45))
-    images = db.relationship("Images", backref="listing", lazy=True)
+    user = db.relationship("User", backref="user")
+
 
     def __init__(
         self, description, location, date, zipcode, userid, title, tag, condition
@@ -94,7 +94,6 @@ class User(db.Model):
     token_id = db.Column("token_id", db.String(1500))
     fb_uid = db.Column("fb_uid", db.String(200))
     overall_rating = db.Column("overall_rating", db.Integer)
-    listings = db.relationship("Listing", back_populates="user")
 
     def __init__(self, emailaddress, displayname, tokenid, uid):
         self.email_address = emailaddress
@@ -109,6 +108,7 @@ class User(db.Model):
             message_title=title,
             message_body=body,
             data_message=data,
+            click_action="FLUTTER_NOTIFICATION_CLICK"
         )
         print(f"Push sent to {self.display_name} at {self.token_id} when {result}")
 
@@ -117,7 +117,7 @@ class DesiredItem(db.Model):
     __tablename__ = "desired_item"
     desired_item_id = db.Column("desired_item_id", db.Integer, primary_key=True)
     user_id = db.Column(
-        "user_id", db.Integer, db.ForeignKey("user.user_id"), nullable=False
+        "user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
     )
     keyword = db.Column("keyword", db.String(45))
     found_listing_id = db.Column("found_listing_id", db.Integer)
@@ -140,6 +140,23 @@ class Images(db.Model):
         self.thumbnail = thumbname
         self.listing_id = listingid
 
+class Messages(db.Model):
+    __tablename__ = "message"
+    message_id = db.Column("message_id", db.Integer, primary_key=True)
+    title = db.Column("title", db.String(50), nullable=False)
+    body = db.Column("body", db.String(300), nullable=False)
+    date = db.Column("date", db.DateTime, nullable=False)
+    sender_id = db.Column("sender_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    recipient_id = db.Column("recipient_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    sentuser = db.relationship("User", backref="sentuser", foreign_keys=[sender_id])
+    receiveduser = db.relationship("User",backref="receiveduser", foreign_keys=[recipient_id])
+
+    def __init__(self, title, body, date, sender, recipient):
+        self.title = title
+        self.body = body
+        self.date = date
+        self.sender = sender
+        self.recipient = recipient
 
 # Listing shcemas (what fields to serve when pulling from database)
 class ListingSchema(ma.Schema):
@@ -154,25 +171,9 @@ class ListingSchema(ma.Schema):
             "title",
             "tag",
             "condition",
+            "user",
         )
-
-
-# Use this schema when joining listing and user tables
-class UserListingSchema(ma.Schema):
-    class Meta:
-        fields = (
-            "listingid",
-            "views",
-            "description",
-            "location",
-            "date",
-            "zipcode",
-            "title",
-            "tag",
-            "condition",
-            "display_name",
-        )
-
+    user = ma.Nested("UserSchema", exclude=("token_id","fb_uid","user_id",))
 
 class RatingSchema(ma.Schema):
     class Meta:
@@ -195,11 +196,15 @@ class UserSchema(ma.Schema):
             "fb_uid",
         )
 
-
 class DesiredItemSchema(ma.Schema):
     class Meta:
         fields = ("desired_item_id", "user_id", "keyword", "found_listing_id")
 
+class MessageSchema(ma.Schema):
+    class Meta:
+        fields = ("message_id", "title", "body", "date", "sentuser", "receiveduser")
+    sentuser = ma.Nested("UserSchema", exclude=("token_id","fb_uid","user_id",))
+    receiveduser = ma.Nested("UserSchema", exclude=("token_id","fb_uid","user_id",))
 
 # Init Schema
 listing_schema = ListingSchema(strict=True)
@@ -217,8 +222,8 @@ users_schema = UserSchema(many=True, strict=True)
 desired_item_schema = DesiredItemSchema(strict=True)
 desired_items_schema = DesiredItemSchema(many=True, strict=True)
 
-user_listing_schema = UserListingSchema(strict=True)
-user_listings_schema = UserListingSchema(many=True, strict=True)
+message_schema = MessageSchema(strict=True)
+messages_schema = MessageSchema(many=True,strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
@@ -227,8 +232,8 @@ def new_listing_desire_check(listing):
         user = User.query.get(di.user_id)
         title = "Desired item alert"
         body = f"A desired item matching {di.keyword} has just been uploaded, claim it now!"
-        data = {"Listing": f"{listing.listingid}"}
-        user.notify(title, body, data)
+        data = {"Listing" : f"{listing.listingid}", "click_action" : "FLUTTER_NOTIFICATION_CLICK"}
+        user.notify(title,body,data)
 
 
 ## APP ENDPOINTS:
@@ -274,11 +279,11 @@ def add_listing():
 @app.route("/adddesireditem", methods=["POST"])
 def add_desired_item():
     user_id = request.json["user_id"]
-    tag = request.json["tag"]
-    new_desired_item = DesiredItem(user_id, tag)
+    keyword = request.json["keyword"]
+    new_desired_item = DesiredItem(user_id, keyword)
     db.session.add(new_desired_item)
     db.session.commit()
-    return listing_schema.jsonify(new_listing)
+    return desired_item_schema.jsonify(new_desired_item)
 
 
 # Upload image
@@ -322,23 +327,8 @@ def get_image_thumbnail(listingid):
 # Get all listings
 @app.route("/listings", methods=["GET"])
 def get_listings():
-    all_listings = (
-        Listing.query.join(User)
-        .with_entities(
-            Listing.listingid,
-            Listing.description,
-            Listing.location,
-            Listing.views,
-            Listing.date,
-            Listing.zipcode,
-            Listing.title,
-            Listing.tag,
-            Listing.condition,
-            User.display_name,
-        )
-        .all()
-    )
-    results = user_listings_schema.dump(all_listings)
+    all_listings = Listing.query.all()
+    results = listings_schema.dump(all_listings)
     return jsonify(results.data)
 
 
@@ -353,25 +343,10 @@ def get_userbyid(userid):
 # Get listing by id
 @app.route("/listingbyid/<listingid>", methods=["GET"])
 def get_listingbyid(listingid):
-    listing = (
-        Listing.query.get(listingid)
-        .join(User)
-        .with_entities(
-            Listing.listingid,
-            Listing.description,
-            Listing.location,
-            Listing.views,
-            Listing.date,
-            Listing.zipcode,
-            Listing.title,
-            Listing.tag,
-            Listing.condition,
-            User.display_name,
-        )
-    )
+    listing = Listing.query.get(listingid)
     listing.views += 1
     db.session.commit()
-    return user_listing_schema.jsonify(listing)
+    return listing_schema.jsonify(listing)
 
 
 # Get desired item by id
@@ -392,69 +367,24 @@ def get_user_desitems(user_id):
 # Get listings by zipcode
 @app.route("/listingsbyzip/<zipcode>", methods=["GET"])
 def get_listingsbyzip(zipcode):
-    listings = (
-        Listing.query.filter(Listing.zipcode == zipcode)
-        .join(User)
-        .with_entities(
-            Listing.listingid,
-            Listing.description,
-            Listing.location,
-            Listing.views,
-            Listing.date,
-            Listing.zipcode,
-            Listing.title,
-            Listing.tag,
-            Listing.condition,
-            User.display_name,
-        )
-    )
-    results = user_listings_schema.dump(listings)
+    listings = Listing.query.filter(Listing.zipcode == zipcode)
+    results = listings_schema.dump(listings)
     return jsonify(results.data)
 
 
 # Get listings by tag
 @app.route("/listingsbytag/<tag>", methods=["GET"])
 def get_listingsbytag(tag):
-    listings = (
-        Listing.query.filter(Listing.tag == tag)
-        .join(User)
-        .with_entities(
-            Listing.listingid,
-            Listing.description,
-            Listing.location,
-            Listing.views,
-            Listing.date,
-            Listing.zipcode,
-            Listing.title,
-            Listing.tag,
-            Listing.condition,
-            User.display_name,
-        )
-    )
-    results = user_listings_schema.dump(listings)
+    listings = Listing.query.filter(Listing.tag == tag)
+    results = listings_schema.dump(listings)
     return jsonify(results.data)
 
 
 # Get a Users listings with their email
 @app.route("/listingbyuser/<email>", methods=["GET"])
 def get_listingsbyuseremail(email):
-    listings = (
-        Listing.query.filter(User.email_address == email)
-        .join(User)
-        .with_entities(
-            Listing.listingid,
-            Listing.description,
-            Listing.location,
-            Listing.views,
-            Listing.date,
-            Listing.zipcode,
-            Listing.title,
-            Listing.tag,
-            Listing.condition,
-            User.display_name,
-        )
-    )
-    results = user_listings_schema.dump(listings)
+    listings = Listing.query.filter(User.email_address == email)
+    results = listings_schema.dump(listings)
     return jsonify(results.data)
 
 
@@ -463,12 +393,12 @@ def get_listingsbyuseremail(email):
 def deletelisting(listingid):
     listing = Listing.query.get(listingid)
     image = Images.query.filter(Images.listing_id == listingid).first()
-
+    
     if image is not None:
-        os.remove(f"{UPLOAD_FOLDER}/{image.image_name}")
-        os.remove(f"{UPLOAD_FOLDER}/{image.thumbnail}")
+        os.remove(f'{UPLOAD_FOLDER}/{image.image_name}')
+        os.remove(f'{UPLOAD_FOLDER}/{image.thumbnail}')
         db.session.delete(image)
-
+    
     db.session.delete(listing)
     db.session.commit()
     return "Operation successful"
@@ -482,6 +412,28 @@ def deletedesireditem(desired_item_id):
     db.session.commit()
     return "Operation successful"
 
+# Send message to user
+@app.route("/sendmessage", methods=["POST"])
+def sendmessage():
+    title = request.json["title"]
+    body = request.json["body"]
+    date = request.json["date"]
+    sender = request.json["sender"]
+    recipient = request.json["recipient"]
+
+    new_message = Messages(title,body,date,sender,recipient)
+    db.session.add(new_message)
+    db.session.commit()
+    return "Message Sent"
+
+# Get all received messages
+@app.route("/receivedmessages/<user_id>")
+def getreceivedmessages(user_id):
+    received = Messages.query.filter(Messages.recipient_id == user_id)
+    result = messages.schema.dump(received)
+    return messages_schema.jsonify(result)
+
+# Delete user message
 
 # The hello world endpoint
 @app.route("/hello")
