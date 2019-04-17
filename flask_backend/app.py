@@ -140,29 +140,39 @@ class Images(db.Model):
         self.listing_id = listingid
 
 
-class Messages(db.Model):
-    __tablename__ = "message"
-    message_id = db.Column("message_id", db.Integer, primary_key=True)
-    title = db.Column("title", db.String(50), nullable=False)
-    body = db.Column("body", db.String(300), nullable=False)
-    date = db.Column("date", db.DateTime, nullable=False)
+class Chat(db.Model):
+    _tablename__ = "chat"
+    chat_id = db.Column("chat_id", db.Integer, primary_key=True)
     sender_id = db.Column(
         "sender_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
     )
     recipient_id = db.Column(
-        "recipient_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
+        "receiver_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
     )
     sentuser = db.relationship("User", backref="sentuser", foreign_keys=[sender_id])
     receiveduser = db.relationship(
         "User", backref="receiveduser", foreign_keys=[recipient_id]
     )
 
-    def __init__(self, title, body, date, sender, recipient):
-        self.title = title
+    def __init__(self, sender, receiver):
+        self.sender_id = sender
+        self.recipient_id = receiver
+
+
+class Messages(db.Model):
+    __tablename__ = "message"
+    message_id = db.Column("message_id", db.Integer, primary_key=True)
+    body = db.Column("body", db.String(300), nullable=False)
+    date = db.Column("date", db.DateTime, nullable=False)
+    chat_id = db.Column(
+        "chat_id", db.Integer, db.ForeignKey("chat.chat_id"), nullable=False
+    )
+    chat = db.relationship("Chat", backref="chat", foreign_keys=[chat_id])
+
+    def __init__(self, body, date, chat):
         self.body = body
         self.date = date
-        self.sender_id = sender
-        self.recipient_id = recipient
+        self.chat_id = chat
 
 
 # Listing shcemas (what fields to serve when pulling from database)
@@ -211,12 +221,19 @@ class DesiredItemSchema(ma.Schema):
         fields = ("desired_item_id", "user_id", "keyword", "found_listing_id")
 
 
-class MessageSchema(ma.Schema):
+class ChatSchema(ma.Schema):
     class Meta:
-        fields = ("message_id", "title", "body", "date", "sentuser", "receiveduser")
+        fields = ("chat_id", "sentuser", "receiveduser")
 
     sentuser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
     receiveduser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
+
+
+class MessageSchema(ma.Schema):
+    class Meta:
+        fields = ("message_id", "body", "date", "chat")
+
+    chat = ma.Nested("ChatSchema")
 
 
 # Init Schema
@@ -234,6 +251,9 @@ users_schema = UserSchema(many=True, strict=True)
 
 desired_item_schema = DesiredItemSchema(strict=True)
 desired_items_schema = DesiredItemSchema(many=True, strict=True)
+
+chat_schema = ChatSchema(strict=True)
+chats_schema = ChatSchema(many=True, strict=True)
 
 message_schema = MessageSchema(strict=True)
 messages_schema = MessageSchema(many=True, strict=True)
@@ -447,12 +467,30 @@ def deletedesireditem(desired_item_id):
 # Send message to user
 @app.route("/sendmessage", methods=["POST"])
 def sendmessage():
-    title = request.json["title"]
     body = request.json["body"]
     date = request.json["date"]
     sender = request.json["sender"]
     recipient = request.json["recipient"]
-    new_message = Messages(title, body, date, sender, recipient)
+
+    # Check if chat exists, if not make new chat
+    chat = Chat.query.filter(
+        Chat.recipient_id == recipient and Chat.sender_id == sender
+    ).first()
+
+    if chat is None:
+        new_chat = Chat(sender, recipient)
+        db.session.add(new_chat)
+        chat_id = (
+            Chat.query.filter(
+                Chat.recipient_id == recipient and Chat.sender_id == sender
+            )
+            .first()
+            .chat_id
+        )
+    else:
+        chat_id = chat.chat_id
+
+    new_message = Messages(body, date, chat_id)
     db.session.add(new_message)
     db.session.commit()
     # Send Push to Recipient
@@ -460,19 +498,21 @@ def sendmessage():
     return "Message Sent"
 
 
-# Get all received messages from user id
-@app.route("/receivedmessages/<user_id>")
-def getreceivedmessages(user_id):
-    received = Messages.query.filter(Messages.recipient_id == user_id)
-    result = messages_schema.dump(received)
+# Get all of a users active chats
+@app.route("/getchats/<user_id>")
+def getchats(user_id):
+    chats = Chat.query.filter(Chat.recipient_id == user_id)
+    result = chats_schema.dump(chats)
     return jsonify(result.data)
 
 
-# Get all sent messages from user id
-@app.route("/sentmessages/<user_id>")
-def getsentmessages(user_id):
-    sent = Messages.query.filter(Messages.sender_id == user_id)
-    result = messages_schema.dump(sent)
+# Get all messages from chat
+@app.route("/getmessages/<chat_id>")
+def getmessages(chat_id):
+    messages = Messages.query.filter(Messages.chat_id == chat_id).order_by(
+        Messages.date
+    )
+    result = messages_schema.dump(messages)
     return jsonify(result.data)
 
 
