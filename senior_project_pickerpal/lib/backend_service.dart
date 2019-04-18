@@ -5,6 +5,7 @@ import 'package:async/async.dart';
 import 'package:path/path.dart';
 import 'pickup_entry.dart';
 import 'package:http/http.dart' as http;
+import 'package:device_info/device_info.dart';
 
 class BackendService {
   //Get a list of pickup listings from server.
@@ -28,15 +29,13 @@ class BackendService {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      List<DesiredItem> desiredItem = DesiredItem.fromJsonList(json.decode(response.body)); 
+      List<DesiredItem> desiredItem =
+          DesiredItem.fromJsonList(json.decode(response.body));
       return desiredItem;
     } else {
       throw Exception('Failed to load desired item');
     }
   }
-
-
-
 
   static Future<void> deleteListing(String url) async {
     final response = await http.get(url);
@@ -76,6 +75,15 @@ class BackendService {
   static Future<User> addUser(User user) async {
     User myUser;
 
+    DeviceInfoPlugin devicePlugin = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await devicePlugin.androidInfo;
+      user.setDeviceName(androidInfo.model.toString());
+    } else {
+      IosDeviceInfo iosInfo = await devicePlugin.iosInfo;
+      user.setDeviceName(iosInfo.model.toString());
+    }
+
     await http
         .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adduser",
             headers: {"Content-Type": "application/json"},
@@ -108,26 +116,17 @@ class BackendService {
   static _uploadImage(File imageFile, dynamic listingId) async {
     var stream =
         new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
-
     var length = await imageFile.length();
-
     var uri = Uri.parse(
         "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/upload/" +
             listingId.toString());
-
     var request = new http.MultipartRequest("POST", uri);
-
     var multipartFile = new http.MultipartFile('photo', stream, length,
         filename: basename(imageFile.path));
-
     //contentType: new MediaType('image', 'png'));
-
     request.files.add(multipartFile);
-
     var response = await request.send();
-
     print(response.statusCode);
-
     response.stream.transform(utf8.decoder).listen((value) {
       print(value);
     });
@@ -136,9 +135,9 @@ class BackendService {
   //Add a desired item to database.
   static Future<DesiredItem> addDesiredItem(DesiredItem item) async {
     DesiredItem newItem;
-
     await http
-        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adddesireditem",
+        .post(
+            "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/adddesireditem",
             headers: {"Content-Type": "application/json"},
             body: json.encode(DesiredItem.toJson(item)))
         .then((response) {
