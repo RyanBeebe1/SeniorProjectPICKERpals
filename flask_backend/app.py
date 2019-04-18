@@ -9,6 +9,7 @@ from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import IMAGES, UploadSet, configure_uploads
 from pyfcm import FCMNotification
+from sqlalchemy import and_
 
 app = Flask(__name__)
 
@@ -90,7 +91,7 @@ class User(db.Model):
     user_id = db.Column("user_id", db.Integer, primary_key=True)
     email_address = db.Column("email", db.String(50))
     display_name = db.Column("display_name", db.String(50))
-    token_id = db.Column("token_id", db.String(1500))
+    token_id = db.Column("token_id", db.String(200))
     fb_uid = db.Column("fb_uid", db.String(200))
     overall_rating = db.Column("overall_rating", db.Integer)
 
@@ -100,16 +101,19 @@ class User(db.Model):
         self.token_id = tokenid
         self.fb_uid = uid
 
-    ## Send push notification to user
-    def notify(self, title, body, data):
-        result = push_service.notify_single_device(
-            registration_id=self.token_id,
-            message_title=title,
-            message_body=body,
-            data_message=data,
-            click_action="FLUTTER_NOTIFICATION_CLICK",
-        )
-        print(f"Push sent to {self.display_name} at {self.token_id} when {result}")
+    ## Send push notification to all user devices
+    def notify(self, title, body, data, click):
+        devices = Device.query.filter(self.user_id = Device.user_id).all()
+        
+        for device in devices:
+            result = push_service.notify_single_device(
+                registration_id=device.token_id,
+                message_title=title,
+                message_body=body,
+                data_message=data,
+                click_action=click,
+            )
+            print(f"Push sent to {self.display_name} at {self.token_id} when {result}")
 
 
 class DesiredItem(db.Model):
@@ -174,6 +178,17 @@ class Messages(db.Model):
         self.date = date
         self.chat_id = chat
 
+class Device(db.Model):
+    __tablename__= "device"
+    device_id = db.Column("device_id", db.Integer, primary_key=True)
+    user_id = db.Column("user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    token_id = db.Column("token_id", db.String(200), nullable=False)
+    device_name = db.Column("device_name", db.String(50))
+
+    def __init__(self, user, token, name):
+        self.user_id = user
+        self.token_id = token
+        self.device_name = name
 
 # Listing shcemas (what fields to serve when pulling from database)
 class ListingSchema(ma.Schema):
@@ -191,7 +206,7 @@ class ListingSchema(ma.Schema):
             "user",
         )
 
-    user = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
+    user = ma.Nested("UserSchema", exclude=("token_id", "fb_uid"))
 
 
 class RatingSchema(ma.Schema):
@@ -215,7 +230,6 @@ class UserSchema(ma.Schema):
             "fb_uid",
         )
 
-
 class DesiredItemSchema(ma.Schema):
     class Meta:
         fields = ("desired_item_id", "user_id", "keyword", "found_listing_id")
@@ -235,6 +249,11 @@ class MessageSchema(ma.Schema):
 
     chat = ma.Nested("ChatSchema")
 
+class DeviceSchema(ma.Schema):
+    class Meta:
+        fields = ("device_id", "token_id", "device_name", "user")
+    
+    user = ma.Nested("UserSchema", exclude=("fb_uid"))
 
 # Init Schema
 listing_schema = ListingSchema(strict=True)
@@ -258,6 +277,9 @@ chats_schema = ChatSchema(many=True, strict=True)
 message_schema = MessageSchema(strict=True)
 messages_schema = MessageSchema(many=True, strict=True)
 
+device_schema = DeviceSchema(strict=True)
+devices_schema = DeviceSchema(many=True, strict=True)
+
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
     desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword)
@@ -265,12 +287,12 @@ def new_listing_desire_check(listing):
         user = User.query.get(di.user_id)
         title = "Desired item alert"
         body = f"A desired item matching {di.keyword} has just been uploaded, claim it now!"
+        click_action = "FLUTTER_NOTIFICATION_CLICK"
         data = {
             "Listing": f"{listing.listingid}",
-            "click_action": "FLUTTER_NOTIFICATION_CLICK",
+            "click_action": click_action,
         }
-        user.notify(title, body, data)
-
+        user.notify(title, body, data, click_action)
 
 # Notify user of new message
 def message_notify(sender, recipient):
@@ -278,13 +300,25 @@ def message_notify(sender, recipient):
     sender = User.query.get(sender)
     title = f"New message from {sender.display_name}"
     body = "Click to see message"
+    click_action = "FLUTTER_NOTIFICATION_CLICK"
     # Add whatever data is neccessary
     data = {
         "sender_id": f"{sender.user_id}",
         "recipient_id": f"{receiver.user_id}",
-        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "click_action": click_action,
     }
     receiver.notify(title, body, data)
+
+# Check if user device is in the DB, adds if not
+def device_check(user,tokenid,devicename):
+    user_device = Device.query.filter(and_(user.user_id == Device.user_id, tokenid == Device.token_id)).first()
+    if user_device is None:
+        user_device = Device(user.user_id, tokenid, devicename)
+        print (f"Adding new device {devicename}")
+        db.session.add(user_device)
+        db.session.commit()
+    else:
+        print ("Device already in DB")
 
 
 ## APP ENDPOINTS:
@@ -293,15 +327,18 @@ def message_notify(sender, recipient):
 @app.route("/adduser", methods=["POST"])
 def add_user():
     anobj = User.query.filter(User.fb_uid == request.json["fb_uid"]).first()
+    tokenid = request.json["token_id"]
+    devicename = request.json["device_name"]
     if anobj == None:
         email = request.json["email_address"]
         name = request.json["display_name"]
-        tokenid = request.json["token_id"]
         uid = request.json["fb_uid"]
         new_user = User(email, name, tokenid, uid)
+        device_check(new_user,tokenid,devicename)
         db.session.add(new_user)
         db.session.commit()
     else:
+        device_check(anobj,tokenid,devicename)
         return user_schema.jsonify(anobj)
     return user_schema.jsonify(new_user)
 
@@ -325,7 +362,6 @@ def add_listing():
     new_listing_desire_check(new_listing)
     return listing_schema.jsonify(new_listing)
 
-
 # Add desired item
 @app.route("/adddesireditem", methods=["POST"])
 def add_desired_item():
@@ -335,7 +371,6 @@ def add_desired_item():
     db.session.add(new_desired_item)
     db.session.commit()
     return desired_item_schema.jsonify(new_desired_item)
-
 
 # Upload image
 @app.route("/upload/<listingid>", methods=["POST"])
@@ -471,30 +506,34 @@ def sendmessage():
     date = request.json["date"]
     sender = request.json["sender"]
     recipient = request.json["recipient"]
-
+    print(recipient)
+    print(sender)
     # Check if chat exists, if not make new chat
     chat = Chat.query.filter(
-        Chat.recipient_id == recipient and Chat.sender_id == sender
+        and_(Chat.recipient_id == recipient,Chat.sender_id == sender)
     ).first()
 
-    if chat is None:
+    if chat == None:
         new_chat = Chat(sender, recipient)
         db.session.add(new_chat)
         chat_id = (
             Chat.query.filter(
-                Chat.recipient_id == recipient and Chat.sender_id == sender
+                and_(Chat.recipient_id == recipient,Chat.sender_id == sender)
             )
             .first()
             .chat_id
         )
+        print("wuts good")
     else:
         chat_id = chat.chat_id
+        print("yoooo")
 
+   
     new_message = Messages(body, date, chat_id)
     db.session.add(new_message)
     db.session.commit()
     # Send Push to Recipient
-    message_notify(sender, recipient)
+    #message_notify(sender, recipient)
     return "Message Sent"
 
 
@@ -515,14 +554,12 @@ def getmessages(chat_id):
     result = messages_schema.dump(messages)
     return jsonify(result.data)
 
-
 # Delete user message
 
 # The hello world endpoint
 @app.route("/hello")
 def hello_endpoint():
     return "Hello world!"
-
 
 if __name__ == "__main__":
     # app.run()
