@@ -37,6 +37,17 @@ class BackendService {
     }
   }
 
+  static Future<Listing> fetchListingById(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      Listing item = Listing.fromJson(json.decode(response.body));
+      return item;
+    }
+    else {
+      throw Exception('Failed to load item by ID');
+    }
+  }
+
   static Future<void> deleteListing(String url) async {
     final response = await http.get(url);
 

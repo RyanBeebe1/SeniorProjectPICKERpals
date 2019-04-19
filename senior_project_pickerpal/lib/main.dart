@@ -55,12 +55,15 @@ class MyHomePageState extends State<MyHomePage> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
         print('on message $message');
+        handleNotification(message);
       },
       onResume: (Map<String, dynamic> message) {
         print('on resume $message');
+        handleNotification(message);
       },
       onLaunch: (Map<String, dynamic> message) {
         print('on launch $message');
+        handleNotification(message);
       },
     );
     _firebaseMessaging.requestNotificationPermissions(
@@ -78,6 +81,21 @@ class MyHomePageState extends State<MyHomePage> {
   String drawerText = "Sign in with Google";
   String headerTxt = "Welcome Picker!";
   bool signedIn = false;
+
+  void handleNotification(Map<String, dynamic> message) async {
+    if(message["data"].containsKey("Listing")){
+      print("caught by handleNotification's if");
+      BackendService.fetchListingById("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" + message["data"]["Listing"]).then((item){
+        print("boutta push some navigation");
+        showDialog (context: context, builder: (_) => new ItemView(item: item),);
+        //Navigator.push(context, MaterialPageRoute(builder: (context) => ItemView(item: item)));
+        setState(() {feed.state.placeOne(item);});
+
+        print("its pushed");
+      });
+      //else {}
+    }
+  }
   
   //Firebase/Google signin, returns FirebaseUser object
   Future<FirebaseUser> _handleSignIn() async {
