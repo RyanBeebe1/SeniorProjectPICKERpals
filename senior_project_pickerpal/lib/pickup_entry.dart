@@ -222,8 +222,8 @@ class UserChat {
   factory UserChat.fromJson(Map<String, dynamic> json) {
     return UserChat(
       chat_id: json['chat_id'],
-      sender: User.fromJson(json['sender']),
-      recipient: User.fromJson(json['recipient']),
+      sender: User.fromJson(json['sentuser']),
+      recipient: User.fromJson(json['receiveduser']),
     );
   }
 }

@@ -170,6 +170,31 @@ class BackendService {
     });
 
   }
+
+
+  static Future<List<UserChat>> fetchChats(String url) async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<UserChat> uChat =
+          UserChat.fromJsonList(json.decode(response.body));
+      return uChat;
+    } else {
+      throw Exception('Failed to load desired item');
+    }
+  }
+
+  static Future<List<Message>> fetchMessages(String url) async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<Message> messages =
+          Message.fromJsonList(json.decode(response.body));
+      return messages;
+    } else {
+      throw Exception('Failed to load desired item');
+    }
+  }
 }
 
   

@@ -179,14 +179,6 @@ class ListingFeedState extends State<ListingFeed> {
 
   @override
   Widget build(BuildContext context) {
-    final snackBar = SnackBar(
-      content: Text("Cannot Reach Server!"),
-      action: SnackBarAction(
-          label: "Ok",
-          onPressed: () {
-            Scaffold.of(context).hideCurrentSnackBar();
-          }),
-    );
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () {
@@ -309,7 +301,7 @@ class ListingFeedState extends State<ListingFeed> {
                                 icon: Icon(Icons.chat),
                                 onPressed: () {
                                   
-                                   SessionVariables.loggedIn ? Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat(receiverId: item.user.userId,))) :
+                                   SessionVariables.loggedIn ? Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat(receiverId: item.user.emailAddress,receiverId2: item.user.userId,))) :
                                    SessionVariables.loggedInDialogue(context, "Please log in to send messages");
                                   /*
                                   showDialog(

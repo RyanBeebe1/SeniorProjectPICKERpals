@@ -6,14 +6,15 @@ import 'package:seniorprojectnuked/session.dart';
 import 'package:intl/intl.dart';
 
 class Chat extends StatefulWidget {
-  Chat({Key key, this.receiverId}) : super(key: key);
-  final int receiverId;
+  Chat({Key key, this.receiverId,this.receiverId2}) : super(key: key);
+  final String receiverId;
+  final int receiverId2;
   @override
   ChatWindow createState() => new ChatWindow();
 }
 
 class ChatWindow extends State<Chat> with TickerProviderStateMixin {
-  final List<Msg> _messages = <Msg>[];
+  List<Msg> _messages = <Msg>[];
   final TextEditingController _textController = new TextEditingController();
   bool _isWriting = false;
 
@@ -21,6 +22,37 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
     return formattedDate;
+  }
+  
+  Future<void> _getMessages() async {
+    List<UserChat> chats = await BackendService.fetchChats("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/getchats/"+SessionVariables.user.userId.toString());
+    List<Message> messages;
+    if (chats.length > 0) {
+    for (UserChat c in chats) {
+        if (c.sender.emailAddress == SessionVariables.user.emailAddress && c.recipient.emailAddress == widget.receiverId) {
+          messages = await BackendService.fetchMessages("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/getmessages/"+c.chat_id.toString());
+        }
+    }
+    }
+    if (messages != null) {
+    for (Message m in messages) {
+      setState(() {
+         _messages.add(new Msg(txt:m.body,animationController: new AnimationController(
+          vsync: this,
+        duration: new Duration(milliseconds: 800)
+      ),));
+      });
+     
+    }
+    }
+  }
+  @override
+  void initState() {
+      super.initState();
+      _getMessages().then((hi) {
+      });
+   
+
   }
   @override
   Widget build(BuildContext ctx) {
@@ -31,7 +63,7 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
       body: new Column(children: <Widget>[
         new Flexible(
             child: new ListView.builder(
-              itemBuilder: (_, int index) => _messages[index],
+              itemBuilder: (ctx, int index) => _messages[index],
               itemCount: _messages.length,
               reverse: true,
               padding: new EdgeInsets.all(6.0),
@@ -89,10 +121,9 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
     );
     setState(() {
       _messages.insert(0, msg);
+      print(_messages.length);
     });
-    print(SessionVariables.user.userId);
-    print(widget.receiverId);
-    BackendService.addMessage(new Message(body:txt, date:_getDateTime()), SessionVariables.user.userId, widget.receiverId);
+    BackendService.addMessage(new Message(body:txt, date:_getDateTime()), SessionVariables.user.userId, widget.receiverId2);
     msg.animationController.forward();
   }
 
@@ -113,34 +144,10 @@ class Msg extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    return new SizeTransition(
-      sizeFactor: new CurvedAnimation(
-          parent: animationController, curve: Curves.easeOut),
-      axisAlignment: 0.0,
-      child: new Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
-        child: new Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            new Container(
-              margin: const EdgeInsets.only(right: 18.0),
-              child: new CircleAvatar(child: new Text(SessionVariables.user.displayName.substring(0,1).toUpperCase())),
-            ),
-            new Expanded(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  new Text(SessionVariables.user.displayName, style: Theme.of(ctx).textTheme.subhead),
-                  new Container(
-                    margin: const EdgeInsets.only(top: 6.0),
-                    child: new Text(txt),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return ListTile(
+      leading: new CircleAvatar(child: new Text(SessionVariables.user.displayName.substring(0,1).toUpperCase())),
+      title:  Text(SessionVariables.user.displayName),
+      subtitle:  Text(txt),
+      );
   }
 }
