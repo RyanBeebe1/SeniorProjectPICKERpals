@@ -6,9 +6,10 @@ import 'package:seniorprojectnuked/session.dart';
 import 'package:intl/intl.dart';
 
 class Chat extends StatefulWidget {
-  Chat({Key key, this.receiverId,this.receiverId2}) : super(key: key);
-  final String receiverId;
-  final int receiverId2;
+  Chat({Key key, this.receiverId,this.senderId,this.myChats}) : super(key: key);
+  final int receiverId;
+  final int senderId;
+  final bool myChats;
   @override
   ChatWindow createState() => new ChatWindow();
 }
@@ -29,8 +30,8 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
     List<Message> messages;
     if (chats.length > 0) {
     for (UserChat c in chats) {
-        if ((c.sender.emailAddress == SessionVariables.user.emailAddress && c.recipient.emailAddress == widget.receiverId)||
-        (c.sender.emailAddress == widget.receiverId && c.recipient.emailAddress == SessionVariables.user.emailAddress)) {
+        if ((c.sender.userId == SessionVariables.user.userId && c.recipient.userId == widget.receiverId)||
+        (c.sender.userId == widget.receiverId && c.recipient.userId == SessionVariables.user.userId)) {
           messages = await BackendService.fetchMessages("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/getmessages/"+c.chat_id.toString());
         }
     }
@@ -125,7 +126,10 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
       _messages.insert(0, msg);
       print(_messages.length);
     });
-    BackendService.addMessage(new Message(body:txt, date:_getDateTime(), user: SessionVariables.user), SessionVariables.user.userId, widget.receiverId2);
+    if (!widget.myChats)
+    BackendService.addMessage(new Message(body:txt, date:_getDateTime(), user: SessionVariables.user), SessionVariables.user.userId, widget.receiverId);
+    else
+    BackendService.addMessage(new Message(body:txt, date:_getDateTime(), user: SessionVariables.user), widget.senderId, widget.receiverId);
     msg.animationController.forward();
   }
 
@@ -172,16 +176,16 @@ class MyChats extends StatefulWidget {
       if (chat.length > 0) {
         for (UserChat c in chat) {
           Message m = await BackendService.fetchLastMessage("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/lastmessage/"+c.chat_id.toString());
-          if (c.sender.userId == SessionVariables.user.userId) {
-            setState(() {
-               _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.recipient.userId,id2: c.recipient.emailAddress));
-            });
-          }
-          else {
-             setState(() {
-              _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.sender.userId, id2 : c.sender.emailAddress));
-             });
-          }
+         // if (c.sender.userId == SessionVariables.user.userId) {
+         //   setState(() {
+               _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,senderId: c.sender.userId,receiverId: c.recipient.userId,));
+         //   });
+        //  }
+         // else {
+           //  setState(() {
+             // _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,receiverId: c.sender.userId,));
+           //  });
+         // }
         }
       }
   }
@@ -213,16 +217,16 @@ class MyChats extends StatefulWidget {
   }
 
   class ChatTile extends StatelessWidget {
-  ChatTile({this.txt,this.name,this.id1,this.id2});
+  ChatTile({this.txt,this.name,this.receiverId,this.senderId});
   final String txt;
   final String name;
-  final int id1;
-  final String id2;
+  final int senderId;
+  final int receiverId;
   @override
   Widget build(BuildContext ctx) {
     return ListTile(
       onTap: () {
-        Navigator.push(ctx, new MaterialPageRoute(builder: (context) => new Chat(receiverId: id2,receiverId2: id1,)));
+        Navigator.push(ctx, new MaterialPageRoute(builder: (context) => new Chat(senderId: senderId,receiverId: receiverId,myChats: true,)));
       },
       leading: new CircleAvatar(child: new Text(name.substring(0,1).toUpperCase())),
       title:  Text(name),
