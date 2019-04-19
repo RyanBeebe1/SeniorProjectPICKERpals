@@ -231,10 +231,13 @@ class UserChat {
 class Message {
   final String body;
   final String date;
-
+  final UserChat chat;
+  final User user;
   Message({
     this.body,
     this.date,
+    this.chat,
+    this.user
   });
 
   static List<Message> fromJsonList(jsonList) {
@@ -245,6 +248,8 @@ class Message {
     return Message(
       body: json['body'],
       date: json['date'],
+      chat: UserChat.fromJson(json['chat']),
+      user: User.fromJson(json['user'])
     );
   }
 
@@ -253,7 +258,8 @@ class Message {
     'body':m.body,
     'date':m.date,
     'sender':sender,
-    'recipient':receiver
+    'recipient':receiver,
+    'user_id':m.user.userId
   };
 }
 

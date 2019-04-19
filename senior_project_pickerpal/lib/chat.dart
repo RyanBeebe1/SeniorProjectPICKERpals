@@ -29,18 +29,20 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
     List<Message> messages;
     if (chats.length > 0) {
     for (UserChat c in chats) {
-        if (c.sender.emailAddress == SessionVariables.user.emailAddress && c.recipient.emailAddress == widget.receiverId) {
+        if ((c.sender.emailAddress == SessionVariables.user.emailAddress && c.recipient.emailAddress == widget.receiverId)||
+        (c.sender.emailAddress == widget.receiverId && c.recipient.emailAddress == SessionVariables.user.emailAddress)) {
           messages = await BackendService.fetchMessages("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/getmessages/"+c.chat_id.toString());
         }
     }
     }
     if (messages != null) {
     for (Message m in messages) {
+      String name = m.user.displayName;
       setState(() {
          _messages.add(new Msg(txt:m.body,animationController: new AnimationController(
           vsync: this,
         duration: new Duration(milliseconds: 800)
-      ),));
+      ),name: name,));
       });
      
     }
@@ -117,13 +119,13 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
       animationController: new AnimationController(
           vsync: this,
         duration: new Duration(milliseconds: 800)
-      ),
+      ),name: SessionVariables.user.displayName
     );
     setState(() {
       _messages.insert(0, msg);
       print(_messages.length);
     });
-    BackendService.addMessage(new Message(body:txt, date:_getDateTime()), SessionVariables.user.userId, widget.receiverId2);
+    BackendService.addMessage(new Message(body:txt, date:_getDateTime(), user: SessionVariables.user), SessionVariables.user.userId, widget.receiverId2);
     msg.animationController.forward();
   }
 
@@ -138,15 +140,15 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
 }
 
 class Msg extends StatelessWidget {
-  Msg({this.txt, this.animationController});
+  Msg({this.txt, this.animationController,this.name});
   final String txt;
   final AnimationController animationController;
-
+  final String name;
   @override
   Widget build(BuildContext ctx) {
     return ListTile(
-      leading: new CircleAvatar(child: new Text(SessionVariables.user.displayName.substring(0,1).toUpperCase())),
-      title:  Text(SessionVariables.user.displayName),
+      leading: new CircleAvatar(child: new Text(name.substring(0,1).toUpperCase())),
+      title:  Text(name),
       subtitle:  Text(txt),
       );
   }
