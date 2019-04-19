@@ -195,6 +195,17 @@ class BackendService {
       throw Exception('Failed to load desired item');
     }
   }
+
+  static Future<Message> fetchLastMessage(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      Message item = Message.fromJson(json.decode(response.body));
+      return item;
+    }
+    else {
+      throw Exception('Failed to load item by ID');
+    }
+  }
 }
 
   

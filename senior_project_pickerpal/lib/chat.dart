@@ -60,7 +60,7 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
   Widget build(BuildContext ctx) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Chat Application"),
+        title: new Text("Chat Page"),
       ),
       body: new Column(children: <Widget>[
         new Flexible(
@@ -147,6 +147,87 @@ class Msg extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     return ListTile(
+      leading: new CircleAvatar(child: new Text(name.substring(0,1).toUpperCase())),
+      title:  Text(name),
+      subtitle:  Text(txt),
+      );
+  }
+}
+
+class MyChats extends StatefulWidget {
+  MyChats();
+ 
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return MyChatsState();
+  }
+}
+
+ class MyChatsState extends State<MyChats> {
+  List<ChatTile> _chats = <ChatTile>[];
+
+  Future<void> _buildTiles() async {
+      List<UserChat> chat = await BackendService.fetchChats("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/getchats/"+SessionVariables.user.userId.toString());
+      if (chat.length > 0) {
+        print("IN HERE0");
+        for (UserChat c in chat) {
+           print("IN HERE1");
+          Message m = await BackendService.fetchLastMessage("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/lastmessage/"+c.chat_id.toString());
+          // if (c.sender.userId == SessionVariables.user.userId) {
+             print("IN HERE2");
+            setState(() {
+               _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.recipient.userId,id2: c.recipient.emailAddress));
+            });
+         // }
+         // else {
+            // print("IN HERE3");
+             //setState(() {
+              // _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.sender.userId, id2 : c.sender.emailAddress));
+            // });
+          //}
+        }
+      }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _buildTiles();
+  }
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("My Chats"),
+      ),
+      body: new Column(children: <Widget>[
+        new Flexible(
+            child: new ListView.builder(
+              itemBuilder: (ctx, int index) => _chats[index],
+              itemCount: _chats.length,
+              padding: new EdgeInsets.all(6.0),
+            )),
+        new Divider(height: 1.0),
+      ]),
+    );
+  }
+    
+  }
+
+  class ChatTile extends StatelessWidget {
+  ChatTile({this.txt,this.name,this.id1,this.id2});
+  final String txt;
+  final String name;
+  final int id1;
+  final String id2;
+  @override
+  Widget build(BuildContext ctx) {
+    return ListTile(
+      onTap: () {
+        Navigator.push(ctx, new MaterialPageRoute(builder: (context) => new Chat(receiverId: id2,receiverId2: id1,)));
+      },
       leading: new CircleAvatar(child: new Text(name.substring(0,1).toUpperCase())),
       title:  Text(name),
       subtitle:  Text(txt),

@@ -208,6 +208,18 @@ class MyHomePageState extends State<MyHomePage> {
           ),
           new Divider(),
           new ListTile(
+            title: new Text('My Chats'),
+            onTap: () {
+               Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  new MaterialPageRoute(
+                      builder: (context) => new MyChats()),
+                );
+            },
+          ),
+          new Divider(),
+          new ListTile(
             title: new Text('My Items'),
             onTap: () {
               if (SessionVariables.loggedIn) {
