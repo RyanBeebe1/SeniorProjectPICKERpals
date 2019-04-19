@@ -104,9 +104,9 @@ class User(db.Model):
 
     ## Send push notification to all user devices
     def notify(self, title, body, data, click):
-        
+
         devices = Device.query.filter(self.user_id == Device.user_id).all()
-        
+
         for device in devices:
             result = push_service.notify_single_device(
                 registration_id=device.token_id,
@@ -180,10 +180,13 @@ class Messages(db.Model):
         self.date = date
         self.chat_id = chat
 
+
 class Device(db.Model):
-    __tablename__= "device"
+    __tablename__ = "device"
     device_id = db.Column("device_id", db.Integer, primary_key=True)
-    user_id = db.Column("user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    user_id = db.Column(
+        "user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
+    )
     token_id = db.Column("token_id", db.String(200), nullable=False)
     device_name = db.Column("device_name", db.String(50))
 
@@ -191,6 +194,7 @@ class Device(db.Model):
         self.user_id = user
         self.token_id = token
         self.device_name = name
+
 
 # Listing shcemas (what fields to serve when pulling from database)
 class ListingSchema(ma.Schema):
@@ -232,6 +236,7 @@ class UserSchema(ma.Schema):
             "fb_uid",
         )
 
+
 class DesiredItemSchema(ma.Schema):
     class Meta:
         fields = ("desired_item_id", "user_id", "keyword", "found_listing_id")
@@ -251,11 +256,13 @@ class MessageSchema(ma.Schema):
 
     chat = ma.Nested("ChatSchema")
 
+
 class DeviceSchema(ma.Schema):
     class Meta:
         fields = ("device_id", "token_id", "device_name", "user")
-    
+
     user = ma.Nested("UserSchema", exclude=("fb_uid"))
+
 
 # Init Schema
 listing_schema = ListingSchema(strict=True)
@@ -284,17 +291,16 @@ devices_schema = DeviceSchema(many=True, strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
-    desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword)
+    desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword).all()
     for di in desired_items:
         user = User.query.get(di.user_id)
         title = "Desired item alert"
         body = f"A desired item matching {di.keyword} has just been uploaded, claim it now!"
         click_action = "FLUTTER_NOTIFICATION_CLICK"
-        data = {
-            "Listing": f"{listing.listingid}",
-            "click_action": click_action,
-        }
+        data = {"Listing": f"{listing.listingid}", "click_action": click_action}
+        print(f"Notifying {user.display_name} about {di.keyword}")
         user.notify(title, body, data, click_action)
+
 
 # Notify user of new message
 def message_notify(sender, recipient):
@@ -311,16 +317,19 @@ def message_notify(sender, recipient):
     }
     receiver.notify(title, body, data, click_action)
 
+
 # Check if user device is in the DB, adds if not
-def device_check(user,tokenid,devicename):
-    user_device = Device.query.filter(and_(user.user_id == Device.user_id, tokenid == Device.token_id)).first()
+def device_check(user, tokenid, devicename):
+    user_device = Device.query.filter(
+        and_(user.user_id == Device.user_id, tokenid == Device.token_id)
+    ).first()
     if user_device is None:
         user_device = Device(user.user_id, tokenid, devicename)
-        print (f"Adding new device {devicename}")
+        print(f"Adding new device {devicename}")
         db.session.add(user_device)
         db.session.commit()
     else:
-        print ("Device already in DB")
+        print("Device already in DB")
 
 
 ## APP ENDPOINTS:
@@ -336,11 +345,11 @@ def add_user():
         name = request.json["display_name"]
         uid = request.json["fb_uid"]
         new_user = User(email, name, tokenid, uid)
-        device_check(new_user,tokenid,devicename)
+        device_check(new_user, tokenid, devicename)
         db.session.add(new_user)
         db.session.commit()
     else:
-        device_check(anobj,tokenid,devicename)
+        device_check(anobj, tokenid, devicename)
         return user_schema.jsonify(anobj)
     return user_schema.jsonify(new_user)
 
@@ -361,10 +370,10 @@ def add_listing():
     )
     db.session.add(new_listing)
     db.session.commit()
-    new_listing_desire_check(new_listing)
     time.sleep(10)
-    new_listing_desire_check(Listing.query.get(89))
+    new_listing_desire_check(new_listing)
     return listing_schema.jsonify(new_listing)
+
 
 # Add desired item
 @app.route("/adddesireditem", methods=["POST"])
@@ -375,6 +384,7 @@ def add_desired_item():
     db.session.add(new_desired_item)
     db.session.commit()
     return desired_item_schema.jsonify(new_desired_item)
+
 
 # Upload image
 @app.route("/upload/<listingid>", methods=["POST"])
@@ -512,7 +522,7 @@ def sendmessage():
     recipient = request.json["recipient"]
     # Check if chat exists, if not make new chat
     chat = Chat.query.filter(
-        and_(Chat.recipient_id == recipient,Chat.sender_id == sender)
+        and_(Chat.recipient_id == recipient, Chat.sender_id == sender)
     ).first()
 
     if chat == None:
@@ -520,7 +530,7 @@ def sendmessage():
         db.session.add(new_chat)
         chat_id = (
             Chat.query.filter(
-                and_(Chat.recipient_id == recipient,Chat.sender_id == sender)
+                and_(Chat.recipient_id == recipient, Chat.sender_id == sender)
             )
             .first()
             .chat_id
@@ -528,7 +538,6 @@ def sendmessage():
     else:
         chat_id = chat.chat_id
 
-   
     new_message = Messages(body, date, chat_id)
     db.session.add(new_message)
     db.session.commit()
@@ -540,7 +549,9 @@ def sendmessage():
 # Get all of a users active chats
 @app.route("/getchats/<user_id>")
 def getchats(user_id):
-    chats = Chat.query.filter(or_(Chat.sender_id == user_id, Chat.recipient_id == user_id))
+    chats = Chat.query.filter(
+        or_(Chat.sender_id == user_id, Chat.recipient_id == user_id)
+    )
     result = chats_schema.dump(chats)
     return jsonify(result.data)
 
@@ -554,12 +565,21 @@ def getmessages(chat_id):
     result = messages_schema.dump(messages)
     return jsonify(result.data)
 
+# Get last message from chat
+@app.route("/lastmessage/<chat_id>")
+def getmessages(chat_id):
+    messages = Messages.query.filter(Messages.chat_id == chat_id).order_by(
+        desc(Messages.date)
+    ).first()
+    result = messages_schema.dump(messages)
+    return jsonify(result.data)
 # Delete user message
 
 # The hello world endpoint
 @app.route("/hello")
 def hello_endpoint():
     return "Hello world!"
+
 
 if __name__ == "__main__":
     # app.run()
