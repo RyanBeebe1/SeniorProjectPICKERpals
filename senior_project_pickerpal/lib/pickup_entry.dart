@@ -106,6 +106,7 @@ class User {
   final String tokenId;
   final String fbId;
   final int overallRating;
+  String deviceName;
 
   User(
       {this.emailAddress,
@@ -133,12 +134,17 @@ class User {
     this.userId = id;
   }
 
+  setDeviceName(String name){
+    this.deviceName = name;
+  }
+
   static Map<String, dynamic> toJson(User user) => {
         'email_address': user.emailAddress,
         'display_name': user.displayName,
         'token_id': user.tokenId,
         'fb_uid': user.fbId,
-        'overall_rating': user.overallRating
+        'overall_rating': user.overallRating,
+        'device_name': user.deviceName
       };
 }
 
@@ -207,14 +213,10 @@ class UserChat {
   final User sender;
   final User recipient;
 
-  UserChat({
-    this.chat_id,
-    this.sender,
-    this.recipient
-  });
+  UserChat({this.chat_id, this.sender, this.recipient});
 
   static List<UserChat> fromJsonList(jsonList) {
-    return jsonList.map<UserChat>((obj) =>UserChat.fromJson(obj)).toList();
+    return jsonList.map<UserChat>((obj) => UserChat.fromJson(obj)).toList();
   }
 
   factory UserChat.fromJson(Map<String, dynamic> json) {
@@ -224,7 +226,6 @@ class UserChat {
       recipient: User.fromJson(json['recipient']),
     );
   }
-
 }
 
 class Message {
@@ -255,3 +256,4 @@ class Message {
     'recipient':receiver
   };
 }
+

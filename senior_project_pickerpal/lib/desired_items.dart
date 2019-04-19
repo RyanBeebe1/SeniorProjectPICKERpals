@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_tags/input_tags.dart';
 import 'package:flutter_tags/selectable_tags.dart';
+import 'session.dart';
 
 class DesiredItemTag extends StatefulWidget{
   DesiredItemTag({Key key, this.title}) : super(key: key);
@@ -54,7 +55,7 @@ class DesiredItemTagState extends State<DesiredItemTag> with SingleTickerProvide
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _scrollViewController = ScrollController();
-
+    print (SessionVariables.user.userId);
     int cnt = 0;
    
 

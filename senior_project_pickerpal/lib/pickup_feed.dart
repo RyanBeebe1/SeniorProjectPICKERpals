@@ -18,6 +18,66 @@ class ListingFeed extends StatefulWidget {
   ListingFeedState createState() => state;
 }
 
+class ItemView extends StatelessWidget{
+  ItemView({this.item});
+  final Listing item;
+  @override
+  Widget build (BuildContext context) {
+    return new SimpleDialog(
+      contentPadding: EdgeInsets.all(10.0),
+      children: <Widget>[
+        Text(
+          item.item_title,
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24.0),
+        ),
+        Padding(padding: EdgeInsets.all(20.0)),
+        CachedNetworkImage(
+          imageUrl:
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/" +
+              item.listing_id.toString(),
+          placeholder: (context, url) =>
+          new Center(
+              child: Container(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 5.0,
+                  ))),
+          errorWidget: (context, url, error) =>
+          new Icon(Icons.error_outline),
+        ),
+        Text("Posted by: " + item.user.displayName),
+        Text(
+          item.description,
+          style: TextStyle(fontSize: 15.0),
+        ),
+        SimpleDialogOption(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Container(
+            height: 30.0,
+            width: 10.0,
+            child: Text(
+              "Ok",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0),
+              textAlign: TextAlign.center,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.lightGreen,
+              border: Border.all(color: Colors.black),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+}
+
 class ListingFeedState extends State<ListingFeed> {
   bool ratePress = false;
   int pageNum;
@@ -79,6 +139,11 @@ class ListingFeedState extends State<ListingFeed> {
         widget.items.addAll(pick);
       });
     });
+  }
+
+  Future<void> placeOne(Listing thing) async {
+    await newList();
+    widget.items.insert(0, thing);
   }
 
   @override
@@ -232,57 +297,7 @@ class ListingFeedState extends State<ListingFeed> {
                       onTap: () async {
                         showDialog(
                           context: context,
-                          builder: (_) => new SimpleDialog(
-                                contentPadding: EdgeInsets.all(10.0),
-                                children: <Widget>[
-                                  Text(
-                                    item.item_title,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 24.0),
-                                  ),
-                                  Padding(padding: EdgeInsets.all(20.0)),
-                                  CachedNetworkImage(
-                                    imageUrl:
-                                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/" +
-                                            item.listing_id.toString(),
-                                    placeholder: (context, url) => new Center(
-                                        child: Container(
-                                            height: 30,
-                                            width: 30,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 5.0,
-                                            ))),
-                                    errorWidget: (context, url, error) =>
-                                        new Icon(Icons.error_outline),
-                                  ),
-                                  Text("Posted by: " + item.user.displayName),
-                                  Text(
-                                    item.description,
-                                    style: TextStyle(fontSize: 15.0),
-                                  ),
-                                  SimpleDialogOption(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Container(
-                                      height: 30.0,
-                                      width: 10.0,
-                                      child: Text(
-                                        "Ok",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20.0),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.lightGreen,
-                                        border: Border.all(color: Colors.black),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
+                          builder: (_) => new ItemView(item: item),
                         );
                       },
                       title: Text(item.item_title),
