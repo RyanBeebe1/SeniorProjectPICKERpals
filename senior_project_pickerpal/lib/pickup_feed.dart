@@ -293,7 +293,8 @@ class ListingFeedState extends State<ListingFeed> {
                             IconButton(
                                 icon: Icon(Icons.chat),
                                 onPressed: () {
-                                   SessionVariables.loggedIn ? Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat())) :
+                                  
+                                   SessionVariables.loggedIn ? Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat(receiverId: item.user.userId,))) :
                                    SessionVariables.loggedInDialogue(context, "Please log in to send messages");
                                   /*
                                   showDialog(

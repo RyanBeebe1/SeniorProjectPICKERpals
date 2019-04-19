@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:seniorprojectnuked/backend_service.dart';
+import 'package:seniorprojectnuked/pickup_entry.dart';
 import 'package:seniorprojectnuked/session.dart';
+import 'package:intl/intl.dart';
 
 class Chat extends StatefulWidget {
-  Chat({Key key}) : super(key: key);
+  Chat({Key key, this.receiverId}) : super(key: key);
+  final int receiverId;
   @override
   ChatWindow createState() => new ChatWindow();
 }
@@ -13,6 +17,11 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
   final TextEditingController _textController = new TextEditingController();
   bool _isWriting = false;
 
+  String _getDateTime() {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    return formattedDate;
+  }
   @override
   Widget build(BuildContext ctx) {
     return new Scaffold(
@@ -81,6 +90,9 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
     setState(() {
       _messages.insert(0, msg);
     });
+    print(SessionVariables.user.userId);
+    print(widget.receiverId);
+    BackendService.addMessage(new Message(body:txt, date:_getDateTime()), SessionVariables.user.userId, widget.receiverId);
     msg.animationController.forward();
   }
 

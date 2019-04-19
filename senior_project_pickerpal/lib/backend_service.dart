@@ -150,4 +150,16 @@ class BackendService {
 
     return newItem;
   }
+  static Future<void> addMessage(Message m, int sender, int receiver) async {
+    
+   await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/sendmessage",
+            headers: {"Content-Type": "application/json"},
+            body: json.encode(Message.toJson(m,sender, receiver)))
+        .then((response) {
+    });
+
+  }
 }
+
+  

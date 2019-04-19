@@ -112,7 +112,9 @@ class User {
       this.displayName,
       this.tokenId,
       this.fbId,
-      this.overallRating});
+      this.overallRating,
+      this.userId
+      });
 
   User.firebase(this.emailAddress, this.displayName, this.tokenId, this.fbId,
       this.overallRating);
@@ -123,7 +125,8 @@ class User {
         displayName: json['display_name'],
         tokenId: json['token_id'],
         fbId: json['fb_uid'],
-        overallRating: json['overall_rating']);
+        overallRating: json['overall_rating'],
+        userId:json['user_id']);
   }
 
   setUserId(int id) {
@@ -227,13 +230,10 @@ class UserChat {
 class Message {
   final String body;
   final String date;
-  final int chat_id;
 
   Message({
     this.body,
-    this.chat_id,
     this.date,
-
   });
 
   static List<Message> fromJsonList(jsonList) {
@@ -246,4 +246,12 @@ class Message {
       date: json['date'],
     );
   }
+
+ static Map<String, dynamic> toJson(Message m,int sender, int receiver) =>
+  {
+    'body':m.body,
+    'date':m.date,
+    'sender':sender,
+    'recipient':receiver
+  };
 }
