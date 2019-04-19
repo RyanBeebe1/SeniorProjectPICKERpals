@@ -2,6 +2,7 @@ import configparser
 import json
 import os
 import MySQLdb
+import time
 from PIL import Image
 from sqlalchemy.sql import func
 from flask import Flask, jsonify, request, send_from_directory
@@ -9,7 +10,7 @@ from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import IMAGES, UploadSet, configure_uploads
 from pyfcm import FCMNotification
-from sqlalchemy import and_
+from sqlalchemy import and_, desc, or_
 
 app = Flask(__name__)
 
@@ -103,7 +104,8 @@ class User(db.Model):
 
     ## Send push notification to all user devices
     def notify(self, title, body, data, click):
-        devices = Device.query.filter(self.user_id = Device.user_id).all()
+        
+        devices = Device.query.filter(self.user_id == Device.user_id).all()
         
         for device in devices:
             result = push_service.notify_single_device(
@@ -307,7 +309,7 @@ def message_notify(sender, recipient):
         "recipient_id": f"{receiver.user_id}",
         "click_action": click_action,
     }
-    receiver.notify(title, body, data)
+    receiver.notify(title, body, data, click_action)
 
 # Check if user device is in the DB, adds if not
 def device_check(user,tokenid,devicename):
@@ -360,6 +362,8 @@ def add_listing():
     db.session.add(new_listing)
     db.session.commit()
     new_listing_desire_check(new_listing)
+    time.sleep(10)
+    new_listing_desire_check(Listing.query.get(89))
     return listing_schema.jsonify(new_listing)
 
 # Add desired item
@@ -506,8 +510,6 @@ def sendmessage():
     date = request.json["date"]
     sender = request.json["sender"]
     recipient = request.json["recipient"]
-    print(recipient)
-    print(sender)
     # Check if chat exists, if not make new chat
     chat = Chat.query.filter(
         and_(Chat.recipient_id == recipient,Chat.sender_id == sender)
@@ -523,24 +525,22 @@ def sendmessage():
             .first()
             .chat_id
         )
-        print("wuts good")
     else:
         chat_id = chat.chat_id
-        print("yoooo")
 
    
     new_message = Messages(body, date, chat_id)
     db.session.add(new_message)
     db.session.commit()
     # Send Push to Recipient
-    #message_notify(sender, recipient)
+    message_notify(sender, recipient)
     return "Message Sent"
 
 
 # Get all of a users active chats
 @app.route("/getchats/<user_id>")
 def getchats(user_id):
-    chats = Chat.query.filter(Chat.recipient_id == user_id)
+    chats = Chat.query.filter(or_(Chat.sender_id == user_id, Chat.recipient_id == user_id))
     result = chats_schema.dump(chats)
     return jsonify(result.data)
 
@@ -549,7 +549,7 @@ def getchats(user_id):
 @app.route("/getmessages/<chat_id>")
 def getmessages(chat_id):
     messages = Messages.query.filter(Messages.chat_id == chat_id).order_by(
-        Messages.date
+        desc(Messages.date)
     )
     result = messages_schema.dump(messages)
     return jsonify(result.data)
