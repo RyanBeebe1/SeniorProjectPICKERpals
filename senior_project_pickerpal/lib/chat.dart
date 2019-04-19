@@ -170,22 +170,18 @@ class MyChats extends StatefulWidget {
   Future<void> _buildTiles() async {
       List<UserChat> chat = await BackendService.fetchChats("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/getchats/"+SessionVariables.user.userId.toString());
       if (chat.length > 0) {
-        print("IN HERE0");
         for (UserChat c in chat) {
-           print("IN HERE1");
           Message m = await BackendService.fetchLastMessage("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/lastmessage/"+c.chat_id.toString());
-          // if (c.sender.userId == SessionVariables.user.userId) {
-             print("IN HERE2");
+          if (c.sender.userId == SessionVariables.user.userId) {
             setState(() {
                _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.recipient.userId,id2: c.recipient.emailAddress));
             });
-         // }
-         // else {
-            // print("IN HERE3");
-             //setState(() {
-              // _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.sender.userId, id2 : c.sender.emailAddress));
-            // });
-          //}
+          }
+          else {
+             setState(() {
+              _chats.add(new ChatTile(name: m.user.displayName,txt: m.body,id1: c.sender.userId, id2 : c.sender.emailAddress));
+             });
+          }
         }
       }
   }
