@@ -125,7 +125,7 @@ class DesiredItem(db.Model):
         "user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
     )
     keyword = db.Column("keyword", db.String(45))
-    found_listing_id = db.Column("found_listing_id", db.Integer)
+    user = db.relationship("User", backref="desireduser", foreign_keys=[user_id])
 
     def __init__(self, userid, keyword):
         self.user_id = userid
@@ -174,11 +174,16 @@ class Messages(db.Model):
         "chat_id", db.Integer, db.ForeignKey("chat.chat_id"), nullable=False
     )
     chat = db.relationship("Chat", backref="chat", foreign_keys=[chat_id])
+    user_id = db.Column(
+        "user_id", db.Integer, db.ForeignKey("users.user_id"), nullable=False
+    )
+    user = db.relationship("User", backref="sendinguser", foreign_keys=[user_id])
 
-    def __init__(self, body, date, chat):
+    def __init__(self, body, date, chat, user_id):
         self.body = body
         self.date = date
         self.chat_id = chat
+        self.user_id = user_id
 
 
 class Device(db.Model):
@@ -239,22 +244,27 @@ class UserSchema(ma.Schema):
 
 class DesiredItemSchema(ma.Schema):
     class Meta:
-        fields = ("desired_item_id", "user_id", "keyword", "found_listing_id")
+        fields = ("desired_item_id", "user_id", "keyword", "user")
+
+    user = ma.Nested(
+        "UserSchema", exclude=("token_id", "fb_uid", "user_id", "overall_rating")
+    )
 
 
 class ChatSchema(ma.Schema):
     class Meta:
         fields = ("chat_id", "sentuser", "receiveduser")
 
-    sentuser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
-    receiveduser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid", "user_id"))
+    sentuser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid"))
+    receiveduser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid"))
 
 
 class MessageSchema(ma.Schema):
     class Meta:
-        fields = ("message_id", "body", "date", "chat")
+        fields = ("message_id", "body", "date", "chat", "user")
 
     chat = ma.Nested("ChatSchema")
+    user = ma.Nested("UserSchema")
 
 
 class DeviceSchema(ma.Schema):
@@ -519,10 +529,14 @@ def sendmessage():
     body = request.json["body"]
     date = request.json["date"]
     sender = request.json["sender"]
+    uid = request.json["user_id"]
     recipient = request.json["recipient"]
     # Check if chat exists, if not make new chat
     chat = Chat.query.filter(
-        and_(Chat.recipient_id == recipient, Chat.sender_id == sender)
+        or_(
+            and_(Chat.recipient_id == recipient, Chat.sender_id == sender),
+            and_(Chat.recipient_id == sender, Chat.sender_id == recipient),
+        )
     ).first()
 
     if chat == None:
@@ -538,7 +552,7 @@ def sendmessage():
     else:
         chat_id = chat.chat_id
 
-    new_message = Messages(body, date, chat_id)
+    new_message = Messages(body, date, chat_id, uid)
     db.session.add(new_message)
     db.session.commit()
     # Send Push to Recipient
@@ -565,14 +579,18 @@ def getmessages(chat_id):
     result = messages_schema.dump(messages)
     return jsonify(result.data)
 
+
 # Get last message from chat
 @app.route("/lastmessage/<chat_id>")
-def getmessages(chat_id):
-    messages = Messages.query.filter(Messages.chat_id == chat_id).order_by(
-        desc(Messages.date)
-    ).first()
-    result = messages_schema.dump(messages)
-    return jsonify(result.data)
+def getlastmessage(chat_id):
+    messages = (
+        Messages.query.filter(Messages.chat_id == chat_id)
+        .order_by(desc(Messages.date))
+        .first()
+    )
+    return message_schema.jsonify(messages)
+
+
 # Delete user message
 
 # The hello world endpoint
