@@ -213,32 +213,7 @@ class ListingFeedState extends State<ListingFeed> {
                 }
               } else if (!refreshing) {
                 final item = widget.items[index];
-                return Dismissible(
-                  key: Key(item.hashCode.toString()),
-                  onDismissed: (direction) {
-                    setState(() {
-                      widget.items.removeAt(index);
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        action: SnackBarAction(
-                            label: "UNDO",
-                            onPressed: () {
-                              setState(() {
-                                widget.items.insert(index, item);
-                              });
-                            }),
-                        content: Text(item.item_title + " dismissed"),
-                      ));
-                    });
-                  },
-                  background: Container(
-                      child: Center(
-                        child: Text("Y E E E E E E E E E E E E E T"),
-                      ),
-                      color: Colors.red),
-                  secondaryBackground: Container(
-                      child: Text("Y E E E E E E E E E E E T"),
-                      color: Colors.green),
-                  child: ListTile(
+                return  ListTile(
                     leading: Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/thumbs/"+item.listing_id.toString()),
                       onLongPress: () {
                         if (widget.personalMode) {
@@ -300,40 +275,9 @@ class ListingFeedState extends State<ListingFeed> {
                             IconButton(
                                 icon: Icon(Icons.chat),
                                 onPressed: () {
-                                  
-                                   SessionVariables.loggedIn ? Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat(myChats: false,receiverId: item.user.userId,))) :
-                                   SessionVariables.loggedInDialogue(context, "Please log in to send messages");
-                                  /*
-                                  showDialog(
-                                      context: context,
-                                      builder: (_) => new AlertDialog(
-                                            title: Text("Chat with Seller"),
-                                            content: Text(
-                                                "This is where the chat would be"),
-                                            actions: <Widget>[
-                                              Container(
-                                                height: 30.0,
-                                                child: RaisedButton(
-                                                  child: const Text(
-                                                    'I Understand',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.black),
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  splashColor: Colors.grey,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.lightGreen,
-                                                    border: Border.all(
-                                                        color: Colors.black)),
-                                              ),
-                                            ],
-                                          ));
-                                          */
+                                   !SessionVariables.loggedIn ? SessionVariables.loggedInDialogue(context, "Please log in to send messages") : SessionVariables.user.userId == item.user.userId ? SessionVariables.loggedInDialogue(context, "You can't message yourself"):
+                                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat(myChats: false,senderId: SessionVariables.user.userId, receiverId: item.user.userId,)))
+                                    ;
                                 }),
                             Visibility(
                                 child: IconButton(
@@ -349,8 +293,7 @@ class ListingFeedState extends State<ListingFeed> {
                                       });
                                     }),
                                 visible: ratePress ? true : true)
-                          ])),
-                );
+                          ]));
               }
             }),
       ),
