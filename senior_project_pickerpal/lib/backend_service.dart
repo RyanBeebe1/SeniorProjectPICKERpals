@@ -109,6 +109,17 @@ class BackendService {
     return myUser;
   }
 
+  static Future<User> fetchUserById(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      User myUser = User.fromJson(json.decode(response.body));
+      return myUser;
+    }
+    else {
+      throw Exception('Failed to load user by ID');
+    }
+  }
+
   static Future<Rating> addRating(Rating rating) async {
     Rating rat;
 

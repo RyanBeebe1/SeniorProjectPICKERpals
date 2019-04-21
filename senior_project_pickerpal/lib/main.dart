@@ -54,8 +54,7 @@ class MyHomePageState extends State<MyHomePage> {
     super.initState();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
-        print('on message $message');
-        handleNotification(message);
+        askUser(message);
       },
       onResume: (Map<String, dynamic> message) {
         print('on resume $message');
@@ -94,6 +93,27 @@ class MyHomePageState extends State<MyHomePage> {
       Navigator.push(context, new MaterialPageRoute(builder: (context) =>
       new Chat(myChats: false,senderId: int.parse(message["data"]["sender_id"]),
         receiverId: int.parse(message["data"]["recipient_id"]),)));
+    }
+  }
+
+  void askUser(Map<String, dynamic> message) async{
+    String info;
+    print("message data: " + message["data"].toString());
+    if(message["data"].containsKey("Listing")) {
+      info = "New item matching " + await BackendService.fetchListingById(
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
+              message["data"]["Listing"]).then((item){return item.tag;}) +
+          " was just posted. View it?";
+    }
+    else if(message["data"].containsKey("sender_id")){
+      info = "New message from " + await BackendService.fetchUserById(
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/userbyid/" +
+              message["data"]["sender_id"]).then((user) {return user.displayName;}) +
+          ". View it?";
+    }
+     final view = await showDialog(context: context, builder: (_) => new NotificationAlert(text: info),);
+    if(view) {
+      handleNotification(message);
     }
   }
   
