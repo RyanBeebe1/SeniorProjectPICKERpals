@@ -54,8 +54,7 @@ class MyHomePageState extends State<MyHomePage> {
     super.initState();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
-        print('on message $message');
-        handleNotification(message);
+        askUser(message);
       },
       onResume: (Map<String, dynamic> message) {
         print('on resume $message');
@@ -83,17 +82,39 @@ class MyHomePageState extends State<MyHomePage> {
   bool signedIn = false;
 
   void handleNotification(Map<String, dynamic> message) async {
-    if(message["data"].containsKey("Listing")){
-      print("caught by handleNotification's if");
-      BackendService.fetchListingById("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" + message["data"]["Listing"]).then((item){
-        print("boutta push some navigation");
-        showDialog (context: context, builder: (_) => new ItemView(item: item),);
-        //Navigator.push(context, MaterialPageRoute(builder: (context) => ItemView(item: item)));
-        setState(() {feed.state.placeOne(item);});
-
-        print("its pushed");
+    if(message["data"].containsKey("Listing")) {
+        BackendService.fetchListingById(
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
+              message["data"]["Listing"]).then((item) {
+        showDialog(context: context, builder: (_) => new ItemView(item: item),);
+        feed.state.addOne(item);
       });
-      //else {}
+    } else if(message["data"].containsKey("sender_id")){
+      Navigator.push(context, new MaterialPageRoute(builder: (context) =>
+      new Chat(myChats: false,senderId: int.parse(message["data"]["sender_id"]),
+        receiverId: int.parse(message["data"]["recipient_id"]),)));
+    }
+  }
+
+  void askUser(Map<String, dynamic> message) async{
+    String info;
+    print("message data: " + message["data"].toString());
+    if(message["data"].containsKey("Listing")) {
+      info = "New item matching " + await BackendService.fetchListingById(
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
+              message["data"]["Listing"]).then((item){return item.tag;}) +
+          " was just posted. View it?";
+    }
+    else if(message["data"].containsKey("sender_id")){
+      info = "New message from " + await BackendService.fetchUserById(
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/userbyid/" +
+              message["data"]["sender_id"]).then((user) {return user.displayName;}) +
+          ". View it?";
+    }
+     final view = await showDialog(context: context, builder: (_) =>
+      new NotificationAlert(text: info),);
+    if(view) {
+      handleNotification(message);
     }
   }
   
@@ -331,22 +352,26 @@ class _FilterDialogState extends State<FilterDialog>{
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget> [
-              new Radio(value: 0, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 0, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("None"),],
           ),
           new Row(
             children: <Widget> [
-              new Radio(value: 1, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 1, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("Electronics"),],
           ),
           new Row(
             children: <Widget> [
-              new Radio(value: 2, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 2, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("Furniture"),],
           ),
           new Row(
             children: <Widget> [
-              new Radio(value: 3, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 3, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("Misc"),],
           ),
         ],
@@ -357,16 +382,20 @@ class _FilterDialogState extends State<FilterDialog>{
                   color: Colors.lightGreen,
                   onPressed:() {Navigator.of(context).pop();
                   switch(_filterValue) {
-                    case 0: SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
+                    case 0: SessionVariables.filtered_feed =
+                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
                     break;
                     case 1:
-                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
+                      SessionVariables.filtered_feed =
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
                       break;
                     case 2:
-                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
+                      SessionVariables.filtered_feed =
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
                       break;
                     case 3:
-                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
+                      SessionVariables.filtered_feed =
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
                   }
                   },
                   child: Text("Ok",style: TextStyle(
@@ -377,4 +406,3 @@ class _FilterDialogState extends State<FilterDialog>{
     );
   }
 }
-

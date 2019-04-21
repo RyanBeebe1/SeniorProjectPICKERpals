@@ -262,4 +262,3 @@ class Message {
     'user_id':m.user.userId
   };
 }
-

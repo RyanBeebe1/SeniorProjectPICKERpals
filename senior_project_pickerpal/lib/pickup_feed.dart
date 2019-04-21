@@ -141,15 +141,14 @@ class ListingFeedState extends State<ListingFeed> {
     });
   }
 
-  Future<void> placeOne(Listing thing) async {
-    await newList();
-    widget.items.insert(0, thing);
-  }
-
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void addOne(Listing item) {
+    setState((){widget.items.insert(0, item);});
   }
 
   @override
@@ -214,7 +213,9 @@ class ListingFeedState extends State<ListingFeed> {
               } else if (!refreshing) {
                 final item = widget.items[index];
                 return  ListTile(
-                    leading: Image.network("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/thumbs/"+item.listing_id.toString()),
+                    leading: Image.network(
+                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/thumbs/"+
+                            item.listing_id.toString()),
                       onLongPress: () {
                         if (widget.personalMode) {
                           showDialog(
@@ -275,9 +276,13 @@ class ListingFeedState extends State<ListingFeed> {
                             IconButton(
                                 icon: Icon(Icons.chat),
                                 onPressed: () {
-                                   !SessionVariables.loggedIn ? SessionVariables.loggedInDialogue(context, "Please log in to send messages") : SessionVariables.user.userId == item.user.userId ? SessionVariables.loggedInDialogue(context, "You can't message yourself"):
-                                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat(myChats: false,senderId: SessionVariables.user.userId, receiverId: item.user.userId,)))
-                                    ;
+                                   !SessionVariables.loggedIn ? SessionVariables.loggedInDialogue(context,
+                                       "Please log in to send messages") : SessionVariables.user.userId ==
+                                       item.user.userId ? SessionVariables.loggedInDialogue(context,
+                                       "You can't message yourself"):
+                                   Navigator.push(context, new MaterialPageRoute(builder: (context) =>
+                                   new Chat(myChats: false,senderId: SessionVariables.user.userId,
+                                     receiverId: item.user.userId,)));
                                 }),
                             Visibility(
                                 child: IconButton(
