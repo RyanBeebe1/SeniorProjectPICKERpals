@@ -91,7 +91,7 @@ class MyHomePageState extends State<MyHomePage> {
       });
     } else if(message["data"].containsKey("sender_id")){
       Navigator.push(context, new MaterialPageRoute(builder: (context) =>
-      new Chat(myChats: false,senderId: int.parse(message["data"]["sender_id"]),
+      new Chat(myChats: true,senderId: int.parse(message["data"]["sender_id"]),
         receiverId: int.parse(message["data"]["recipient_id"]),)));
     }
   }
