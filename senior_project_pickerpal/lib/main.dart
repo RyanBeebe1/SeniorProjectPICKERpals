@@ -88,11 +88,12 @@ class MyHomePageState extends State<MyHomePage> {
           "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
               message["data"]["Listing"]).then((item) {
         showDialog(context: context, builder: (_) => new ItemView(item: item),);
-        //Navigator.push(context, MaterialPageRoute(builder: (context) => ItemView(item: item)));
         feed.state.addOne(item);
       });
-    } else {
-
+    } else if(message["data"].containsKey("sender_id")){
+      Navigator.push(context, new MaterialPageRoute(builder: (context) =>
+      new Chat(myChats: false,senderId: int.parse(message["data"]["sender_id"]),
+        receiverId: int.parse(message["data"]["recipient_id"]),)));
     }
   }
   
