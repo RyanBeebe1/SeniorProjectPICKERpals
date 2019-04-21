@@ -20,7 +20,8 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
   final List<String> _list = [
     '0','SDk','plugin updates','Facebook','哔了狗了QP又不够了',
     'Kirchhoff','Italy','France','Spain','美','Dart','Foo','Select','lorem ip','9',
-    'Star','Flutter Selectable Tags','1','Hubble','2','Input flutter tags','A B C','8','Android Studio developer','welcome to the jungle','Gauss',
+    'Star','Flutter Selectable Tags','1','Hubble','2','Input flutter tags',
+    'A B C','8','Android Studio developer','welcome to the jungle','Gauss',
       '美术',
       '互联网',
       '炫舞时代',
@@ -256,7 +257,8 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
                                         PopupMenuItem(
                                             child: Text(tag.title,
                                                 style: TextStyle(
-                                                    color: Colors.black87,fontWeight: FontWeight.w800
+                                                    color: Colors.black87,
+                                                    fontWeight: FontWeight.w800
                                                 ),
                                             ),
                                             enabled: false,
@@ -285,7 +287,8 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
                                             value: 3,
                                             child: Row(
                                                 children: <Widget>[
-                                                    Icon(Icons.format_color_fill,color:_color,size: 18,),
+                                                    Icon(Icons.format_color_fill,
+                                                      color:_color,size: 18,),
                                                     Text("  Randomize"),
                                                 ],
                                             ),
@@ -294,7 +297,8 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
                                             value: 4,
                                             child: Row(
                                                 children: <Widget>[
-                                                    Icon(Icons.format_color_reset,color: Colors.grey,size: 18,),
+                                                    Icon(Icons.format_color_reset,
+                                                      color: Colors.grey,size: 18,),
                                                     Text(" Reset"),
                                                 ],
                                             ),
@@ -305,7 +309,8 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
                                 popupMenuOnSelected: (int id,Tag tag){
                                     switch(id){
                                         case 1:
-                                            Clipboard.setData( ClipboardData(text: tag.title));
+                                            Clipboard.setData( ClipboardData(text:
+                                            tag.title));
                                             break;
                                         case 2:
                                             setState(() {
@@ -338,9 +343,11 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
                           Container(
                               padding: EdgeInsets.only(left: 10),
                               alignment: Alignment.topLeft,
-                              child: Text("OnPressed",style: TextStyle(fontSize: 18),)),
+                              child: Text("OnPressed",style: TextStyle(fontSize:
+                              18),)),
                           Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              padding: EdgeInsets.symmetric(horizontal: 20,
+                                  vertical: 10),
                               alignment: Alignment.topLeft,
                               child: Text(_selectableOnPressed)
                           )
@@ -469,7 +476,8 @@ class _selected_itemState extends State<selected_item> with SingleTickerProvider
                                           PopupMenuItem(
                                               child: Text(tag,
                                                   style: TextStyle(
-                                                      color: Colors.black87,fontWeight: FontWeight.w800
+                                                      color: Colors.black87,fontWeight:
+                                                  FontWeight.w800
                                                   ),
                                               ),
                                               enabled: false,

@@ -86,7 +86,8 @@ class _UploadItemState extends State<UploadItem> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        leading: FlatButton(onPressed: () {Navigator.of(context).pop();}, child: Icon(Icons.close)),
+        leading: FlatButton(onPressed: () {Navigator.of(context).pop();}, child:
+          Icon(Icons.close)),
         title: Text("Upload Item"),
         actions: <Widget>[
           IconButton(icon: Icon(Icons.add_a_photo), onPressed: (){getImage();})
@@ -105,7 +106,8 @@ class _UploadItemState extends State<UploadItem> {
                     height: 100,
                     width: 100,
                     child: Center(
-                      child: _image == null?Text("No Image Selected", textAlign: TextAlign.center,):Image.file(_image),
+                      child: _image == null?Text("No Image Selected", textAlign:
+                        TextAlign.center,):Image.file(_image),
                     )
                 ),
                 Padding(padding: EdgeInsets.all(20.0)),
@@ -122,7 +124,8 @@ class _UploadItemState extends State<UploadItem> {
               ],
             ),
             Padding(padding: EdgeInsets.all(20.0)),
-            Text("Enter Item Description: ",textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+            Text("Enter Item Description: ",textAlign: TextAlign.left, style:
+              TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
             Row(
               children: <Widget>[
                 Padding(padding: EdgeInsets.all(20.0)),
@@ -153,7 +156,8 @@ class _UploadItemState extends State<UploadItem> {
                     });
                   },
                   value: dropdownValue,
-                  items: <String>['Like New', 'Okay', 'Broken'].map<DropdownMenuItem<String>>((String value) {
+                  items: <String>['Like New', 'Okay', 'Broken'].map
+                  <DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -170,7 +174,9 @@ class _UploadItemState extends State<UploadItem> {
                   color: Colors.lightGreen,
                   onPressed: () {
                     Listing newListing;
-                    UploadListing ll = new UploadListing(_descController.text, SessionVariables.user.userId, _titleController.text, "145.0,243.0", widget.tag, "08080", dropdownValue, _getDate());
+                    UploadListing ll = new UploadListing(_descController.text,
+                        SessionVariables.user.userId, _titleController.text, "145.0,243.0",
+                        widget.tag, "08080", dropdownValue, _getDate());
                     BackendService.createListing(ll,_image).then(
                             (l) {
                             newListing = l;

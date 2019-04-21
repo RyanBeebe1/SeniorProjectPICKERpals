@@ -111,7 +111,8 @@ class MyHomePageState extends State<MyHomePage> {
               message["data"]["sender_id"]).then((user) {return user.displayName;}) +
           ". View it?";
     }
-     final view = await showDialog(context: context, builder: (_) => new NotificationAlert(text: info),);
+     final view = await showDialog(context: context, builder: (_) =>
+      new NotificationAlert(text: info),);
     if(view) {
       handleNotification(message);
     }
@@ -351,22 +352,26 @@ class _FilterDialogState extends State<FilterDialog>{
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget> [
-              new Radio(value: 0, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 0, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("None"),],
           ),
           new Row(
             children: <Widget> [
-              new Radio(value: 1, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 1, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("Electronics"),],
           ),
           new Row(
             children: <Widget> [
-              new Radio(value: 2, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 2, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("Furniture"),],
           ),
           new Row(
             children: <Widget> [
-              new Radio(value: 3, groupValue: _filterValue, onChanged: _handleFilterValueChange),
+              new Radio(value: 3, groupValue: _filterValue, onChanged:
+              _handleFilterValueChange),
               new Text("Misc"),],
           ),
         ],
@@ -377,16 +382,20 @@ class _FilterDialogState extends State<FilterDialog>{
                   color: Colors.lightGreen,
                   onPressed:() {Navigator.of(context).pop();
                   switch(_filterValue) {
-                    case 0: SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
+                    case 0: SessionVariables.filtered_feed =
+                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
                     break;
                     case 1:
-                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
+                      SessionVariables.filtered_feed =
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
                       break;
                     case 2:
-                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
+                      SessionVariables.filtered_feed =
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
                       break;
                     case 3:
-                      SessionVariables.filtered_feed = "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
+                      SessionVariables.filtered_feed =
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
                   }
                   },
                   child: Text("Ok",style: TextStyle(
@@ -397,4 +406,3 @@ class _FilterDialogState extends State<FilterDialog>{
     );
   }
 }
-

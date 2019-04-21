@@ -78,7 +78,8 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Electronics", page: widget.page)),
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder:
+            (context) => new UploadItem(tag: "Electronics", page: widget.page)),
         );},
         tooltip: 'Add',
         child: Icon(Icons.keyboard),
@@ -90,7 +91,8 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload2',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Furniture",page: widget.page)),
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder:
+            (context) => new UploadItem(tag: "Furniture",page: widget.page)),
         );},
         tooltip: 'Image',
         child: Icon(Icons.hotel),
@@ -102,7 +104,8 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload3',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder: (context) => new UploadItem(tag: "Misc", page: widget.page)),
+        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder:
+            (context) => new UploadItem(tag: "Misc", page: widget.page)),
         );},
         tooltip: 'Inbox',
         child: Icon(Icons.language),
