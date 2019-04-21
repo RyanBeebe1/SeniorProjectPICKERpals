@@ -204,6 +204,7 @@ class MyChatsState extends State<MyChats> {
         }
         setState(() {
           _chats.add(new ChatTile(
+            lastMsgName: m.user.displayName,
             name: otherUser,
             txt: m.body,
             senderId: c.sender.userId,
@@ -241,9 +242,10 @@ class MyChatsState extends State<MyChats> {
 }
 
 class ChatTile extends StatelessWidget {
-  ChatTile({this.txt, this.name, this.receiverId, this.senderId});
+  ChatTile({this.txt, this.name, this.receiverId, this.senderId,this.lastMsgName});
   final String txt;
   final String name;
+  final String lastMsgName;
   final int senderId;
   final int receiverId;
   @override
@@ -262,7 +264,7 @@ class ChatTile extends StatelessWidget {
       leading:
           new CircleAvatar(child: new Text(name.substring(0, 1).toUpperCase())),
       title: Text(name),
-      subtitle: Text(txt),
+      subtitle: Text(lastMsgName + ": " + txt),
     );
   }
 }
