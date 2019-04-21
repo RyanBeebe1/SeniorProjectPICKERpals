@@ -83,17 +83,16 @@ class MyHomePageState extends State<MyHomePage> {
   bool signedIn = false;
 
   void handleNotification(Map<String, dynamic> message) async {
-    if(message["data"].containsKey("Listing")){
-      print("caught by handleNotification's if");
-      BackendService.fetchListingById("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" + message["data"]["Listing"]).then((item){
-        print("boutta push some navigation");
-        showDialog (context: context, builder: (_) => new ItemView(item: item),);
+    if(message["data"].containsKey("Listing")) {
+        BackendService.fetchListingById(
+          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
+              message["data"]["Listing"]).then((item) {
+        showDialog(context: context, builder: (_) => new ItemView(item: item),);
         //Navigator.push(context, MaterialPageRoute(builder: (context) => ItemView(item: item)));
-        setState(() {feed.state.placeOne(item);});
-
-        print("its pushed");
+        feed.state.addOne(item);
       });
-      //else {}
+    } else {
+
     }
   }
   

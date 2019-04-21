@@ -141,15 +141,14 @@ class ListingFeedState extends State<ListingFeed> {
     });
   }
 
-  Future<void> placeOne(Listing thing) async {
-    await newList();
-    widget.items.insert(0, thing);
-  }
-
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void addOne(Listing item) {
+    setState((){widget.items.insert(0, item);});
   }
 
   @override
