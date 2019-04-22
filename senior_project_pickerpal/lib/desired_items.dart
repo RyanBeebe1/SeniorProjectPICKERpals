@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_tags/input_tags.dart';
 import 'package:flutter_tags/selectable_tags.dart';
+import 'package:seniorprojectnuked/backend_service.dart';
+import 'package:seniorprojectnuked/pickup_entry.dart';
 import 'session.dart';
 
 class DesiredItemTag extends StatefulWidget{
@@ -41,6 +43,7 @@ class DesiredItemTagState extends State<DesiredItemTag> with SingleTickerProvide
 
   List<Tag> _selectableTags = [];
   List<String> _inputTags = [];
+  List<DesiredItem> items = [];
 
   List _icon=[
     Icons.home,
@@ -48,6 +51,17 @@ class DesiredItemTagState extends State<DesiredItemTag> with SingleTickerProvide
     Icons.headset
   ];
 
+  Future<void> _getItems() async {
+    items = await BackendService.fetchDesiredItems("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/desireditems/" + SessionVariables.user.userId.toString());
+    if (items.length > 0) {
+      for (DesiredItem d in items) {
+        setState(() {
+             _inputTags.add(d.keyword);
+        });
+      }
+    }
+
+  }
 
   @override
   void initState()
@@ -55,8 +69,7 @@ class DesiredItemTagState extends State<DesiredItemTag> with SingleTickerProvide
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _scrollViewController = ScrollController();
-    print (SessionVariables.user.userId);
-    int cnt = 0;
+    _getItems();
    
 
     
@@ -109,6 +122,27 @@ class DesiredItemTagState extends State<DesiredItemTag> with SingleTickerProvide
                           Container(
                               child:
                               InputTags(
+                                onDelete: (item) {
+                                  DesiredItem temp;
+                                  for (DesiredItem d in items) {
+                                    if (d.keyword == item) {
+                                        temp = d;
+                                        break;
+                                    }
+                                  }
+                                  items.remove(temp);
+                                  BackendService.deleteDesiredItem("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/deletedesireditem/" + temp.desiredItemId.toString());
+                                },
+                                  onInsert: (item) {
+                                    DesiredItem d = new DesiredItem(keyword: item, userId: SessionVariables.user.userId);
+                                    BackendService.addDesiredItem(d).then((onValue) {
+                                      print(onValue.desiredItemId);
+                                      items.add(onValue);
+                                    });
+      
+
+
+                                  },
                                   tags: _inputTags,
                                   columns: _column,
                                   fontSize: _fontSize,
