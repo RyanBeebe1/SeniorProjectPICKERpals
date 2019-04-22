@@ -111,9 +111,9 @@ class MyHomePageState extends State<MyHomePage> {
               message["data"]["sender_id"]).then((user) {return user.displayName;}) +
           ". View it?";
     }
-     final view = await showDialog(context: context, builder: (_) =>
-      new NotificationAlert(text: info),);
-    if(view) {
+     final pos = await showDialog(context: context, builder: (_) =>
+      new GeneralAlert(text: info, positive: "View", negative: "No thanks"),);
+    if(pos) {
       handleNotification(message);
     }
   }

@@ -128,7 +128,20 @@ class BackendService {
             headers: {"Content-Type": "application/json"},
             body: json.encode(Rating.toJson(rating)))
         .then((response) {
-          //print(json.decode(response.body));
+      rat = Rating.fromJson(json.decode(response.body));
+      return rat;
+    });
+    return rat;
+  }
+
+  static Future<Rating> changeRating(Rating rating) async {
+    Rating rat;
+
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/changerating",
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(Rating.toJson(rating)))
+        .then((response) {
       rat = Rating.fromJson(json.decode(response.body));
       return rat;
     });
@@ -153,6 +166,16 @@ class BackendService {
     }
     else{
       throw Exception('Failed to get overall rating');
+    }
+  }
+
+  static Future<int> fetchRating(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return json.decode(response.body)["value"];
+    }
+    else{
+      throw Exception('Failed to fetch single rating');
     }
   }
 
