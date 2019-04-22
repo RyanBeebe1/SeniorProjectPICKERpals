@@ -25,7 +25,7 @@ class BackendService {
     }
   }
 
-  static Future<List<DesiredItem>> fetchDesiredItem(String url) async {
+  static Future<List<DesiredItem>> fetchDesiredItems(String url) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -34,6 +34,19 @@ class BackendService {
       return desiredItem;
     } else {
       throw Exception('Failed to load desired item');
+    }
+  }
+
+  static Future<void> deleteDesiredItem(String url) async {
+         final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON
+
+    } else {
+      // If that response was not OK, throw an error.
+
+      throw Exception('Failed to load post');
     }
   }
 
@@ -210,7 +223,6 @@ class BackendService {
         .then((response) {
       Map<String, dynamic> jmap = json.decode(response.body);
       newItem = DesiredItem.fromJson(jmap);
-      newItem.setId(jmap['desired_item_id']);
       return newItem;
     });
 
