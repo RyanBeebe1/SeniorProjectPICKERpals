@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Listing {
   final String description;
   final String user_id;

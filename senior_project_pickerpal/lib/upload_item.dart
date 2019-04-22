@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'backend_service.dart';
 import 'main.dart';
 import 'pickup_entry.dart';
-import 'pickup_feed.dart';
 import 'session.dart';
 
 class UploadItem extends StatefulWidget {

@@ -11,11 +11,8 @@ import 'search_bar.dart';
 import 'session.dart';
 import 'fancy_fab.dart';
 import 'splashScreen.dart';
-import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_tags/selectable_tags.dart';
-import 'selected_items.dart';
 
 void main() => runApp(MyApp());
 int item = 0;
