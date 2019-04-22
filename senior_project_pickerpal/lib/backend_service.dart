@@ -128,10 +128,32 @@ class BackendService {
             headers: {"Content-Type": "application/json"},
             body: json.encode(Rating.toJson(rating)))
         .then((response) {
+          //print(json.decode(response.body));
       rat = Rating.fromJson(json.decode(response.body));
       return rat;
     });
     return rat;
+  }
+
+  static Future<bool> inquireRating(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      print("inquireRating response.body: " + json.decode(response.body)["value"]);
+     return json.decode(response.body)["value"] == "True";
+    }
+    else{
+      throw Exception('Failed to inquire about rating');
+    }
+  }
+
+  static Future<double> getOverall(String url) async {
+    final response = await http.get(url);
+    if(response.statusCode == 200) {
+      return json.decode(response.body)["value"];
+    }
+    else{
+      throw Exception('Failed to get overall rating');
+    }
   }
 
   //Upload an image for the given listing

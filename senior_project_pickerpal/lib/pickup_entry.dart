@@ -105,7 +105,7 @@ class User {
   final String displayName;
   final String tokenId;
   final String fbId;
-  final int overallRating;
+  double overallRating;
   String deviceName;
 
   User(
@@ -190,22 +190,24 @@ class Images {
 }
 
 class Rating {
-  //final String ratingId;
   final String rating;
-  final String listingId;
-  final String userId;
+  final String listing_id;
+  final String sender_id;
+  final String reciever_id;
 
-  Rating(this.rating, this.listingId, this.userId);
+  Rating(this.rating, this.listing_id, this.sender_id, this.reciever_id);
   factory Rating.fromJson(Map<String, dynamic> json) {
-    return Rating(json['rating'], json['listing_id'], json['user_id']);
+    return Rating(json['rating'],
+        json['listing_id'],
+        json['sender_id'],
+        json['reciever_id']);
   }
 
-  static List<Rating> fromJsonList(jsonList) {
-    return jsonList.map<Rating>((obj) => Rating.fromJson(obj)).toList();
-  }
-
-  static Map<String, dynamic> toJson(Rating r) =>
-      {'rating': r.rating, 'listing_id': r.listingId, 'user_id': r.userId};
+  static Map<String, dynamic> toJson(Rating rat) =>
+      {'rating': rat.rating,
+        'listing_id': rat.listing_id,
+        'sender_id': rat.sender_id,
+        'reciever_id': rat.reciever_id};
 }
 
 class UserChat {

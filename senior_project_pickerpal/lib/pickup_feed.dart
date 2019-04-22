@@ -5,6 +5,7 @@ import 'package:seniorprojectnuked/session.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:developer';
 
 class ListingFeed extends StatefulWidget {
   ListingFeed({Key key, this.title, this.endpoint, this.personalMode})
@@ -22,7 +23,7 @@ class ItemView extends StatelessWidget{
   ItemView({this.item});
   final Listing item;
   @override
-  Widget build (BuildContext context) {
+  Widget build (BuildContext context)  {
     return new SimpleDialog(
       contentPadding: EdgeInsets.all(10.0),
       children: <Widget>[
@@ -49,6 +50,7 @@ class ItemView extends StatelessWidget{
           new Icon(Icons.error_outline),
         ),
         Text("Posted by: " + item.user.displayName),
+        Text("User's overall rating: " + item.user.overallRating.toString() + "\n"),
         Text(
           item.description,
           style: TextStyle(fontSize: 15.0),
@@ -263,6 +265,9 @@ class ListingFeedState extends State<ListingFeed> {
                         }
                       },
                       onTap: () async {
+                        item.user.overallRating = await BackendService.getOverall(
+                            "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/get_overall/" +
+                                item.user.userId.toString());
                         showDialog(
                           context: context,
                           builder: (_) => new ItemView(item: item),
@@ -288,6 +293,7 @@ class ListingFeedState extends State<ListingFeed> {
                                 child: IconButton(
                                     icon: Icon(Icons.star),
                                     onPressed: () async {
+                                      //await BackendService.inquireRating()
                                       await showDialog(
                                           context: context,
                                           builder: (_) => RatingDialog(
@@ -317,7 +323,7 @@ class RatingDialog extends StatefulWidget {
 }
 
 class _RatingDialogState extends State<RatingDialog> {
-  int _radioValue = -1;
+  int _radioValue = null;
   void _handleRadioValueChange(int value) {
     setState(() {
       _radioValue = value;
@@ -363,27 +369,27 @@ class _RatingDialogState extends State<RatingDialog> {
             new Row(
               children: <Widget>[
                 new Radio(
-                    value: 0,
+                    value: 1,
                     groupValue: _radioValue,
                     onChanged: _handleRadioValueChange),
                 new Text("1"),
                 new Radio(
-                    value: 1,
+                    value: 2,
                     groupValue: _radioValue,
                     onChanged: _handleRadioValueChange),
                 new Text("2"),
                 new Radio(
-                    value: 2,
+                    value: 3,
                     groupValue: _radioValue,
                     onChanged: _handleRadioValueChange),
                 new Text("3"),
                 new Radio(
-                    value: 3,
+                    value: 4,
                     groupValue: _radioValue,
                     onChanged: _handleRadioValueChange),
                 new Text("4"),
                 new Radio(
-                    value: 4,
+                    value: 5,
                     groupValue: _radioValue,
                     onChanged: _handleRadioValueChange),
                 new Text("5"),
@@ -397,7 +403,8 @@ class _RatingDialogState extends State<RatingDialog> {
                 Rating r = new Rating(
                     _radioValue.toString(),
                     widget.item.listing_id.toString(),
-                    widget.item.user_id.toString());
+                    SessionVariables.user.userId.toString(),
+                    widget.item.user.userId.toString(),);
                 BackendService.addRating(r);
                 _radioValue = -1;
               },
