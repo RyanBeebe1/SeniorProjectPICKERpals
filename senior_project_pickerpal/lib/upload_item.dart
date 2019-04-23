@@ -35,21 +35,6 @@ class _UploadItemState extends State<UploadItem> {
     _descController = new TextEditingController();
 
   }
-
-  /*
-  Future<List<double>> _getLatLong() async {
-    var location = new Location();
-    double lat, long;
-    location.getLocation().then((location) {
-
-      lat = location.latitude;
-      long = location.longitude;
-
-    }
-    );
-    return [lat,long];
-  }
-  */
   Future getImage() async {
     var image;
     return showDialog(
@@ -173,9 +158,9 @@ class _UploadItemState extends State<UploadItem> {
                   color: Colors.lightGreen,
                   onPressed: () {
                     Listing newListing;
-                    UploadListing ll = new UploadListing(_descController.text,
-                        SessionVariables.user.userId, _titleController.text, "145.0,243.0",
-                        widget.tag, "08080", dropdownValue, _getDate());
+                    Listing ll = new Listing(description: _descController.text,
+                        user_id: SessionVariables.user.userId,  item_title: _titleController.text, location: "145.0,243.0",
+                        tag: widget.tag, zipcode: "08080", cond: dropdownValue, listing_date: _getDate());
                     BackendService.createListing(ll,_image).then(
                             (l) {
                             newListing = l;

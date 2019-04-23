@@ -77,13 +77,13 @@ class BackendService {
   //Create a listing in the database, return the new listing.
 
   static Future<Listing> createListing(
-      UploadListing listing, File image) async {
+      Listing listing, File image) async {
     Listing listin;
 
     await http
         .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addlisting",
             headers: {"Content-Type": "application/json"},
-            body: json.encode(UploadListing.toJson(listing)))
+            body: json.encode(Listing.toJson(listing)))
         .then((response) {
       listin = Listing.fromJson(json.decode(response.body));
       return listin;

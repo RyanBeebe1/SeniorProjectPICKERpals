@@ -136,7 +136,6 @@ class DesiredItemTagState extends State<DesiredItemTag> with SingleTickerProvide
                                   onInsert: (item) {
                                     DesiredItem d = new DesiredItem(keyword: item, userId: SessionVariables.user.userId);
                                     BackendService.addDesiredItem(d).then((onValue) {
-                                      print(onValue.desiredItemId);
                                       items.add(onValue);
                                     });
       

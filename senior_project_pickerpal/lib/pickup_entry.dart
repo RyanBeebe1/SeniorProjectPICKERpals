@@ -1,6 +1,6 @@
 class Listing {
   final String description;
-  final String user_id;
+  final int user_id;
   final String item_title;
   final String location;
   final String tag;
@@ -25,7 +25,7 @@ class Listing {
   factory Listing.fromJson(Map<String, dynamic> json) {
     return Listing(
         description: json['description'],
-        user_id: json['userid'].toString(),
+        user_id: json['userid'],
         item_title: json['title'],
         location: json['location'],
         tag: json['tag'],
@@ -51,49 +51,6 @@ class Listing {
         "condition": l.cond,
         "listingid": l.listing_id,
         "user": l.user,
-      };
-}
-
-class UploadListing {
-  final String description;
-  final int user_id;
-  final String item_title;
-  final String location;
-  final String tag;
-  final String zipcode;
-  final String cond;
-  final String listing_date;
-
-  UploadListing(this.description, this.user_id, this.item_title, this.location,
-      this.tag, this.zipcode, this.cond, this.listing_date);
-
-  factory UploadListing.fromJson(Map<String, dynamic> json) {
-    return UploadListing(
-        json['description'],
-        json['userid'],
-        json['title'],
-        json['location'],
-        json['tag'],
-        json['zipcode'],
-        json['condition'],
-        json['date']);
-  }
-
-  static List<UploadListing> fromJsonList(jsonList) {
-    return jsonList
-        .map<UploadListing>((obj) => UploadListing.fromJson(obj))
-        .toList();
-  }
-
-  static Map<String, dynamic> toJson(UploadListing l) => {
-        "description": l.description,
-        "title": l.item_title,
-        "userid": l.user_id,
-        "location": l.location,
-        "tag": l.tag,
-        "zipcode": l.zipcode,
-        "date": l.listing_date,
-        "condition": l.cond
       };
 }
 
