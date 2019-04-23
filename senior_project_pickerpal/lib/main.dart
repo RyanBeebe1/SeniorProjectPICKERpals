@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:seniorprojectnuked/chat.dart';
+import 'tos.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
 import 'personal_feed.dart';
@@ -265,6 +266,14 @@ class MyHomePageState extends State<MyHomePage> {
         ) : SessionVariables.loggedInDialogue(context, "Please log in to set desired items");
 
 
+            },
+          ),
+          new Divider(),
+          new ListTile(
+            title: new Text("Terms of Service"),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>
+              new TOS()));
             },
           ),
           new Divider(),
