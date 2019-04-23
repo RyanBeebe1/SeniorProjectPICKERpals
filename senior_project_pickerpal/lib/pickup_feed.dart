@@ -237,14 +237,14 @@ class ListingFeedState extends State<ListingFeed> {
                                               SessionVariables.user.userId
                                                   .toString() + "/" +
                                               item.listing_id.toString())) {
-                                        Rating rat = await BackendService
+                                        int rat = await BackendService
                                             .fetchRating(
                                             "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/fetch_rating/" +
                                                 SessionVariables.user.userId
                                                     .toString() + "/" +
                                                 item.listing_id.toString());
                                         String info = "You've already given this listing a " +
-                                            rat.rating.toString() +
+                                            rat.toString() +
                                             ". Would you like to change it?";
                                         changing = await showDialog(
                                           context: context,

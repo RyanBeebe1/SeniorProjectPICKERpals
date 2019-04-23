@@ -133,32 +133,18 @@ class BackendService {
     }
   }
 
-  static Future<Rating> addRating(Rating rating) async {
-    Rating rat;
-
+  static Future<void> addRating(Rating rating) async {
     await http
         .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addrating",
             headers: {"Content-Type": "application/json"},
-            body: json.encode(Rating.toJson(rating)))
-        .then((response) {
-      rat = Rating.fromJson(json.decode(response.body));
-      return rat;
-    });
-    return rat;
+            body: json.encode(Rating.toJson(rating)));
   }
 
-  static Future<Rating> changeRating(Rating rating) async {
-    Rating rat;
-
+  static Future<void> changeRating(Rating rating) async {
     await http
         .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/changerating",
         headers: {"Content-Type": "application/json"},
-        body: json.encode(Rating.toJson(rating)))
-        .then((response) {
-      rat = Rating.fromJson(json.decode(response.body));
-      return rat;
-    });
-    return rat;
+        body: json.encode(Rating.toJson(rating)));
   }
 
   static Future<bool> inquireRating(String url) async {
@@ -182,10 +168,10 @@ class BackendService {
     }
   }
 
-  static Future<Rating> fetchRating(String url) async {
+  static Future<int> fetchRating(String url) async {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      return Rating.fromJson(json.decode(response.body));
+      return json.decode(response.body)["value"];
     }
     else{
       throw Exception('Failed to fetch single rating');
