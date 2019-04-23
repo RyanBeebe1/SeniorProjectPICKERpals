@@ -147,11 +147,18 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
           SessionVariables.user.userId,
           widget.receiverId);
     } else {
+      //If chat already exists, otherUserId is not the sender
+      int otherUserId;
+      if (widget.senderId == SessionVariables.user.userId) {
+        otherUserId = widget.receiverId;
+      }else {
+        otherUserId = widget.senderId;
+      }
       BackendService.addMessage(
           new Message(
               body: txt, date: _getDateTime(), user: SessionVariables.user),
-          widget.senderId,
-          widget.receiverId);
+              SessionVariables.user.userId, 
+              otherUserId);
     }
     msg.animationController.forward();
   }

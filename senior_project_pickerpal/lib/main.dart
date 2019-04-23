@@ -116,7 +116,7 @@ class MyHomePageState extends State<MyHomePage> {
               message["data"]["Listing"]).then((item){return item.tag;}) +
           " was just posted. View it?";
     }
-    else if(message["data"].containsKey("sender_id")){
+    else if(message["data"].containsKey("sender_id") && SessionVariables.user.userId != message["data"]["sender_id"]){
       info = "New message from " + await BackendService.fetchUserById(
           "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/userbyid/" +
               message["data"]["sender_id"]).then((user) {return user.displayName;}) +
