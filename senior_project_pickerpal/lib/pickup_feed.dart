@@ -230,31 +230,46 @@ class ListingFeedState extends State<ListingFeed> {
                               child: IconButton(
                                   icon: Icon(Icons.star),
                                   onPressed: () async {
-                                    bool changing = false;
-                                    if(await BackendService.inquireRating(
-                                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/inquire_rating/" +
-                                            SessionVariables.user.userId.toString() + "/" + item.listing_id.toString())){
-                                          int rat = await BackendService.fetchRating("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/fetch_rating/" +
-                                            SessionVariables.user.userId.toString() + "/" + item.listing_id.toString());
-                                          String info = "You've already given this listing a " + rat.toString() + ". Would you like to change it?";
-                                       changing = await showDialog(
+                                    if(item.user.userId != SessionVariables.user.userId) {
+                                      bool changing = false;
+                                      if (await BackendService.inquireRating(
+                                          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/inquire_rating/" +
+                                              SessionVariables.user.userId
+                                                  .toString() + "/" +
+                                              item.listing_id.toString())) {
+                                        Rating rat = await BackendService
+                                            .fetchRating(
+                                            "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/fetch_rating/" +
+                                                SessionVariables.user.userId
+                                                    .toString() + "/" +
+                                                item.listing_id.toString());
+                                        String info = "You've already given this listing a " +
+                                            rat.rating.toString() +
+                                            ". Would you like to change it?";
+                                        changing = await showDialog(
                                           context: context,
                                           builder: (_) =>
-                                              GeneralAlert(text: info, positive: "Yes", negative: "No"),);
-                                       if(changing){
-                                         await showDialog(context: context,
-                                          builder: (_) => RatingDialog(item: item,
-                                            changing: changing));
-                                       }
-                                    }else{
-                                      await showDialog(
-                                          context: context,
-                                          builder: (_) =>
-                                              RatingDialog(
-                                                item: item,
-                                                changing: false,
-                                              ));
+                                              GeneralAlert(text: info,
+                                                  positive: "Yes",
+                                                  negative: "No"),);
+                                        if (changing) {
+                                          await showDialog(context: context,
+                                              builder: (_) =>
+                                                  RatingDialog(item: item,
+                                                      changing: changing));
+                                        }
+                                      } else {
+                                        await showDialog(
+                                            context: context,
+                                            builder: (_) =>
+                                                RatingDialog(
+                                                  item: item,
+                                                  changing: false,
+                                                ));
                                       }
+                                    }else{
+                                      SessionVariables.loggedInDialogue(context, "You can't rate your own items");
+                                    }
                                       setState(() {
                                         ratePress = true;
                                       });

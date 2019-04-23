@@ -182,10 +182,10 @@ class BackendService {
     }
   }
 
-  static Future<int> fetchRating(String url) async {
+  static Future<Rating> fetchRating(String url) async {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      return json.decode(response.body)["value"];
+      return Rating.fromJson(json.decode(response.body));
     }
     else{
       throw Exception('Failed to fetch single rating');

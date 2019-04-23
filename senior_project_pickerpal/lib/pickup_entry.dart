@@ -193,7 +193,7 @@ class Rating {
 
   Rating(this.rating, this.listing_id, this.sender_id, this.reciever_id);
   factory Rating.fromJson(Map<String, dynamic> json) {
-    return Rating(json['rating'],
+    return Rating(json['value'].toString(),
         json['listing_id'],
         json['sender_id'],
         json['reciever_id']);
