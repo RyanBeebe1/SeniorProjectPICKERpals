@@ -93,14 +93,12 @@ class User(db.Model):
     user_id = db.Column("user_id", db.Integer, primary_key=True)
     email_address = db.Column("email", db.String(50))
     display_name = db.Column("display_name", db.String(50))
-    token_id = db.Column("token_id", db.String(200))
     fb_uid = db.Column("fb_uid", db.String(200))
     overall_rating = db.Column("overall_rating", db.Integer)
 
-    def __init__(self, emailaddress, displayname, tokenid, uid):
+    def __init__(self, emailaddress, displayname, uid):
         self.email_address = emailaddress
         self.display_name = displayname
-        self.token_id = tokenid
         self.fb_uid = uid
 
     ## Send push notification to all user devices
@@ -116,7 +114,9 @@ class User(db.Model):
                 data_message=data,
                 click_action=click,
             )
-            print(f"Push sent to {self.display_name} at {self.token_id} when {result}")
+            print(
+                f"Push sent to {self.display_name} at {device.token_id} when {result}"
+            )
 
 
 class DesiredItem(db.Model):
@@ -237,7 +237,6 @@ class UserSchema(ma.Schema):
             "user_id",
             "email_address",
             "display_name",
-            "token_id",
             "overall_rating",
             "fb_uid",
         )
@@ -247,17 +246,15 @@ class DesiredItemSchema(ma.Schema):
     class Meta:
         fields = ("desired_item_id", "user_id", "keyword", "user")
 
-    user = ma.Nested(
-        "UserSchema", exclude=("token_id", "fb_uid", "user_id", "overall_rating")
-    )
+    user = ma.Nested("UserSchema", exclude=("fb_uid", "user_id", "overall_rating"))
 
 
 class ChatSchema(ma.Schema):
     class Meta:
         fields = ("chat_id", "sentuser", "receiveduser")
 
-    sentuser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid"))
-    receiveduser = ma.Nested("UserSchema", exclude=("token_id", "fb_uid"))
+    sentuser = ma.Nested("UserSchema", exclude=("fb_uid"))
+    receiveduser = ma.Nested("UserSchema", exclude=("fb_uid"))
 
 
 class MessageSchema(ma.Schema):
@@ -302,8 +299,7 @@ devices_schema = DeviceSchema(many=True, strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
-    #desired_items = DesiredItem.query.filter(func.lower(listing.tag) == func.lower(DesiredItem.keyword)).all()
-    desired_items = DesiredItem.query.filter(func.lower(listing.description).contains(func.lower(DesiredItem.keyword))).all()
+    desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword).all()
     for di in desired_items:
         user = User.query.get(di.user_id)
         title = "Desired item alert"
@@ -311,7 +307,7 @@ def new_listing_desire_check(listing):
         click_action = "FLUTTER_NOTIFICATION_CLICK"
         data = {"Listing": f"{listing.listingid}", "click_action": click_action}
         print(f"Notifying {user.display_name} about {di.keyword}")
-        if listing.userid != user.user_id:
+        if listing.userid != di.user_id:
             user.notify(title, body, data, click_action)
 
 
@@ -357,13 +353,14 @@ def add_user():
         email = request.json["email_address"]
         name = request.json["display_name"]
         uid = request.json["fb_uid"]
-        new_user = User(email, name, tokenid, uid)
-        device_check(new_user, tokenid, devicename)
+        new_user = User(email, name, uid)
         db.session.add(new_user)
         db.session.commit()
     else:
         device_check(anobj, tokenid, devicename)
         return user_schema.jsonify(anobj)
+    new_user = User.query.filter(User.fb_uid == request.json["fb_uid"]).first()
+    device_check(new_user, tokenid, devicename)
     return user_schema.jsonify(new_user)
 
 
@@ -417,7 +414,8 @@ def upload_image(listingid):
     db.session.commit()
     return imagename
 
-#Add rating
+
+# Add rating
 @app.route("/addrating", methods=["POST"])
 def add_rating():
     rating = request.json["rating"]
@@ -430,47 +428,66 @@ def add_rating():
     update_overall(reciever_id)
     return rating_schema.jsonify(new_rating)
 
-#Change the rating a user gave a listing
+
+# Change the rating a user gave a listing
 @app.route("/changerating", methods=["POST"])
 def change_rating():
-    rating = request.json["rating"] 
+    rating = request.json["rating"]
     listing_id = request.json["listing_id"]
     sender_id = request.json["sender_id"]
     reciever_id = request.json["reciever_id"]
-    Rating.query.filter(Rating.sender_id == sender_id, Rating.listing_id == listing_id).delete()
+    Rating.query.filter(
+        Rating.sender_id == sender_id, Rating.listing_id == listing_id
+    ).delete()
     new_rating = Rating(rating, listing_id, sender_id, reciever_id)
     db.session.add(new_rating)
     db.session.commit()
     update_overall(reciever_id)
-    return rating_schema.jsonify(new_rating)    
+    return rating_schema.jsonify(new_rating)
 
-#Update a user's overall rating
+
+# Update a user's overall rating
 def update_overall(reciever_id):
-    average = db.session.query(func.avg(Rating.rating).label('average')).filter(Rating.reciever_id == reciever_id)
+    average = db.session.query(func.avg(Rating.rating).label("average")).filter(
+        Rating.reciever_id == reciever_id
+    )
     user = User.query.get(reciever_id)
     user.overall_rating = average
     db.session.commit()
 
-#Get user's overall rating
+
+# Get user's overall rating
 @app.route("/get_overall/<user_id>", methods=["GET"])
 def get_overall(user_id):
-    return json.dumps({"value" : User.query.get(user_id).overall_rating})
+    return json.dumps({"value": User.query.get(user_id).overall_rating})
 
-#Get a user's rating they gave to a specific listing
+
+# Get a user's rating they gave to a specific listing
 @app.route("/fetch_rating/<sender>/<listing>", methods=["GET"])
 def fetch_rating(sender, listing):
-    return json.dumps({"value" : db.session.query(Rating.rating).filter(
-        Rating.sender_id == sender, Rating.listing_id == listing).one()[0]})
+    return json.dumps(
+        {
+            "value": db.session.query(Rating.rating)
+            .filter(Rating.sender_id == sender, Rating.listing_id == listing)
+            .one()[0]
+        }
+    )
 
-#Return whether a user has rated a listing already
+
+# Return whether a user has rated a listing already
 @app.route("/inquire_rating/<sender>/<listing>", methods=["GET"])
 def inquire_rating(sender, listing):
-    if db.session.query(Rating.rating).filter(Rating.sender_id == sender,
-            Rating.listing_id == listing).first() is None:
-        data = {"value" : "False"}
+    if (
+        db.session.query(Rating.rating)
+        .filter(Rating.sender_id == sender, Rating.listing_id == listing)
+        .first()
+        is None
+    ):
+        data = {"value": "False"}
     else:
-        data = {"value" : "True"}
+        data = {"value": "True"}
     return json.dumps(data)
+
 
 # Get image from listing
 @app.route("/images/<listingid>", methods=["GET"])
@@ -546,9 +563,9 @@ def get_listingsbytag(tag):
     return jsonify(results.data)
 
 
-# Get a Users listings with their email
+# Get a Users listings with their ID
 @app.route("/listingbyuser/<user_id>", methods=["GET"])
-def get_listingsbyuseremail(user_id):
+def get_listingsbyuserid(user_id):
     listings = Listing.query.filter(Listing.userid == user_id)
     results = listings_schema.dump(listings)
     return jsonify(results.data)
