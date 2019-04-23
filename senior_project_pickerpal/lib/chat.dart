@@ -97,16 +97,23 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
         child: new Row(
           children: <Widget>[
             new Flexible(
-              child: new TextField(
-                controller: _textController,
-                onChanged: (String txt) {
-                  setState(() {
-                    _isWriting = txt.length > 0;
-                  });
-                },
-                onSubmitted: _submitMsg,
-                decoration: new InputDecoration.collapsed(
-                    hintText: "Enter some text to send a message"),
+              child: Container(
+                height: 55,
+                child: new TextField(
+                  cursorColor: Colors.lightGreen,
+                  controller: _textController,
+                  onChanged: (String txt) {
+                    setState(() {
+                      _isWriting = txt.length > 0;
+                    });
+                  },
+                  onSubmitted: _submitMsg,
+                  decoration: new InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
+                    border: OutlineInputBorder(),
+                      fillColor: Colors.lightGreen,
+                      hintText: "  Enter some text to send a message"),
+                ),
               ),
             ),
             new Container(
