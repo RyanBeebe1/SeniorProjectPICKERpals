@@ -2,7 +2,6 @@ import configparser
 import json
 import os
 import MySQLdb
-import time
 from PIL import Image
 from sqlalchemy.sql import func
 from flask import Flask, jsonify, request, send_from_directory
@@ -79,12 +78,14 @@ class Rating(db.Model):
     rating_id = db.Column("rating_id", db.Integer, primary_key=True)
     rating = db.Column("rating", db.Integer)
     listing_id = db.Column("listing_id", db.Integer)
-    user_id = db.Column("user_id", db.Integer)
+    sender_id = db.Column("sender_id", db.Integer)
+    reciever_id = db.Column("reciever_id", db.Integer)
 
-    def __init__(self, rating, listingid, userid):
-        self.rating = ratingid
-        self.listing_id = listingid
-        self.user_id = userid
+    def __init__(self, rating, listing_id, sender_id, reciever_id):
+        self.rating = rating
+        self.listing_id = listing_id
+        self.sender_id = sender_id
+        self.reciever_id = reciever_id
 
 
 class User(db.Model):
@@ -222,7 +223,7 @@ class ListingSchema(ma.Schema):
 
 class RatingSchema(ma.Schema):
     class Meta:
-        fields = ("ratingid", "rating", "listingid", "userid")
+        fields = ("rating_id", "rating", "listing_id", "sender_id", "reciever_id")
 
 
 class ImageSchema(ma.Schema):
@@ -301,7 +302,8 @@ devices_schema = DeviceSchema(many=True, strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
-    desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword).all()
+    #desired_items = DesiredItem.query.filter(func.lower(listing.tag) == func.lower(DesiredItem.keyword)).all()
+    desired_items = DesiredItem.query.filter(func.lower(listing.description).contains(func.lower(DesiredItem.keyword))).all()
     for di in desired_items:
         user = User.query.get(di.user_id)
         title = "Desired item alert"
@@ -309,7 +311,8 @@ def new_listing_desire_check(listing):
         click_action = "FLUTTER_NOTIFICATION_CLICK"
         data = {"Listing": f"{listing.listingid}", "click_action": click_action}
         print(f"Notifying {user.display_name} about {di.keyword}")
-        user.notify(title, body, data, click_action)
+        if listing.userid != user.user_id:
+            user.notify(title, body, data, click_action)
 
 
 # Notify user of new message
@@ -380,7 +383,6 @@ def add_listing():
     )
     db.session.add(new_listing)
     db.session.commit()
-    time.sleep(10)
     new_listing_desire_check(new_listing)
     return listing_schema.jsonify(new_listing)
 
@@ -415,6 +417,60 @@ def upload_image(listingid):
     db.session.commit()
     return imagename
 
+#Add rating
+@app.route("/addrating", methods=["POST"])
+def add_rating():
+    rating = request.json["rating"]
+    listing_id = request.json["listing_id"]
+    sender_id = request.json["sender_id"]
+    reciever_id = request.json["reciever_id"]
+    new_rating = Rating(rating, listing_id, sender_id, reciever_id)
+    db.session.add(new_rating)
+    db.session.commit()
+    update_overall(reciever_id)
+    return rating_schema.jsonify(new_rating)
+
+#Change the rating a user gave a listing
+@app.route("/changerating", methods=["POST"])
+def change_rating():
+    rating = request.json["rating"] 
+    listing_id = request.json["listing_id"]
+    sender_id = request.json["sender_id"]
+    reciever_id = request.json["reciever_id"]
+    Rating.query.filter(Rating.sender_id == sender_id, Rating.listing_id == listing_id).delete()
+    new_rating = Rating(rating, listing_id, sender_id, reciever_id)
+    db.session.add(new_rating)
+    db.session.commit()
+    update_overall(reciever_id)
+    return rating_schema.jsonify(new_rating)    
+
+#Update a user's overall rating
+def update_overall(reciever_id):
+    average = db.session.query(func.avg(Rating.rating).label('average')).filter(Rating.reciever_id == reciever_id)
+    user = User.query.get(reciever_id)
+    user.overall_rating = average
+    db.session.commit()
+
+#Get user's overall rating
+@app.route("/get_overall/<user_id>", methods=["GET"])
+def get_overall(user_id):
+    return json.dumps({"value" : User.query.get(user_id).overall_rating})
+
+#Get a user's rating they gave to a specific listing
+@app.route("/fetch_rating/<sender>/<listing>", methods=["GET"])
+def fetch_rating(sender, listing):
+    return json.dumps({"value" : db.session.query(Rating.rating).filter(
+        Rating.sender_id == sender, Rating.listing_id == listing).one()[0]})
+
+#Return whether a user has rated a listing already
+@app.route("/inquire_rating/<sender>/<listing>", methods=["GET"])
+def inquire_rating(sender, listing):
+    if db.session.query(Rating.rating).filter(Rating.sender_id == sender,
+            Rating.listing_id == listing).first() is None:
+        data = {"value" : "False"}
+    else:
+        data = {"value" : "True"}
+    return json.dumps(data)
 
 # Get image from listing
 @app.route("/images/<listingid>", methods=["GET"])
@@ -491,9 +547,9 @@ def get_listingsbytag(tag):
 
 
 # Get a Users listings with their email
-@app.route("/listingbyuser/<email>", methods=["GET"])
-def get_listingsbyuseremail(email):
-    listings = Listing.query.filter(User.email_address == email)
+@app.route("/listingbyuser/<user_id>", methods=["GET"])
+def get_listingsbyuseremail(user_id):
+    listings = Listing.query.filter(Listing.userid == user_id)
     results = listings_schema.dump(listings)
     return jsonify(results.data)
 
