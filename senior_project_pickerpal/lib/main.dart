@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:seniorprojectnuked/chat.dart';
+import "dart:io";
 import 'tos.dart';
+import 'package:path_provider/path_provider.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
 import 'personal_feed.dart';
@@ -35,7 +38,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
-
   @override
   MyHomePageState createState() => MyHomePageState();
 }
@@ -45,11 +47,13 @@ enum HomePageState { feed, map, personalfeed }
 class MyHomePageState extends State<MyHomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = new GoogleSignIn();
+
   //Firebase messaging setup
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   @override
   void initState() {
     super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) => displayTOS());
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
         askUser(message);
@@ -94,6 +98,14 @@ class MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void displayTOS() async {
+    String filePath = await _getPath() + "/ran_before";
+    if(! await _ranBefore(filePath)){
+      File(filePath).writeAsString("hello");
+      Navigator.push(context, new MaterialPageRoute(builder: (context) => new TOS()));
+    }
+  }
+
   void askUser(Map<String, dynamic> message) async{
     String info;
     print("message data: " + message["data"].toString());
@@ -115,7 +127,8 @@ class MyHomePageState extends State<MyHomePage> {
       handleNotification(message);
     }
   }
-  
+
+
   //Firebase/Google signin, returns FirebaseUser object
   Future<FirebaseUser> _handleSignIn() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
@@ -152,6 +165,15 @@ class MyHomePageState extends State<MyHomePage> {
     if (_state == HomePageState.feed) {
       return feed;
     } else {}
+  }
+
+  Future<String> _getPath() async {
+    Directory directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<bool> _ranBefore(String path) async {
+    return File(path).exists();
   }
 
   GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -295,7 +317,7 @@ class MyHomePageState extends State<MyHomePage> {
         ],
       )),
       body: Center(
-        child: _getHomeView(),
+        child: _getHomeView(), //pass bool firstTime?
       ),
       floatingActionButton: SessionVariables.loggedIn
           ? new FancyFab(

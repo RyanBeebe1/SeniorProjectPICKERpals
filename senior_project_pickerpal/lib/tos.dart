@@ -12,7 +12,9 @@ class TOS extends StatelessWidget {
           }, child: Icon(Icons.close)),
           title: Text("Terms of Service"),
         ),
-        body: new SingleChildScrollView(
+        body: new Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+          child: new SingleChildScrollView(
           child: const Text.rich(TextSpan(text:
             "\nThe PICKERpal development team does not assume any responsibility " +
             "for users' individual experience while conducting meet-ups or item pick-ups " +
@@ -28,10 +30,16 @@ class TOS extends StatelessWidget {
             "not directly affiliated with the development team. \"Personal information\" refers " +
             "to emails, usernames, passwords, user locations, and item upload information.\n\n" +
             "By using the PICKERpal app, you agree that you are of at least 18 years of age.\n\n" +
-            "The PICKERpal development team reserves the right to change these Terms of Service" +
+            "The PICKERpal development team reserves the right to change these Terms of Service " +
             "whenever and however they see fit.\n\n", style: TextStyle(fontSize: 20.0),
             children: <TextSpan>[TextSpan(text:
             "Use of this app constitutes agreement to these Terms of Service.\n", style:
-            TextStyle(fontWeight: FontWeight.bold))],),)));
+            TextStyle(fontWeight: FontWeight.bold))
+            ],
+          ),
+          )
+          )
+        )
+    );
   }
 }

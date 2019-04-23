@@ -22,7 +22,8 @@ dependencies:
   location:
   intl:
   image_picker:
-  http: 
+  http:
+  path_provider:
   google_maps_flutter:
   google_sign_in: 
   cached_network_image: 
