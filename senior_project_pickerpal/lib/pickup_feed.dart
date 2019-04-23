@@ -309,7 +309,7 @@ class ItemView extends StatelessWidget{
           bool reporting = await showDialog(context: context, builder: (_) =>
           new GeneralAlert(text: "Report this listing?", positive: "Yes", negative: "No"));
           if(reporting){
-            BackendService.report(Report(item.listing_id, "-1", SessionVariables.user.userId, item.user.userId));
+            BackendService.report(Report(item.listing_id, "-1", SessionVariables.loggedIn ? SessionVariables.user.userId : -1, item.user.userId));
           }
         }),
             visible: (! SessionVariables.loggedIn) ? true : diff)]),

@@ -53,8 +53,8 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
             animationController: new AnimationController(
                 vsync: this, duration: new Duration(milliseconds: 800)),
             name: name,
-            senderId: m.user.userId;
-          ));
+            senderId: m.user.userId)
+          );
         });
       }
     }
