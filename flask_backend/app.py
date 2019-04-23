@@ -100,6 +100,7 @@ class User(db.Model):
         self.email_address = emailaddress
         self.display_name = displayname
         self.fb_uid = uid
+        self.overall_rating = 0
 
     ## Send push notification to all user devices
     def notify(self, title, body, data, click):
@@ -299,7 +300,9 @@ devices_schema = DeviceSchema(many=True, strict=True)
 
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
-    desired_items = DesiredItem.query.filter(listing.tag == DesiredItem.keyword).all()
+    
+    #desired_items = DesiredItem.query.filter(func.lower(listing.tag) == func.lower(DesiredItem.keyword)).all()
+    desired_items = DesiredItem.query.filter(func.lower(listing.description).contains(func.lower(DesiredItem.keyword))).all()
     for di in desired_items:
         user = User.query.get(di.user_id)
         title = "Desired item alert"
@@ -324,6 +327,7 @@ def message_notify(sender, recipient):
         "recipient_id": f"{receiver.user_id}",
         "click_action": click_action,
     }
+    print (f"notifying {receiver.display_name}")
     receiver.notify(title, body, data, click_action)
 
 
@@ -355,12 +359,11 @@ def add_user():
         uid = request.json["fb_uid"]
         new_user = User(email, name, uid)
         db.session.add(new_user)
-        db.session.commit()
+        db.session.flush()
+        device_check(new_user, tokenid, devicename)
     else:
         device_check(anobj, tokenid, devicename)
         return user_schema.jsonify(anobj)
-    new_user = User.query.filter(User.fb_uid == request.json["fb_uid"]).first()
-    device_check(new_user, tokenid, devicename)
     return user_schema.jsonify(new_user)
 
 
