@@ -122,6 +122,13 @@ class BackendService {
     return myUser;
   }
 
+  static Future<void> report(Report report) async {
+    await http
+        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addreport",
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(Report.toJson(report)));
+  }
+
   static Future<User> fetchUserById(String url) async {
     final response = await http.get(url);
     if (response.statusCode == 200) {

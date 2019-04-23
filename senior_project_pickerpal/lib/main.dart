@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:seniorprojectnuked/chat.dart';
+import 'package:seniorprojectnuked/general_alert.dart';
 import "dart:io";
 import 'tos.dart';
 import 'package:path_provider/path_provider.dart';
@@ -88,7 +89,7 @@ class MyHomePageState extends State<MyHomePage> {
         BackendService.fetchListingById(
           "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
               message["data"]["Listing"]).then((item) {
-        showDialog(context: context, builder: (_) => new ItemView(item: item),);
+        showDialog(context: context, builder: (_) => new ItemView(item: item, diff: true),);
         feed.state.addOne(item);
       });
     } else if(message["data"].containsKey("sender_id")){

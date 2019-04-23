@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:seniorprojectnuked/chat.dart';
+import 'package:seniorprojectnuked/general_alert.dart';
 import 'package:seniorprojectnuked/session.dart';
 import 'backend_service.dart';
 import 'pickup_entry.dart';
@@ -23,6 +24,7 @@ class ListingFeedState extends State<ListingFeed> {
   ScrollController _controller = ScrollController();
 
   bool loading = false, refreshing = false;
+  bool diff;
 
   int rating_id = 0;
   int test = 1;
@@ -33,7 +35,8 @@ class ListingFeedState extends State<ListingFeed> {
     return widget.items;
   }
 
-  Future<void> onRefresh() async {
+  Future<void> onRefresh(
+      ) async {
     await Future.delayed(Duration(milliseconds: 3000));
     BackendService.fetchListing(widget.endpoint)
         .whenComplete(() {})
@@ -202,12 +205,15 @@ class ListingFeedState extends State<ListingFeed> {
                       }
                     },
                     onTap: () async {
+                      if(SessionVariables.loggedIn){
+                        diff = SessionVariables.user.userId != item.user.userId;
+                      }
                       item.user.overallRating = await BackendService.getOverall(
                           "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/get_overall/" +
                               item.user.userId.toString());
                       showDialog(
                         context: context,
-                        builder: (_) => new ItemView(item: item),
+                        builder: (_) => new ItemView(item: item, diff: diff),
                       );
                     },
                     title: Text(item.item_title),
@@ -284,19 +290,29 @@ class ListingFeedState extends State<ListingFeed> {
 }
 
 class ItemView extends StatelessWidget{
-  ItemView({this.item});
+  ItemView({this.item, this.diff});
   final Listing item;
+  bool diff;
   @override
   Widget build (BuildContext context)  {
     return new SimpleDialog(
       contentPadding: EdgeInsets.all(10.0),
       children: <Widget>[
+        Row(children: <Widget>[
         Text(
           item.item_title,
           style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 24.0),
         ),
+        Visibility(child: IconButton(icon: Icon(Icons.flag), onPressed: ()async {
+          bool reporting = await showDialog(context: context, builder: (_) =>
+          new GeneralAlert(text: "Report this listing?", positive: "Yes", negative: "No"));
+          if(reporting){
+            BackendService.report(Report(item.listing_id, "-1", SessionVariables.user.userId, item.user.userId));
+          }
+        }),
+            visible: (! SessionVariables.loggedIn) ? true : diff)]),
         Padding(padding: EdgeInsets.all(20.0)),
         CachedNetworkImage(
           imageUrl:
@@ -335,69 +351,6 @@ class ItemView extends StatelessWidget{
             ),
             decoration: BoxDecoration(
               color: Colors.lightGreen,
-              border: Border.all(color: Colors.black),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-}
-
-class GeneralAlert extends StatelessWidget{
-  GeneralAlert({this.text, this.positive, this.negative});
-  final String text;
-  final String positive;
-  final String negative;
-  @override
-  Widget build (BuildContext context){
-    return new SimpleDialog(
-      contentPadding: EdgeInsets.all(10.0),
-      children: <Widget>[
-        Text(
-          text,
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24.0),
-          textAlign: TextAlign.center,
-        ),
-        Padding(padding: EdgeInsets.all(20.0)),
-        SimpleDialogOption(
-          onPressed: () {
-            Navigator.of(context).pop(true);
-          },
-          child: Container(
-            height: 30.0,
-            width: 10.0,
-            child: Text(
-              positive,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0),
-              textAlign: TextAlign.center,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.lightBlue,
-              border: Border.all(color: Colors.black),
-            ),
-          ),
-        ),
-        SimpleDialogOption(
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
-          child: Container(
-            height: 30.0,
-            width: 10.0,
-            child: Text(
-              negative,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0),
-              textAlign: TextAlign.center,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.grey,
               border: Border.all(color: Colors.black),
             ),
           ),

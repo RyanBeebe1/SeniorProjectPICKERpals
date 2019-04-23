@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:seniorprojectnuked/backend_service.dart';
 import 'package:seniorprojectnuked/pickup_entry.dart';
 import 'package:seniorprojectnuked/session.dart';
+import 'package:seniorprojectnuked/general_alert.dart';
 import 'package:intl/intl.dart';
 
 class Chat extends StatefulWidget {
@@ -52,6 +53,7 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
             animationController: new AnimationController(
                 vsync: this, duration: new Duration(milliseconds: 800)),
             name: name,
+            senderId: m.user.userId;
           ));
         });
       }
@@ -125,7 +127,8 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
         txt: txt,
         animationController: new AnimationController(
             vsync: this, duration: new Duration(milliseconds: 800)),
-        name: SessionVariables.user.displayName);
+        name: SessionVariables.user.displayName,
+        senderId: SessionVariables.user.userId);
     setState(() {
       _messages.insert(0, msg);
       print(_messages.length);
@@ -156,10 +159,11 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
 }
 
 class Msg extends StatelessWidget {
-  Msg({this.txt, this.animationController, this.name});
+  Msg({this.txt, this.animationController, this.name, this.senderId});
   final String txt;
   final AnimationController animationController;
   final String name;
+  final int senderId;
   @override
   Widget build(BuildContext ctx) {
     return ListTile(
@@ -167,6 +171,14 @@ class Msg extends StatelessWidget {
           new CircleAvatar(child: new Text(name.substring(0, 1).toUpperCase())),
       title: Text(name),
       subtitle: Text(txt),
+        trailing: Visibility(child: IconButton(icon: Icon(Icons.flag), onPressed: ()async {
+          bool reporting = await showDialog(context: ctx, builder: (_) =>
+          new GeneralAlert(text: "Report this message?", positive: "Yes", negative: "No"));
+          if(reporting){
+            BackendService.report(Report(-1, txt, SessionVariables.user.userId, senderId));
+          }
+        }),
+            visible: name != SessionVariables.user.displayName),
     );
   }
 }

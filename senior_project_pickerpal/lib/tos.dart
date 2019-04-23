@@ -28,7 +28,7 @@ class TOS extends StatelessWidget {
             "The PICKERpal app and the PICKERpal development team will not " +
             "give away, sell, or otherwise reveal personal information to any individual or entity " +
             "not directly affiliated with the development team. \"Personal information\" refers " +
-            "to emails, usernames, passwords, user locations, and item upload information.\n\n" +
+            "to emails, usernames, passwords, user locations, chat messages, and item upload information.\n\n" +
             "By using the PICKERpal app, you agree that you are of at least 18 years of age.\n\n" +
             "The PICKERpal development team reserves the right to change these Terms of Service " +
             "whenever and however they see fit.\n\n", style: TextStyle(fontSize: 20.0),
