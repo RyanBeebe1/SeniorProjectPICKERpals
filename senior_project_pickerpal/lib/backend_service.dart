@@ -38,14 +38,11 @@ class BackendService {
   }
 
   static Future<void> deleteDesiredItem(String url) async {
-         final response = await http.get(url);
-
+    final response = await http.get(url);
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON
-
     } else {
       // If that response was not OK, throw an error.
-
       throw Exception('Failed to load post');
     }
   }
@@ -55,8 +52,7 @@ class BackendService {
     if (response.statusCode == 200) {
       Listing item = Listing.fromJson(json.decode(response.body));
       return item;
-    }
-    else {
+    } else {
       throw Exception('Failed to load item by ID');
     }
   }
@@ -76,8 +72,7 @@ class BackendService {
 
   //Create a listing in the database, return the new listing.
 
-  static Future<Listing> createListing(
-      Listing listing, File image) async {
+  static Future<Listing> createListing(Listing listing, File image) async {
     Listing listin;
 
     await http
@@ -122,34 +117,26 @@ class BackendService {
     return myUser;
   }
 
-  static Future<void> report(Report report) async {
-    await http
-        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addreport",
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(Report.toJson(report)));
-  }
-
   static Future<User> fetchUserById(String url) async {
     final response = await http.get(url);
     if (response.statusCode == 200) {
       User myUser = User.fromJson(json.decode(response.body));
       return myUser;
-    }
-    else {
+    } else {
       throw Exception('Failed to load user by ID');
     }
   }
 
   static Future<void> addRating(Rating rating) async {
-    await http
-        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addrating",
-            headers: {"Content-Type": "application/json"},
-            body: json.encode(Rating.toJson(rating)));
+    await http.post(
+        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/addrating",
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(Rating.toJson(rating)));
   }
 
   static Future<void> changeRating(Rating rating) async {
-    await http
-        .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/changerating",
+    await http.post(
+        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/changerating",
         headers: {"Content-Type": "application/json"},
         body: json.encode(Rating.toJson(rating)));
   }
@@ -157,20 +144,19 @@ class BackendService {
   static Future<bool> inquireRating(String url) async {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      print("inquireRating response.body: " + json.decode(response.body)["value"]);
-     return json.decode(response.body)["value"] == "True";
-    }
-    else{
+      print("inquireRating response.body: " +
+          json.decode(response.body)["value"]);
+      return json.decode(response.body)["value"] == "True";
+    } else {
       throw Exception('Failed to inquire about rating');
     }
   }
 
   static Future<double> getOverall(String url) async {
     final response = await http.get(url);
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       return json.decode(response.body)["value"];
-    }
-    else{
+    } else {
       throw Exception('Failed to get overall rating');
     }
   }
@@ -179,8 +165,7 @@ class BackendService {
     final response = await http.get(url);
     if (response.statusCode == 200) {
       return json.decode(response.body)["value"];
-    }
-    else{
+    } else {
       throw Exception('Failed to fetch single rating');
     }
   }
@@ -221,24 +206,20 @@ class BackendService {
 
     return newItem;
   }
+
   static Future<void> addMessage(Message m, int sender, int receiver) async {
-    
-   await http
+    await http
         .post("http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/sendmessage",
             headers: {"Content-Type": "application/json"},
-            body: json.encode(Message.toJson(m,sender, receiver)))
-        .then((response) {
-    });
-
+            body: json.encode(Message.toJson(m, sender, receiver)))
+        .then((response) {});
   }
-
 
   static Future<List<UserChat>> fetchChats(String url) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      List<UserChat> uChat =
-          UserChat.fromJsonList(json.decode(response.body));
+      List<UserChat> uChat = UserChat.fromJsonList(json.decode(response.body));
       return uChat;
     } else {
       throw Exception('Failed to load desired item');
@@ -249,8 +230,7 @@ class BackendService {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      List<Message> messages =
-          Message.fromJsonList(json.decode(response.body));
+      List<Message> messages = Message.fromJsonList(json.decode(response.body));
       return messages;
     } else {
       throw Exception('Failed to load desired item');
@@ -262,11 +242,28 @@ class BackendService {
     if (response.statusCode == 200) {
       Message item = Message.fromJson(json.decode(response.body));
       return item;
-    }
-    else {
+    } else {
       throw Exception('Failed to load item by ID');
     }
   }
-}
 
-  
+  static Future<void> reportMessage(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Message ID not found');
+    }
+  }
+
+  static Future<void> reportListing(String url) async {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Listing ID not found');
+    }
+  }
+}

@@ -10,7 +10,7 @@ class ListingFeed extends StatefulWidget {
   ListingFeed({Key key, this.title, this.endpoint, this.personalMode})
       : super(key: key);
   final String title;
-        String endpoint;
+  String endpoint;
   final List<Listing> items = [];
   final bool personalMode;
   ListingFeedState state = ListingFeedState();
@@ -35,8 +35,7 @@ class ListingFeedState extends State<ListingFeed> {
     return widget.items;
   }
 
-  Future<void> onRefresh(
-      ) async {
+  Future<void> onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
     BackendService.fetchListing(widget.endpoint)
         .whenComplete(() {})
@@ -74,7 +73,8 @@ class ListingFeedState extends State<ListingFeed> {
 
   Future<void> newList() async {
     await Future.delayed(Duration(milliseconds: 1000));
-    BackendService.fetchListing(widget.endpoint).whenComplete(() {})
+    BackendService.fetchListing(widget.endpoint)
+        .whenComplete(() {})
         .then((pick) {
       setState(() {
         widget.items.clear();
@@ -90,7 +90,9 @@ class ListingFeedState extends State<ListingFeed> {
   }
 
   void addOne(Listing item) {
-    setState((){widget.items.insert(0, item);});
+    setState(() {
+      widget.items.insert(0, item);
+    });
   }
 
   @override
@@ -144,8 +146,8 @@ class ListingFeedState extends State<ListingFeed> {
                   return ListTile(
                     title: Center(
                         child: CircularProgressIndicator(
-                          backgroundColor: Colors.green,
-                        )),
+                      backgroundColor: Colors.green,
+                    )),
                   );
                 } else {
                   return ListTile(
@@ -154,9 +156,9 @@ class ListingFeedState extends State<ListingFeed> {
                 }
               } else if (!refreshing) {
                 final item = widget.items[index];
-                return  ListTile(
+                return ListTile(
                     leading: Image.network(
-                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/thumbs/"+
+                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/thumbs/" +
                             item.listing_id.toString()),
                     onLongPress: () {
                       if (widget.personalMode) {
@@ -205,7 +207,7 @@ class ListingFeedState extends State<ListingFeed> {
                       }
                     },
                     onTap: () async {
-                      if(SessionVariables.loggedIn){
+                      if (SessionVariables.loggedIn) {
                         diff = SessionVariables.user.userId != item.user.userId;
                       }
                       item.user.overallRating = await BackendService.getOverall(
@@ -218,70 +220,82 @@ class ListingFeedState extends State<ListingFeed> {
                     },
                     title: Text(item.item_title),
                     subtitle: Text(item.description),
-                    trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          IconButton(
-                              icon: Icon(Icons.chat),
-                              onPressed: () {
-                                !SessionVariables.loggedIn ? SessionVariables.loggedInDialogue(context,
-                                    "Please log in to send messages") : SessionVariables.user.userId ==
-                                    item.user.userId ? SessionVariables.loggedInDialogue(context,
-                                    "You can't message yourself"):
-                                Navigator.push(context, new MaterialPageRoute(builder: (context) =>
-                                new Chat(myChats: false,senderId: SessionVariables.user.userId,
-                                  receiverId: item.user.userId,)));
-                              }),
-                          Visibility(
-                              child: IconButton(
-                                  icon: Icon(Icons.star),
-                                  onPressed: () async {
-                                    if(item.user.userId != SessionVariables.user.userId) {
-                                      bool changing = false;
-                                      if (await BackendService.inquireRating(
-                                          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/inquire_rating/" +
-                                              SessionVariables.user.userId
-                                                  .toString() + "/" +
-                                              item.listing_id.toString())) {
-                                        int rat = await BackendService
-                                            .fetchRating(
-                                            "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/fetch_rating/" +
-                                                SessionVariables.user.userId
-                                                    .toString() + "/" +
-                                                item.listing_id.toString());
-                                        String info = "You've already given this listing a " +
+                    trailing:
+                        Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      IconButton(
+                          icon: Icon(Icons.chat),
+                          onPressed: () {
+                            !SessionVariables.loggedIn
+                                ? SessionVariables.loggedInDialogue(
+                                    context, "Please log in to send messages")
+                                : SessionVariables.user.userId ==
+                                        item.user.userId
+                                    ? SessionVariables.loggedInDialogue(
+                                        context, "You can't message yourself")
+                                    : Navigator.push(
+                                        context,
+                                        new MaterialPageRoute(
+                                            builder: (context) => new Chat(
+                                                  myChats: false,
+                                                  senderId: SessionVariables
+                                                      .user.userId,
+                                                  receiverId: item.user.userId,
+                                                )));
+                          }),
+                      Visibility(
+                          child: IconButton(
+                              icon: Icon(Icons.star),
+                              onPressed: () async {
+                                if (item.user.userId !=
+                                    SessionVariables.user.userId) {
+                                  bool changing = false;
+                                  if (await BackendService.inquireRating(
+                                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/inquire_rating/" +
+                                          SessionVariables.user.userId
+                                              .toString() +
+                                          "/" +
+                                          item.listing_id.toString())) {
+                                    int rat = await BackendService.fetchRating(
+                                        "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/fetch_rating/" +
+                                            SessionVariables.user.userId
+                                                .toString() +
+                                            "/" +
+                                            item.listing_id.toString());
+                                    String info =
+                                        "You've already given this listing a " +
                                             rat.toString() +
                                             ". Would you like to change it?";
-                                        changing = await showDialog(
+                                    changing = await showDialog(
+                                      context: context,
+                                      builder: (_) => GeneralAlert(
+                                          text: info,
+                                          positive: "Yes",
+                                          negative: "No"),
+                                    );
+                                    if (changing) {
+                                      await showDialog(
                                           context: context,
-                                          builder: (_) =>
-                                              GeneralAlert(text: info,
-                                                  positive: "Yes",
-                                                  negative: "No"),);
-                                        if (changing) {
-                                          await showDialog(context: context,
-                                              builder: (_) =>
-                                                  RatingDialog(item: item,
-                                                      changing: changing));
-                                        }
-                                      } else {
-                                        await showDialog(
-                                            context: context,
-                                            builder: (_) =>
-                                                RatingDialog(
-                                                  item: item,
-                                                  changing: false,
-                                                ));
-                                      }
-                                    }else{
-                                      SessionVariables.loggedInDialogue(context, "You can't rate your own items");
+                                          builder: (_) => RatingDialog(
+                                              item: item, changing: changing));
                                     }
-                                      setState(() {
-                                        ratePress = true;
-                                      });
-                                  }),
-                              visible: ratePress ? true : true)
-                        ]));
+                                  } else {
+                                    await showDialog(
+                                        context: context,
+                                        builder: (_) => RatingDialog(
+                                              item: item,
+                                              changing: false,
+                                            ));
+                                  }
+                                } else {
+                                  SessionVariables.loggedInDialogue(
+                                      context, "You can't rate your own items");
+                                }
+                                setState(() {
+                                  ratePress = true;
+                                });
+                              }),
+                          visible: ratePress ? true : true)
+                    ]));
               }
             }),
       ),
@@ -289,48 +303,56 @@ class ListingFeedState extends State<ListingFeed> {
   }
 }
 
-class ItemView extends StatelessWidget{
+class ItemView extends StatelessWidget {
   ItemView({this.item, this.diff});
   final Listing item;
   bool diff;
   @override
-  Widget build (BuildContext context)  {
+  Widget build(BuildContext context) {
     return new SimpleDialog(
       contentPadding: EdgeInsets.all(10.0),
       children: <Widget>[
         Row(children: <Widget>[
-        Text(
-          item.item_title,
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24.0),
-        ),
-        Visibility(child: IconButton(icon: Icon(Icons.flag), onPressed: ()async {
-          bool reporting = await showDialog(context: context, builder: (_) =>
-          new GeneralAlert(text: "Report this listing?", positive: "Yes", negative: "No"));
-          if(reporting){
-            BackendService.report(Report(item.listing_id, "-1", SessionVariables.loggedIn ? SessionVariables.user.userId : -1, item.user.userId));
-          }
-        }),
-            visible: (! SessionVariables.loggedIn) ? true : diff)]),
+          Text(
+            item.item_title,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24.0),
+          ),
+          Visibility(
+              child: IconButton(
+                  icon: Icon(Icons.flag),
+                  onPressed: () async {
+                    bool reporting = await showDialog(
+                        context: context,
+                        builder: (_) => new GeneralAlert(
+                            text: "Report this listing?",
+                            positive: "Yes",
+                            negative: "No"));
+                    if (reporting) {
+                      BackendService.reportListing(
+                          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/reportlisting/" +
+                              item.listing_id.toString());
+                    }
+                  }),
+              visible: (!SessionVariables.loggedIn) ? true : diff)
+        ]),
         Padding(padding: EdgeInsets.all(20.0)),
         CachedNetworkImage(
           imageUrl:
-          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/" +
-              item.listing_id.toString(),
-          placeholder: (context, url) =>
-          new Center(
+              "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/images/" +
+                  item.listing_id.toString(),
+          placeholder: (context, url) => new Center(
               child: Container(
                   height: 30,
                   width: 30,
                   child: CircularProgressIndicator(
                     strokeWidth: 5.0,
                   ))),
-          errorWidget: (context, url, error) =>
-          new Icon(Icons.error_outline),
+          errorWidget: (context, url, error) => new Icon(Icons.error_outline),
         ),
         Text("Posted by: " + item.user.displayName),
-        Text("User's overall rating: " + item.user.overallRating.toString() + "\n"),
+        Text("User's overall rating: " +
+            item.user.overallRating.toString() +
+            "\n"),
         Text(
           item.description,
           style: TextStyle(fontSize: 15.0),
@@ -344,9 +366,7 @@ class ItemView extends StatelessWidget{
             width: 10.0,
             child: Text(
               "Ok",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
               textAlign: TextAlign.center,
             ),
             decoration: BoxDecoration(
@@ -361,7 +381,8 @@ class ItemView extends StatelessWidget{
 }
 
 class RatingDialog extends StatefulWidget {
-  RatingDialog({Key key, this.title, this.item, this.changing}) : super(key: key);
+  RatingDialog({Key key, this.title, this.item, this.changing})
+      : super(key: key);
 
   final String title;
   final Listing item;
@@ -450,14 +471,14 @@ class _RatingDialogState extends State<RatingDialog> {
               onPressed: () {
                 Navigator.of(context).pop();
                 Rating r = new Rating(
-                    _radioValue.toString(),
-                    widget.item.listing_id.toString(),
-                    SessionVariables.user.userId.toString(),
-                    widget.item.user.userId.toString(),);
-                if(!widget.changing) {
+                  _radioValue.toString(),
+                  widget.item.listing_id.toString(),
+                  SessionVariables.user.userId.toString(),
+                  widget.item.user.userId.toString(),
+                );
+                if (!widget.changing) {
                   BackendService.addRating(r);
-                }
-                else{
+                } else {
                   BackendService.changeRating(r);
                 }
                 _radioValue = null; //or back to -1?

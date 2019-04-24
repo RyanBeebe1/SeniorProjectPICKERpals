@@ -53,8 +53,9 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
             animationController: new AnimationController(
                 vsync: this, duration: new Duration(milliseconds: 800)),
             name: name,
-            senderId: m.user.userId)
-          );
+            senderId: m.user.userId,
+            messageId: m.messageId,
+          ));
         });
       }
     }
@@ -109,8 +110,9 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
                   },
                   onSubmitted: _submitMsg,
                   decoration: new InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
-                    border: OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 5),
+                      border: OutlineInputBorder(),
                       fillColor: Colors.lightGreen,
                       hintText: "  Enter some text to send a message"),
                 ),
@@ -135,7 +137,8 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
         animationController: new AnimationController(
             vsync: this, duration: new Duration(milliseconds: 800)),
         name: SessionVariables.user.displayName,
-        senderId: SessionVariables.user.userId);
+        senderId: SessionVariables.user.userId,
+        messageId: 0);
     setState(() {
       _messages.insert(0, msg);
       print(_messages.length);
@@ -151,14 +154,14 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
       int otherUserId;
       if (widget.senderId == SessionVariables.user.userId) {
         otherUserId = widget.receiverId;
-      }else {
+      } else {
         otherUserId = widget.senderId;
       }
       BackendService.addMessage(
           new Message(
               body: txt, date: _getDateTime(), user: SessionVariables.user),
-              SessionVariables.user.userId, 
-              otherUserId);
+          SessionVariables.user.userId,
+          otherUserId);
     }
     msg.animationController.forward();
   }
@@ -173,11 +176,17 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
 }
 
 class Msg extends StatelessWidget {
-  Msg({this.txt, this.animationController, this.name, this.senderId});
+  Msg(
+      {this.txt,
+      this.animationController,
+      this.name,
+      this.senderId,
+      this.messageId});
   final String txt;
   final AnimationController animationController;
   final String name;
   final int senderId;
+  final int messageId;
   @override
   Widget build(BuildContext ctx) {
     return ListTile(
@@ -185,14 +194,23 @@ class Msg extends StatelessWidget {
           new CircleAvatar(child: new Text(name.substring(0, 1).toUpperCase())),
       title: Text(name),
       subtitle: Text(txt),
-        trailing: Visibility(child: IconButton(icon: Icon(Icons.flag), onPressed: ()async {
-          bool reporting = await showDialog(context: ctx, builder: (_) =>
-          new GeneralAlert(text: "Report this message?", positive: "Yes", negative: "No"));
-          if(reporting){
-            BackendService.report(Report(-1, txt, SessionVariables.user.userId, senderId));
-          }
-        }),
-            visible: name != SessionVariables.user.displayName),
+      trailing: Visibility(
+          child: IconButton(
+              icon: Icon(Icons.flag),
+              onPressed: () async {
+                bool reporting = await showDialog(
+                    context: ctx,
+                    builder: (_) => new GeneralAlert(
+                        text: "Report this message?",
+                        positive: "Yes",
+                        negative: "No"));
+                if (reporting) {
+                  BackendService.reportMessage(
+                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/reportmessage/" +
+                          this.messageId.toString());
+                }
+              }),
+          visible: name != SessionVariables.user.displayName),
     );
   }
 }
@@ -216,13 +234,12 @@ class MyChatsState extends State<MyChats> {
             SessionVariables.user.userId.toString());
     if (chat.length > 0) {
       for (UserChat c in chat) {
-        
         Message m = await BackendService.fetchLastMessage(
             "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/lastmessage/" +
                 c.chat_id.toString());
-        
+
         String otherUser;
-        
+
         if (SessionVariables.user.userId == c.sender.userId) {
           otherUser = c.recipient.displayName;
         } else {
@@ -268,7 +285,8 @@ class MyChatsState extends State<MyChats> {
 }
 
 class ChatTile extends StatelessWidget {
-  ChatTile({this.txt, this.name, this.receiverId, this.senderId,this.lastMsgName});
+  ChatTile(
+      {this.txt, this.name, this.receiverId, this.senderId, this.lastMsgName});
   final String txt;
   final String name;
   final String lastMsgName;

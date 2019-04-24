@@ -163,27 +163,6 @@ class Rating {
         'reciever_id': rat.reciever_id};
 }
 
-class Report {
-  final int listing_id;
-  final String message;
-  final int sender_id;
-  final int reciever_id;
-
-  Report(this.listing_id, this.message, this.sender_id, this.reciever_id);
-  factory Report.fromJson(Map<String, dynamic> json) {
-    return Report(json['listing_id'],
-        json['message'],
-        json['sender_id'],
-        json['reciever_id']);
-  }
-
-  static Map<String, dynamic> toJson(Report rep) =>
-      {'listing_id' : rep.listing_id,
-       'message' : rep.message,
-       'sender_id' : rep.sender_id,
-       'reciever_id' : rep.reciever_id};
-}
-
 class UserChat {
   final int chat_id;
   final User sender;
@@ -209,11 +188,13 @@ class Message {
   final String date;
   final UserChat chat;
   final User user;
+  final int messageId;
   Message({
     this.body,
     this.date,
     this.chat,
-    this.user
+    this.user,
+    this.messageId
   });
 
   static List<Message> fromJsonList(jsonList) {
@@ -225,7 +206,8 @@ class Message {
       body: json['body'],
       date: json['date'],
       chat: UserChat.fromJson(json['chat']),
-      user: User.fromJson(json['user'])
+      user: User.fromJson(json['user']),
+      messageId: json['message_id']
     );
   }
 
