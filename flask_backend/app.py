@@ -136,11 +136,13 @@ class DesiredItem(db.Model):
 
 class Images(db.Model):
     __tablename__ = "images"
-    image_name = db.Column("image_name", db.String(200), primary_key=True)
+    image_id = db.Column("image_id", db.Integer, primary_key=True)
+    image_name = db.Column("image_name", db.String(200))
     listing_id = db.Column(
         "listing_id", db.Integer, db.ForeignKey("listing.listing_id"), nullable=False
     )
     thumbnail = db.Column("thumbnail", db.String(200))
+    listing_image = db.relationship("Listing", backref="listingimage", foreign_keys=[listing_id])
 
     def __init__(self, name, thumbname, listingid):
         self.image_name = name
@@ -202,6 +204,23 @@ class Device(db.Model):
         self.token_id = token
         self.device_name = name
 
+class ReportedListing(db.Model):
+    __tablename__ = "reported_listing"
+    case_id = db.Column("case_id", db.Integer, primary_key=True)
+    listing_id = db.Column("listing_id", db.Integer, db.ForeignKey("listing.listing_id"))
+    reportedlisting = db.relationship("Listing",backref="reportedlisting",foreign_keys=[listing_id])
+
+    def __init__(self, listing):
+        self.listing_id = listing
+
+class ReportedMessage(db.Model):
+    __tablename__ = "reported_message"
+    case_id = db.Column("case_id", db.Integer, primary_key=True)
+    message_id = db.Column("message_id", db.Integer, db.ForeignKey("message.message_id"))
+    reportedmessage = db.relationship("Messages",backref="reportedmessage",foreign_keys=[message_id])
+
+    def __init__(self, message):
+        self.message_id = message
 
 # Listing shcemas (what fields to serve when pulling from database)
 class ListingSchema(ma.Schema):
@@ -225,11 +244,6 @@ class ListingSchema(ma.Schema):
 class RatingSchema(ma.Schema):
     class Meta:
         fields = ("rating_id", "rating", "listing_id", "sender_id", "reciever_id")
-
-
-class ImageSchema(ma.Schema):
-    class Meta:
-        fields = ("image_name", "thumbnail", "listing_id")
 
 
 class UserSchema(ma.Schema):
@@ -276,9 +290,6 @@ class DeviceSchema(ma.Schema):
 # Init Schema
 listing_schema = ListingSchema(strict=True)
 listings_schema = ListingSchema(many=True, strict=True)
-
-image_schema = ImageSchema(strict=True)
-images_schema = ImageSchema(many=True, strict=True)
 
 rating_schema = RatingSchema(strict=True)
 ratings_schema = RatingSchema(many=True, strict=True)
@@ -666,6 +677,24 @@ def getlastmessage(chat_id):
     )
     return message_schema.jsonify(messages)
 
+# Report message
+@app.route("/reportmessage/<messageid>")
+def reportmessage(messageid):
+    if ReportedMessage.query.filter(ReportedMessage.message_id == messageid) is None:
+        message = ReportedMessage(messageid)
+        db.session.add(message)
+        db.session.commit()
+    else:
+        return "Message already Reported"
+    return f"Reported Message {messageid}"
+
+# Report listing
+@app.route("/reportlisting/<listingid>")
+def reportlisting(listingid):
+    listing = ReportedListing(listingid)
+    db.session.add(listing)
+    db.session.commit()
+    return f"Reported Listing {listingid}"
 
 # Delete user message
 
