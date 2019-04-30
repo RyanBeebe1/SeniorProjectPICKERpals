@@ -36,7 +36,10 @@ class SearchBar extends SearchDelegate {
         itemBuilder: (context, index) {
           final item = newList[index];
           return ListTile(
-            
+            onTap:() {showDialog(
+              context: context,
+              builder: (_) => new ItemView(item: item, diff: true),
+            );},
             title: Center(child: Text(item.item_title)),
           );
         });
