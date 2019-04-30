@@ -119,6 +119,16 @@ class ListingFeedState extends State<ListingFeed> {
     });
     super.initState();
   }
+  
+  bool showRefresh() {
+    if (widget.items.length < 8) {
+      visibleFeed = false;
+    }
+    else {
+      visibleFeed = true;
+    }
+    return visibleFeed;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +155,12 @@ class ListingFeedState extends State<ListingFeed> {
                 if (!widget.personalMode) {
                   return ListTile(
                     title: Center(
-                        child: CircularProgressIndicator(
-                      backgroundColor: Colors.green,
-                    )),
+                        child: Visibility(
+                          visible: showRefresh()?true:false,
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.green,
+                          ),
+                     )),
                   );
                 } else {
                   return ListTile(
