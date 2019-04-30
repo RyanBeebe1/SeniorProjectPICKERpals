@@ -19,6 +19,7 @@ class ListingFeed extends StatefulWidget {
 }
 
 class ListingFeedState extends State<ListingFeed> {
+  bool emptyList;
   bool ratePress = false;
   int pageNum;
   ScrollController _controller = ScrollController();
@@ -153,14 +154,15 @@ class ListingFeedState extends State<ListingFeed> {
             itemBuilder: (context, index) {
               if (index == widget.items.length && !refreshing) {
                 if (!widget.personalMode) {
+                  emptyList = widget.items.isEmpty;
                   return ListTile(
-                    title: Center(
+                    title: emptyList?Center(child: Text("Server is Offline!")):Center(
                         child: Visibility(
                           visible: showRefresh()?true:false,
                           child: CircularProgressIndicator(
                             backgroundColor: Colors.green,
                           ),
-                     )),
+                      )),
                   );
                 } else {
                   return ListTile(
