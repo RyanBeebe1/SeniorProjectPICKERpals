@@ -120,12 +120,12 @@ class ListingFeedState extends State<ListingFeed> {
     });
     super.initState();
   }
-  
+
   bool showRefresh() {
+    bool visibleFeed;
     if (widget.items.length < 8) {
       visibleFeed = false;
-    }
-    else {
+    } else {
       visibleFeed = true;
     }
     return visibleFeed;
@@ -156,13 +156,15 @@ class ListingFeedState extends State<ListingFeed> {
                 if (!widget.personalMode) {
                   emptyList = widget.items.isEmpty;
                   return ListTile(
-                    title: emptyList?Center(child: Text("Server is Offline!")):Center(
-                        child: Visibility(
-                          visible: showRefresh()?true:false,
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.green,
-                          ),
-                      )),
+                    title: emptyList
+                        ? Center(child: Text("Server is Offline!"))
+                        : Center(
+                            child: Visibility(
+                            visible: showRefresh() ? true : false,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.green,
+                            ),
+                          )),
                   );
                 } else {
                   return ListTile(
