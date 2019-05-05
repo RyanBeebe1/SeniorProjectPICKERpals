@@ -23,6 +23,7 @@ void main() => runApp(MyApp());
 int item = 0;
 bool clicked = false;
 
+/// Initializes the application and prompts the SplashScreen while the app loads
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -74,6 +75,7 @@ class MyHomePageState extends State<MyHomePage> {
       print(token);
     });
   }
+
   ListingFeed feed = new ListingFeed(
     endpoint: 'http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings',
     personalMode: false,
@@ -85,50 +87,70 @@ class MyHomePageState extends State<MyHomePage> {
   bool signedIn = false;
 
   void handleNotification(Map<String, dynamic> message) async {
-    if(message["data"].containsKey("Listing")) {
-        BackendService.fetchListingById(
-          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
-              message["data"]["Listing"]).then((item) {
-        showDialog(context: context, builder: (_) => new ItemView(item: item, diff: true),);
+    if (message["data"].containsKey("Listing")) {
+      BackendService.fetchListingById(
+              "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
+                  message["data"]["Listing"])
+          .then((item) {
+        showDialog(
+          context: context,
+          builder: (_) => new ItemView(item: item, diff: true),
+        );
         feed.state.addOne(item);
       });
-    } else if(message["data"].containsKey("sender_id")){
-      Navigator.push(context, new MaterialPageRoute(builder: (context) =>
-      new Chat(myChats: true,senderId: int.parse(message["data"]["sender_id"]),
-        receiverId: int.parse(message["data"]["recipient_id"]),)));
+    } else if (message["data"].containsKey("sender_id")) {
+      Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (context) => new Chat(
+                    myChats: true,
+                    senderId: int.parse(message["data"]["sender_id"]),
+                    receiverId: int.parse(message["data"]["recipient_id"]),
+                  )));
     }
   }
 
   void displayTOS() async {
     String filePath = await _getPath() + "/ran_before";
-    if(! await _ranBefore(filePath)){
+    if (!await _ranBefore(filePath)) {
       File(filePath).writeAsString("hello");
-      Navigator.push(context, new MaterialPageRoute(builder: (context) => new TOS()));
+      Navigator.push(
+          context, new MaterialPageRoute(builder: (context) => new TOS()));
     }
   }
 
-  void askUser(Map<String, dynamic> message) async{
+  void askUser(Map<String, dynamic> message) async {
     String info;
     print("message data: " + message["data"].toString());
-    if(message["data"].containsKey("Listing")) {
-      info = "New item matching " + await BackendService.fetchListingById(
-          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
-              message["data"]["Listing"]).then((item){return item.tag;}) +
+    if (message["data"].containsKey("Listing")) {
+      info = "New item matching " +
+          await BackendService.fetchListingById(
+                  "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingbyid/" +
+                      message["data"]["Listing"])
+              .then((item) {
+            return item.tag;
+          }) +
           " was just posted. View it?";
-    }
-    else if(message["data"].containsKey("sender_id") && SessionVariables.user.userId != message["data"]["sender_id"]){
-      info = "New message from " + await BackendService.fetchUserById(
-          "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/userbyid/" +
-              message["data"]["sender_id"]).then((user) {return user.displayName;}) +
+    } else if (message["data"].containsKey("sender_id") &&
+        SessionVariables.user.userId != message["data"]["sender_id"]) {
+      info = "New message from " +
+          await BackendService.fetchUserById(
+                  "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/userbyid/" +
+                      message["data"]["sender_id"])
+              .then((user) {
+            return user.displayName;
+          }) +
           ". View it?";
     }
-     final pos = await showDialog(context: context, builder: (_) =>
-      new GeneralAlert(text: info, positive: "View", negative: "No thanks"),);
-    if(pos) {
+    final pos = await showDialog(
+      context: context,
+      builder: (_) =>
+          new GeneralAlert(text: info, positive: "View", negative: "No thanks"),
+    );
+    if (pos) {
       handleNotification(message);
     }
   }
-
 
   //Firebase/Google signin, returns FirebaseUser object
   Future<FirebaseUser> _handleSignIn() async {
@@ -147,13 +169,15 @@ class MyHomePageState extends State<MyHomePage> {
 
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
-     FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-    String token =await _firebaseMessaging.getToken();
-    User newUser = new User.firebase(user.email,user.displayName,token,user.uid,null);
+    FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+    String token = await _firebaseMessaging.getToken();
+    User newUser =
+        new User.firebase(user.email, user.displayName, token, user.uid, null);
     SessionVariables.user = await BackendService.addUser(newUser);
     return user;
   }
-  
+
+  /// Signs User out of their Google account when prompted
   Future<void> _handleSignOut() async {
     try {
       await _googleSignIn.signOut();
@@ -162,6 +186,7 @@ class MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  /// Returns the Home Page with the feed
   Widget _getHomeView() {
     if (_state == HomePageState.feed) {
       return feed;
@@ -184,8 +209,6 @@ class MyHomePageState extends State<MyHomePage> {
     ],
   );
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,13 +220,13 @@ class MyHomePageState extends State<MyHomePage> {
           IconButton(
               icon: Icon(Icons.filter_list),
               onPressed: () async {
-                await showDialog(context: context,
-                builder: (_) => FilterDialog());
+                await showDialog(
+                    context: context, builder: (_) => FilterDialog());
                 setState(() {
                   feed.state.newList();
                   feed.state.setEndpoint(SessionVariables.filtered_feed);
-                  });
-                }),
+                });
+              }),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
@@ -227,14 +250,13 @@ class MyHomePageState extends State<MyHomePage> {
             child: new ListTile(
               title: new Text(drawerText),
               onTap: () {
-                _handleSignIn()..whenComplete(() {
-                  setState(() {
-                    headerTxt =
-                        "Hello, " + SessionVariables.user.displayName;
-                        SessionVariables.loggedIn = true;
+                _handleSignIn()
+                  ..whenComplete(() {
+                    setState(() {
+                      headerTxt = "Hello, " + SessionVariables.user.displayName;
+                      SessionVariables.loggedIn = true;
+                    });
                   });
-
-                });
               },
             ),
           ),
@@ -252,12 +274,11 @@ class MyHomePageState extends State<MyHomePage> {
           new ListTile(
             title: new Text('My Chats'),
             onTap: () {
-               Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  new MaterialPageRoute(
-                      builder: (context) => new MyChats()),
-                );
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                new MaterialPageRoute(builder: (context) => new MyChats()),
+              );
             },
           ),
           new Divider(),
@@ -274,7 +295,8 @@ class MyHomePageState extends State<MyHomePage> {
                           )),
                 );
               } else {
-                SessionVariables.loggedInDialogue(context, "Please log in to view your items");
+                SessionVariables.loggedInDialogue(
+                    context, "Please log in to view your items");
               }
             },
           ),
@@ -283,20 +305,23 @@ class MyHomePageState extends State<MyHomePage> {
             title: new Text('User Page'),
             onTap: () {
               // trying to edit from here
-             SessionVariables.loggedIn ? Navigator.push(
-          context,
-         MaterialPageRoute(builder: (context) => new DesiredItemTag(title: "Title Here")),
-        ) : SessionVariables.loggedInDialogue(context, "Please log in to set desired items");
-
-
+              SessionVariables.loggedIn
+                  ? Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              new DesiredItemTag(title: "Title Here")),
+                    )
+                  : SessionVariables.loggedInDialogue(
+                      context, "Please log in to set desired items");
             },
           ),
           new Divider(),
           new ListTile(
             title: new Text("Terms of Service"),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) =>
-              new TOS()));
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => new TOS()));
             },
           ),
           new Divider(),
@@ -337,7 +362,7 @@ class FilterDialog extends StatefulWidget {
   _FilterDialogState createState() => new _FilterDialogState();
 }
 
-class _FilterDialogState extends State<FilterDialog>{
+class _FilterDialogState extends State<FilterDialog> {
   int _filterValue = -1;
   void _handleFilterValueChange(int value) {
     setState(() {
@@ -370,68 +395,84 @@ class _FilterDialogState extends State<FilterDialog>{
   Widget build(BuildContext context) {
     return new AlertDialog(
       title: Text("Filter Feed"),
-      content:
-          new Container(
-            height: 215,
+      content: new Container(
+        height: 215,
         child: new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Text("Choose a Tag: "),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget> [
-              new Radio(value: 0, groupValue: _filterValue, onChanged:
-              _handleFilterValueChange),
-              new Text("None"),],
-          ),
-          new Row(
-            children: <Widget> [
-              new Radio(value: 1, groupValue: _filterValue, onChanged:
-              _handleFilterValueChange),
-              new Text("Electronics"),],
-          ),
-          new Row(
-            children: <Widget> [
-              new Radio(value: 2, groupValue: _filterValue, onChanged:
-              _handleFilterValueChange),
-              new Text("Furniture"),],
-          ),
-          new Row(
-            children: <Widget> [
-              new Radio(value: 3, groupValue: _filterValue, onChanged:
-              _handleFilterValueChange),
-              new Text("Misc"),],
-          ),
-        ],
-      ),
-          ),
-      actions: <Widget>[
-                new RaisedButton(
-                  color: Colors.lightGreen,
-                  onPressed:() {Navigator.of(context).pop();
-                  switch(_filterValue) {
-                    case 0: SessionVariables.filtered_feed =
-                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
-                    break;
-                    case 1:
-                      SessionVariables.filtered_feed =
-                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
-                      break;
-                    case 2:
-                      SessionVariables.filtered_feed =
-                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
-                      break;
-                    case 3:
-                      SessionVariables.filtered_feed =
-                      "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
-                  }
-                  },
-                  child: Text("Ok",style: TextStyle(
-                    color: Colors.black,
-                  ),),),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Text("Choose a Tag: "),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                new Radio(
+                    value: 0,
+                    groupValue: _filterValue,
+                    onChanged: _handleFilterValueChange),
+                new Text("None"),
               ],
-
+            ),
+            new Row(
+              children: <Widget>[
+                new Radio(
+                    value: 1,
+                    groupValue: _filterValue,
+                    onChanged: _handleFilterValueChange),
+                new Text("Electronics"),
+              ],
+            ),
+            new Row(
+              children: <Widget>[
+                new Radio(
+                    value: 2,
+                    groupValue: _filterValue,
+                    onChanged: _handleFilterValueChange),
+                new Text("Furniture"),
+              ],
+            ),
+            new Row(
+              children: <Widget>[
+                new Radio(
+                    value: 3,
+                    groupValue: _filterValue,
+                    onChanged: _handleFilterValueChange),
+                new Text("Misc"),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        new RaisedButton(
+          color: Colors.lightGreen,
+          onPressed: () {
+            Navigator.of(context).pop();
+            switch (_filterValue) {
+              case 0:
+                SessionVariables.filtered_feed =
+                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listings";
+                break;
+              case 1:
+                SessionVariables.filtered_feed =
+                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Electronics";
+                break;
+              case 2:
+                SessionVariables.filtered_feed =
+                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Furniture";
+                break;
+              case 3:
+                SessionVariables.filtered_feed =
+                    "http://ec2-3-88-8-44.compute-1.amazonaws.com:5000/listingsbytag/Misc";
+            }
+          },
+          child: Text(
+            "Ok",
+            style: TextStyle(
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
