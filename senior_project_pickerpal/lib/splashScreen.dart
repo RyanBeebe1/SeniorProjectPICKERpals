@@ -7,6 +7,7 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
+/// Displays SplashScreen for 3 seconds while the application loads
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
@@ -16,10 +17,11 @@ class _SplashScreenState extends State<SplashScreen> {
         const Duration(seconds: 3),
         () => Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => MyHomePage(
-              title: 'PickerPAL Feed',
-            ))));
+                  title: 'PickerPAL Feed',
+                ))));
   }
 
+  /// Builds the SplashScreen with the PICKERpal Logo Image, Logo as a String, and a quote
   @override
   Widget build(BuildContext context) {
     return Scaffold(
