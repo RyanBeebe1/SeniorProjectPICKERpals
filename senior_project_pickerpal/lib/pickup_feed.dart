@@ -35,7 +35,7 @@ class ListingFeedState extends State<ListingFeed> {
   List<Listing> getItems() {
     return widget.items;
   }
-
+  //Refreshes the listing feed, called when pull to refresh is triggered.
   Future<void> onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
     BackendService.fetchListing(widget.endpoint)
@@ -51,7 +51,7 @@ class ListingFeedState extends State<ListingFeed> {
     print("loading done.");
     return null;
   }
-
+  //Loads the initial listing feed when the app is opened.
   Future<void> onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
     BackendService.fetchListing(widget.endpoint)
@@ -100,6 +100,7 @@ class ListingFeedState extends State<ListingFeed> {
   void initState() {
     pageNum = 1;
     onLoad();
+    //The following is used to determine whether the user has scrolled to bottom of the page, which will initilize loading of more listings.
     _controller.addListener(() {
       if (_controller.position.pixels == _controller.position.maxScrollExtent) {
         setState(() {

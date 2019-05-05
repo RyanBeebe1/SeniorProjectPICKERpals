@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:seniorprojectnuked/pickup_feed.dart';
 import 'pickup_entry.dart';
 
 class SearchBar extends SearchDelegate {

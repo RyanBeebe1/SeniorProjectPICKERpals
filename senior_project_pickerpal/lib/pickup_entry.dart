@@ -1,3 +1,8 @@
+/*
+The following classes are used to encapsulate and decode the JSON objects returned by backend calls. They are also used to be converted into JSONs
+which can be parsed by the backend and stored appropriately.
+*/
+
 class Listing {
   final String description;
   final int user_id;
