@@ -136,6 +136,7 @@ class ListingFeedState extends State<ListingFeed> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
+
         onRefresh: () {
           setState(() {
             refreshing = true;
@@ -144,6 +145,7 @@ class ListingFeedState extends State<ListingFeed> {
           return onRefresh();
         },
         child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             separatorBuilder: (context, ind) {
               return Divider(
                 color: Colors.lightGreen,
