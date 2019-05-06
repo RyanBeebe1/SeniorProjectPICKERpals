@@ -142,7 +142,9 @@ class Images(db.Model):
         "listing_id", db.Integer, db.ForeignKey("listing.listing_id"), nullable=False
     )
     thumbnail = db.Column("thumbnail", db.String(200))
-    listing_image = db.relationship("Listing", backref="listingimage", foreign_keys=[listing_id])
+    listing_image = db.relationship(
+        "Listing", backref="listingimage", foreign_keys=[listing_id]
+    )
 
     def __init__(self, name, thumbname, listingid):
         self.image_name = name
@@ -204,25 +206,36 @@ class Device(db.Model):
         self.token_id = token
         self.device_name = name
 
+
 class ReportedListing(db.Model):
     __tablename__ = "reported_listing"
     case_id = db.Column("case_id", db.Integer, primary_key=True)
-    listing_id = db.Column("listing_id", db.Integer, db.ForeignKey("listing.listing_id"))
-    reportedlisting = db.relationship("Listing",backref="reportedlisting",foreign_keys=[listing_id])
+    listing_id = db.Column(
+        "listing_id", db.Integer, db.ForeignKey("listing.listing_id")
+    )
+    reportedlisting = db.relationship(
+        "Listing", backref="reportedlisting", foreign_keys=[listing_id]
+    )
 
     def __init__(self, listing):
         self.listing_id = listing
 
+
 class ReportedMessage(db.Model):
     __tablename__ = "reported_message"
     case_id = db.Column("case_id", db.Integer, primary_key=True)
-    message_id = db.Column("message_id", db.Integer, db.ForeignKey("message.message_id"))
-    reportedmessage = db.relationship("Messages",backref="reportedmessage",foreign_keys=[message_id])
+    message_id = db.Column(
+        "message_id", db.Integer, db.ForeignKey("message.message_id")
+    )
+    reportedmessage = db.relationship(
+        "Messages", backref="reportedmessage", foreign_keys=[message_id]
+    )
 
     def __init__(self, message):
         self.message_id = message
 
-# Listing shcemas (what fields to serve when pulling from database)
+
+## Listing shcemas ## (what Json database fields marshmellow will return)
 class ListingSchema(ma.Schema):
     class Meta:
         fields = (
@@ -287,7 +300,7 @@ class DeviceSchema(ma.Schema):
     user = ma.Nested("UserSchema", exclude=("fb_uid"))
 
 
-# Init Schema
+# Init Schemas
 listing_schema = ListingSchema(strict=True)
 listings_schema = ListingSchema(many=True, strict=True)
 
@@ -309,11 +322,16 @@ messages_schema = MessageSchema(many=True, strict=True)
 device_schema = DeviceSchema(strict=True)
 devices_schema = DeviceSchema(many=True, strict=True)
 
+## Helper functions ##
+
 # Checks all desired items against newly added listing, then notifies all users of result
 def new_listing_desire_check(listing):
-    
-    #desired_items = DesiredItem.query.filter(func.lower(listing.tag) == func.lower(DesiredItem.keyword)).all()
-    desired_items = DesiredItem.query.filter(func.lower(listing.description).contains(func.lower(DesiredItem.keyword))).all()
+    desired_items = DesiredItem.query.filter(
+        or_(
+            func.lower(listing.description).contains(func.lower(DesiredItem.keyword)),
+            func.lower(listing.title).contains(func.lower(DesiredItem.keyword)),
+        )
+    ).all()
     for di in desired_items:
         user = User.query.get(di.user_id)
         title = "Desired item alert"
@@ -338,7 +356,7 @@ def message_notify(sender, recipient):
         "recipient_id": f"{receiver.user_id}",
         "click_action": click_action,
     }
-    print (f"notifying {receiver.display_name}")
+    print(f"notifying {receiver.display_name}")
     receiver.notify(title, body, data, click_action)
 
 
@@ -356,7 +374,7 @@ def device_check(user, tokenid, devicename):
         print("Device already in DB")
 
 
-## APP ENDPOINTS:
+## APP ENDPOINTS ##
 
 # Add new user
 @app.route("/adduser", methods=["POST"])
@@ -416,13 +434,13 @@ def upload_image(listingid):
     photo = photos.save(request.files["photo"])
     imagename = os.path.basename(photo)
 
-    ## Make Image object and thumbnail
+    # Make Image object and thumbnail
     thumbnail_image = Image.open(f"{UPLOAD_FOLDER}/{imagename}")
     thumbnail_image.thumbnail((60, 60))
     thumbnail_name = f"{imagename}_thumbnail.jpg"
     thumbnail_image.save(f"{UPLOAD_FOLDER}/{thumbnail_name}")
 
-    ## Add Image object to database
+    # Add Image object to database
     new_image = Images(imagename, thumbnail_name, listingid)
     db.session.add(new_image)
     db.session.commit()
@@ -508,7 +526,7 @@ def inquire_rating(sender, listing):
 def get_image(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
     if photo is None:
-        return "Not found"
+        return send_from_directory(UPLOAD_FOLDER, "noimage.png")
     return send_from_directory(UPLOAD_FOLDER, photo.image_name)
 
 
@@ -517,7 +535,7 @@ def get_image(listingid):
 def get_image_thumbnail(listingid):
     photo = Images.query.filter(Images.listing_id == listingid).first()
     if photo is None:
-        return "Not found"
+        return send_from_directory(UPLOAD_FOLDER, "noimage_thumbnail.png")
     return send_from_directory(UPLOAD_FOLDER, photo.thumbnail)
 
 
@@ -677,6 +695,7 @@ def getlastmessage(chat_id):
     )
     return message_schema.jsonify(messages)
 
+
 # Report message
 @app.route("/reportmessage/<messageid>")
 def reportmessage(messageid):
@@ -688,6 +707,7 @@ def reportmessage(messageid):
         return "Message already Reported"
     return f"Reported Message {messageid}"
 
+
 # Report listing
 @app.route("/reportlisting/<listingid>")
 def reportlisting(listingid):
@@ -696,7 +716,6 @@ def reportlisting(listingid):
     db.session.commit()
     return f"Reported Listing {listingid}"
 
-# Delete user message
 
 # The hello world endpoint
 @app.route("/hello")

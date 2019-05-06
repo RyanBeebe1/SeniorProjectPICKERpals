@@ -131,7 +131,7 @@ class _UploadItemState extends State<UploadItem> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Tag: " + widget.tag, style: TextStyle(fontWeight: FontWeight.bold),),
+                //Text("Tag: " + widget.tag, style: TextStyle(fontWeight: FontWeight.bold),),
                 Padding(padding: EdgeInsets.all(20.0)),
                 DropdownButton(
                   onChanged: (value) {
