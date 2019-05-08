@@ -262,16 +262,6 @@ class MyHomePageState extends State<MyHomePage> {
           ),
           new Divider(),
           new ListTile(
-            title: new Text('Item Feed'),
-            onTap: () {
-              setState(() {
-                _state = HomePageState.feed;
-                Navigator.pop(context);
-              });
-            },
-          ),
-          new Divider(),
-          new ListTile(
             title: new Text('My Chats'),
             onTap: () {
               Navigator.of(context).pop();

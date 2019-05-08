@@ -1,5 +1,5 @@
 /*
-The following are a series of HTTP GETs and POSTs used to store/retrieve data from the RESTful backend.
+The following are a series of static functions utilizing HTTP GETs and POSTs used to store/retrieve data from the RESTful backend.
 */
 
 

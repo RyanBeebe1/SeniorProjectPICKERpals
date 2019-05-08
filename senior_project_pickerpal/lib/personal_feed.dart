@@ -9,7 +9,7 @@ class MyFeed extends StatefulWidget {
   @override
   MyFeedState createState() => MyFeedState();
 }
-
+//State used to represent a personal feed of listings you previously submitted
 class MyFeedState extends State<MyFeed> {
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seniorprojectnuked/pickup_feed.dart';
 import 'pickup_entry.dart';
 
+//Used to implement search functionality.
 class SearchBar extends SearchDelegate {
   final List<Listing> items;
   SearchBar(this.items);

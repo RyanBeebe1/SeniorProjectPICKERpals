@@ -89,7 +89,7 @@ class ListingFeedState extends State<ListingFeed> {
     _controller.dispose();
     super.dispose();
   }
-
+  //Add an item to the beginning of the feed.
   void addOne(Listing item) {
     setState(() {
       widget.items.insert(0, item);
