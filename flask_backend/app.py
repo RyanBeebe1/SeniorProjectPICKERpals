@@ -19,13 +19,14 @@ photos = UploadSet("photos", IMAGES)
 app.config["UPLOADED_PHOTOS_DEST"] = UPLOAD_FOLDER
 configure_uploads(app, photos)
 
-# app.debug = True
+# Extract credentials from config file
 config = configparser.ConfigParser()
 config.read("./config.ini")
 hostname = config.get("config", "hostname")
 username = config.get("config", "username")
 database = config.get("config", "database")
 password = config.get("config", "password")
+# Added this to the config, basically the api key firebase assigned to us for our application
 firebase_api = config.get("config", "api_key")
 
 # Configure Firebase Push Service
@@ -37,7 +38,7 @@ app.config[
 ] = f"mysql://{username}:{password}@{hostname}/{database}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Init DB
+# Init database
 db = SQLAlchemy(app)
 
 # Init marshmallow
@@ -58,6 +59,7 @@ class Listing(db.Model):
     title = db.Column("item_title", db.String(45))
     tag = db.Column("tag", db.String(45))
     condition = db.Column("cond", db.String(45))
+    # This is is for defining relationships between tables (one to many, many to many, etc)
     user = db.relationship("User", backref="user")
 
     def __init__(
@@ -235,7 +237,18 @@ class ReportedMessage(db.Model):
         self.message_id = message
 
 
-## Listing shcemas ## (what Json database fields marshmellow will return)
+## Marshmallow schemas (What data attributes to serve when each schema is called)
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "user_id",
+            "email_address",
+            "display_name",
+            "overall_rating",
+            "fb_uid",
+        )
+
+
 class ListingSchema(ma.Schema):
     class Meta:
         fields = (
@@ -251,23 +264,13 @@ class ListingSchema(ma.Schema):
             "user",
         )
 
+    # This returns the User schema that owns the listing, basically a schema within a schema
     user = ma.Nested("UserSchema", exclude=("token_id", "fb_uid"))
 
 
 class RatingSchema(ma.Schema):
     class Meta:
         fields = ("rating_id", "rating", "listing_id", "sender_id", "reciever_id")
-
-
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = (
-            "user_id",
-            "email_address",
-            "display_name",
-            "overall_rating",
-            "fb_uid",
-        )
 
 
 class DesiredItemSchema(ma.Schema):
@@ -300,8 +303,9 @@ class DeviceSchema(ma.Schema):
     user = ma.Nested("UserSchema", exclude=("fb_uid"))
 
 
-# Init Schemas
+## Init Schemas
 listing_schema = ListingSchema(strict=True)
+# We init two different types of schemas for each where one is for a single, and the other is for many.
 listings_schema = ListingSchema(many=True, strict=True)
 
 rating_schema = RatingSchema(strict=True)
@@ -376,13 +380,15 @@ def device_check(user, tokenid, devicename):
 
 ## APP ENDPOINTS ##
 
-# Add new user
+# Add new user and their device
 @app.route("/adduser", methods=["POST"])
 def add_user():
-    anobj = User.query.filter(User.fb_uid == request.json["fb_uid"]).first()
+    # Check db is firebase user id exists (unique id that each google account has regardless of device)
+    app_user = User.query.filter(User.fb_uid == request.json["fb_uid"]).first()
     tokenid = request.json["token_id"]
     devicename = request.json["device_name"]
-    if anobj == None:
+    # If its not in the db then create new record
+    if app_user == None:
         email = request.json["email_address"]
         name = request.json["display_name"]
         uid = request.json["fb_uid"]
@@ -391,8 +397,8 @@ def add_user():
         db.session.flush()
         device_check(new_user, tokenid, devicename)
     else:
-        device_check(anobj, tokenid, devicename)
-        return user_schema.jsonify(anobj)
+        device_check(app_user, tokenid, devicename)
+        return user_schema.jsonify(app_user)
     return user_schema.jsonify(new_user)
 
 
@@ -412,6 +418,7 @@ def add_listing():
     )
     db.session.add(new_listing)
     db.session.commit()
+    # Check if listing matches any saved desired items
     new_listing_desire_check(new_listing)
     return listing_schema.jsonify(new_listing)
 
@@ -551,7 +558,6 @@ def get_listings():
 @app.route("/userbyid/<userid>")
 def get_userbyid(userid):
     user = User.query.get(userid)
-    db.session.commit()
     return user_schema.jsonify(user)
 
 
@@ -607,6 +613,7 @@ def get_listingsbyuserid(user_id):
 @app.route("/deletelisting/<listingid>", methods=["GET"])
 def deletelisting(listingid):
     listing = Listing.query.get(listingid)
+    # Delete any images associated with listing
     image = Images.query.filter(Images.listing_id == listingid).first()
 
     if image is not None:
@@ -636,7 +643,7 @@ def sendmessage():
     sender = request.json["sender"]
     uid = request.json["user_id"]
     recipient = request.json["recipient"]
-    # Check if chat exists, if not make new chat
+    # Check if chat exists between users, if not make new chat
     chat = Chat.query.filter(
         or_(
             and_(Chat.recipient_id == recipient, Chat.sender_id == sender),
