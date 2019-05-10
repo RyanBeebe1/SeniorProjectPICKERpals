@@ -74,8 +74,7 @@ class User {
       this.tokenId,
       this.fbId,
       this.overallRating,
-      this.userId
-      });
+      this.userId});
 
   User.firebase(this.emailAddress, this.displayName, this.tokenId, this.fbId,
       this.overallRating);
@@ -87,14 +86,14 @@ class User {
         tokenId: json['token_id'],
         fbId: json['fb_uid'],
         overallRating: json['overall_rating'],
-        userId:json['user_id']);
+        userId: json['user_id']);
   }
 
   setUserId(int id) {
     this.userId = id;
   }
 
-  setDeviceName(String name){
+  setDeviceName(String name) {
     this.deviceName = name;
   }
 
@@ -113,12 +112,13 @@ class DesiredItem {
   final int userId;
   final String keyword;
 
-  DesiredItem({this.userId, this.keyword,this.desiredItemId});
+  DesiredItem({this.userId, this.keyword, this.desiredItemId});
   factory DesiredItem.fromJson(Map<String, dynamic> json) {
-    return DesiredItem(userId: json['user_id'], keyword: json['keyword'], desiredItemId: json['desired_item_id']);
+    return DesiredItem(
+        userId: json['user_id'],
+        keyword: json['keyword'],
+        desiredItemId: json['desired_item_id']);
   }
-
-
 
   static List<DesiredItem> fromJsonList(jsonList) {
     return jsonList
@@ -155,17 +155,16 @@ class Rating {
 
   Rating(this.rating, this.listing_id, this.sender_id, this.reciever_id);
   factory Rating.fromJson(Map<String, dynamic> json) {
-    return Rating(json['rating'],
-        json['listing_id'],
-        json['sender_id'],
+    return Rating(json['rating'], json['listing_id'], json['sender_id'],
         json['reciever_id']);
   }
 
-  static Map<String, dynamic> toJson(Rating rat) =>
-      {'rating': rat.rating,
+  static Map<String, dynamic> toJson(Rating rat) => {
+        'rating': rat.rating,
         'listing_id': rat.listing_id,
         'sender_id': rat.sender_id,
-        'reciever_id': rat.reciever_id};
+        'reciever_id': rat.reciever_id
+      };
 }
 
 class UserChat {
@@ -194,13 +193,7 @@ class Message {
   final UserChat chat;
   final User user;
   final int messageId;
-  Message({
-    this.body,
-    this.date,
-    this.chat,
-    this.user,
-    this.messageId
-  });
+  Message({this.body, this.date, this.chat, this.user, this.messageId});
 
   static List<Message> fromJsonList(jsonList) {
     return jsonList.map<Message>((obj) => Message.fromJson(obj)).toList();
@@ -208,20 +201,18 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      body: json['body'],
-      date: json['date'],
-      chat: UserChat.fromJson(json['chat']),
-      user: User.fromJson(json['user']),
-      messageId: json['message_id']
-    );
+        body: json['body'],
+        date: json['date'],
+        chat: UserChat.fromJson(json['chat']),
+        user: User.fromJson(json['user']),
+        messageId: json['message_id']);
   }
 
- static Map<String, dynamic> toJson(Message m,int sender, int receiver) =>
-  {
-    'body':m.body,
-    'date':m.date,
-    'sender':sender,
-    'recipient':receiver,
-    'user_id':m.user.userId
-  };
+  static Map<String, dynamic> toJson(Message m, int sender, int receiver) => {
+        'body': m.body,
+        'date': m.date,
+        'sender': sender,
+        'recipient': receiver,
+        'user_id': m.user.userId
+      };
 }

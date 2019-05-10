@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'upload_item.dart';
 
-
 class FancyFab extends StatefulWidget {
   final Function() onPressed;
   final String tooltip;
@@ -28,10 +27,10 @@ class _FancyFabState extends State<FancyFab>
   @override
   initState() {
     _animationController =
-    AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-      ..addListener(() {
-        setState(() {});
-      });
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+          ..addListener(() {
+            setState(() {});
+          });
     _animateIcon =
         Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
     _buttonColor = ColorTween(
@@ -78,9 +77,14 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder:
-            (context) => new UploadItem(tag: "Electronics", page: widget.page)),
-        );},
+        onPressed: () {
+          Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (context) =>
+                    new UploadItem(tag: "Electronics", page: widget.page)),
+          );
+        },
         tooltip: 'Add',
         child: Icon(Icons.keyboard),
       ),
@@ -91,9 +95,14 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload2',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder:
-            (context) => new UploadItem(tag: "Furniture",page: widget.page)),
-        );},
+        onPressed: () {
+          Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (context) =>
+                    new UploadItem(tag: "Furniture", page: widget.page)),
+          );
+        },
         tooltip: 'Image',
         child: Icon(Icons.hotel),
       ),
@@ -104,9 +113,14 @@ class _FancyFabState extends State<FancyFab>
     return Container(
       child: FloatingActionButton(
         heroTag: 'upload3',
-        onPressed: () {Navigator.push(context, new MaterialPageRoute(builder:
-            (context) => new UploadItem(tag: "Misc", page: widget.page)),
-        );},
+        onPressed: () {
+          Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (context) =>
+                    new UploadItem(tag: "Misc", page: widget.page)),
+          );
+        },
         tooltip: 'Inbox',
         child: Icon(Icons.language),
       ),
@@ -115,15 +129,15 @@ class _FancyFabState extends State<FancyFab>
 
   Widget toggle() {
     return Container(
-        child: FloatingActionButton(
-          backgroundColor: _buttonColor.value,
-          onPressed: animate,
-          tooltip: 'Toggle',
-          child: AnimatedIcon(
-            icon: AnimatedIcons.menu_close,
-            progress: _animateIcon,
-          ),
+      child: FloatingActionButton(
+        backgroundColor: _buttonColor.value,
+        onPressed: animate,
+        tooltip: 'Toggle',
+        child: AnimatedIcon(
+          icon: AnimatedIcons.menu_close,
+          progress: _animateIcon,
         ),
+      ),
     );
   }
 

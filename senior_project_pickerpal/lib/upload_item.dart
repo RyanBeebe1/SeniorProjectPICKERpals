@@ -20,7 +20,6 @@ class _UploadItemState extends State<UploadItem> {
   String dropdownValue;
   TextEditingController _titleController, _descController;
 
-
   String _getDate() {
     var now = new DateTime.now();
     var formatter = new DateFormat('yyyy-MM-dd');
@@ -33,36 +32,41 @@ class _UploadItemState extends State<UploadItem> {
     super.initState();
     _titleController = new TextEditingController();
     _descController = new TextEditingController();
-
   }
+
   Future getImage() async {
     var image;
     return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text("Choose image"),
-          children: <Widget>[
-            SimpleDialogOption(onPressed: () async {
-              image = await ImagePicker.pickImage(source: ImageSource.camera);
-              setState(() {
-                _image = image;
-                Navigator.of(context).pop();
-              });
-            },
-              child: Text("Take Photo"),),
-            SimpleDialogOption(onPressed: () async {
-              image = await ImagePicker.pickImage(source: ImageSource.gallery);
-              setState(() {
-                _image = image;
-                Navigator.of(context).pop();
-              });
-            },
-              child: Text("Choose Photo"),)
-          ],
-        );
-      }
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: Text("Choose image"),
+            children: <Widget>[
+              SimpleDialogOption(
+                onPressed: () async {
+                  image =
+                      await ImagePicker.pickImage(source: ImageSource.camera);
+                  setState(() {
+                    _image = image;
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: Text("Take Photo"),
+              ),
+              SimpleDialogOption(
+                onPressed: () async {
+                  image =
+                      await ImagePicker.pickImage(source: ImageSource.gallery);
+                  setState(() {
+                    _image = image;
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: Text("Choose Photo"),
+              )
+            ],
+          );
+        });
   }
 
   @override
@@ -70,11 +74,18 @@ class _UploadItemState extends State<UploadItem> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        leading: FlatButton(onPressed: () {Navigator.of(context).pop();}, child:
-          Icon(Icons.close)),
+        leading: FlatButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Icon(Icons.close)),
         title: Text("Upload Item"),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.add_a_photo), onPressed: (){getImage();})
+          IconButton(
+              icon: Icon(Icons.add_a_photo),
+              onPressed: () {
+                getImage();
+              })
         ],
       ),
       body: SingleChildScrollView(
@@ -86,44 +97,45 @@ class _UploadItemState extends State<UploadItem> {
               children: <Widget>[
                 Padding(padding: EdgeInsets.all(20.0)),
                 Container(
-                    color: _image == null?Colors.grey:Colors.transparent,
+                    color: _image == null ? Colors.grey : Colors.transparent,
                     height: 100,
                     width: 100,
                     child: Center(
-                      child: _image == null?Text("No Image Selected", textAlign:
-                        TextAlign.center,):Image.file(_image),
-                    )
-                ),
+                      child: _image == null
+                          ? Text(
+                              "No Image Selected",
+                              textAlign: TextAlign.center,
+                            )
+                          : Image.file(_image),
+                    )),
                 Padding(padding: EdgeInsets.all(20.0)),
                 Flexible(
                     child: TextField(
                         controller: _titleController,
                         maxLengthEnforced: false,
-                        decoration: InputDecoration(
-                            hintText: 'Item Name Here'
-                        )
-                    )
-                ),
+                        decoration:
+                            InputDecoration(hintText: 'Item Name Here'))),
                 Padding(padding: EdgeInsets.all(20.0)),
               ],
             ),
             Padding(padding: EdgeInsets.all(20.0)),
-            Text("Enter Item Description: ",textAlign: TextAlign.left, style:
-              TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+            Text(
+              "Enter Item Description: ",
+              textAlign: TextAlign.left,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
             Row(
               children: <Widget>[
                 Padding(padding: EdgeInsets.all(20.0)),
                 Flexible(
                     child: TextField(
-                      controller: _descController,
-                      maxLengthEnforced: false,
-                      maxLines: 5,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Enter Description Here'
-                      ),
-                    )
-                ),
+                  controller: _descController,
+                  maxLengthEnforced: false,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter Description Here'),
+                )),
                 Padding(padding: EdgeInsets.all(20.0)),
               ],
             ),
@@ -131,7 +143,10 @@ class _UploadItemState extends State<UploadItem> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Tag: " + widget.tag, style: TextStyle(fontWeight: FontWeight.bold),),
+                Text(
+                  "Tag: " + widget.tag,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Padding(padding: EdgeInsets.all(20.0)),
                 DropdownButton(
                   onChanged: (value) {
@@ -140,14 +155,15 @@ class _UploadItemState extends State<UploadItem> {
                     });
                   },
                   value: dropdownValue,
-                  items: <String>['Like New', 'Okay', 'Broken'].map
-                  <DropdownMenuItem<String>>((String value) {
+                  items: <String>['Like New', 'Okay', 'Broken']
+                      .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList(),
-                  hint: Text("Choose Condition"),)
+                  hint: Text("Choose Condition"),
+                )
               ],
             ),
             Padding(padding: EdgeInsets.all(20.0)),
@@ -158,23 +174,29 @@ class _UploadItemState extends State<UploadItem> {
                   color: Colors.lightGreen,
                   onPressed: () {
                     Listing newListing;
-                    Listing ll = new Listing(description: _descController.text,
-                        user_id: SessionVariables.user.userId,  item_title: _titleController.text, location: "145.0,243.0",
-                        tag: widget.tag, zipcode: "08080", cond: dropdownValue, listing_date: _getDate());
-                    BackendService.createListing(ll,_image).then(
-                            (l) {
-                            newListing = l;
-                        }
-                    );
+                    Listing ll = new Listing(
+                        description: _descController.text,
+                        user_id: SessionVariables.user.userId,
+                        item_title: _titleController.text,
+                        location: "145.0,243.0",
+                        tag: widget.tag,
+                        zipcode: "08080",
+                        cond: dropdownValue,
+                        listing_date: _getDate());
+                    BackendService.createListing(ll, _image).then((l) {
+                      newListing = l;
+                    });
 
-                      Navigator.of(context).pop();
-                      widget.page.setState(() {});
+                    Navigator.of(context).pop();
+                    widget.page.setState(() {});
                   },
-                  child: Text("Submit"),)
+                  child: Text("Submit"),
+                )
               ],
             )
           ],
         ),
-      ),);
+      ),
+    );
   }
 }

@@ -35,6 +35,7 @@ class ListingFeedState extends State<ListingFeed> {
   List<Listing> getItems() {
     return widget.items;
   }
+
   //Refreshes the listing feed, called when pull to refresh is triggered.
   Future<void> onRefresh() async {
     await Future.delayed(Duration(milliseconds: 3000));
@@ -51,6 +52,7 @@ class ListingFeedState extends State<ListingFeed> {
     print("loading done.");
     return null;
   }
+
   //Loads the initial listing feed when the app is opened.
   Future<void> onLoad() async {
     await Future.delayed(Duration(milliseconds: 500));
@@ -89,6 +91,7 @@ class ListingFeedState extends State<ListingFeed> {
     _controller.dispose();
     super.dispose();
   }
+
   //Add an item to the beginning of the feed.
   void addOne(Listing item) {
     setState(() {
@@ -136,7 +139,6 @@ class ListingFeedState extends State<ListingFeed> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
-
         onRefresh: () {
           setState(() {
             refreshing = true;

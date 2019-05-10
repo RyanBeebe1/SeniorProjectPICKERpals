@@ -2,8 +2,6 @@
 The following are a series of static functions utilizing HTTP GETs and POSTs used to store/retrieve data from the RESTful backend.
 */
 
-
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

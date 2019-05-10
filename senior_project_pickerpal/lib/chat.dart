@@ -15,6 +15,7 @@ class Chat extends StatefulWidget {
   @override
   ChatWindow createState() => new ChatWindow();
 }
+
 //This state represents the chat interface.
 class ChatWindow extends State<Chat> with TickerProviderStateMixin {
   List<Msg> _messages = <Msg>[];
@@ -127,6 +128,7 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
       ),
     );
   }
+
   //Submit a message to the server and update the chat window with the new message.
   void _submitMsg(String txt) {
     _textController.clear();
@@ -175,6 +177,7 @@ class ChatWindow extends State<Chat> with TickerProviderStateMixin {
     super.dispose();
   }
 }
+
 //Widget that represents a message in the chat window.
 class Msg extends StatelessWidget {
   Msg(
@@ -225,6 +228,7 @@ class MyChats extends StatefulWidget {
     return MyChatsState();
   }
 }
+
 //This state represents the 'My Chats' page, which contains a history of a users past chats.
 class MyChatsState extends State<MyChats> {
   List<ChatTile> _chats = <ChatTile>[];
@@ -284,6 +288,7 @@ class MyChatsState extends State<MyChats> {
     );
   }
 }
+
 //Represents a chat tile in the 'My Chats' page.
 class ChatTile extends StatelessWidget {
   ChatTile(
